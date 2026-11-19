@@ -1,0 +1,3748 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="artifact-type" content="tool">
+<meta name="design-style" content="aurora">
+<title>EDAN iM60 — Simulateur Formation Urgences Dialyse &amp; DSA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  color-scheme: dark;
+
+  /* 1. Aurora Style Tokens */
+  --background: #0c1214;
+  --surface-container-low: #111a1e;
+  --surface-container: #152024;
+  --surface-container-high: #1c2a30;
+
+  --on-surface: #edf3f5;
+  --on-surface-variant: #94a8b0;
+
+  --outline: #38515c;
+  --outline-variant: #213138;
+
+  --primary: #63c7d6;
+  --on-primary: #081214;
+  --primary-container: #163840;
+  --on-primary-container: #c7f0f7;
+  --secondary: #5d7882;
+  --tertiary: #87d69b;
+  --error: #f27474;
+  --on-error: #1a0606;
+
+  --data-1: #63c7d6;
+  --data-2: #87d69b;
+  --data-3: #e8b954;
+  --data-4: #f08c70;
+  --data-context: #415861;
+
+  --font-headline: 'Instrument Sans', sans-serif;
+  --font-body: 'Plus Jakarta Sans', sans-serif;
+  --font-label: 'Geist Mono', monospace;
+
+  --rounded: 0.5rem;
+  --rounded-lg: 0.75rem;
+  --rounded-full: 9999px;
+
+  --hairline: 1px solid var(--outline-variant);
+  --hairline-strong: 1px solid var(--outline);
+  --panel-gradient: linear-gradient(180deg, #162226 0%, #111a1e 100%);
+  --heading-tracking: -0.025em;
+  --label-tracking: 0.06em;
+  --sage-tint: color-mix(in srgb, var(--tertiary) 13%, transparent);
+  --cyan-tint: color-mix(in srgb, var(--primary) 13%, transparent);
+
+  /* 2. EDAN iM60 Hardware & Clinical Monitor Tokens */
+  --bezel-surface: #252b32;
+  --bezel-surface-dark: #181c22;
+  --bezel-border: #3b444f;
+  --bezel-highlight: #4c5663;
+  --bezel-key-gray: #3a414a;
+  --bezel-key-orange: #d97706;
+  --bezel-key-orange-text: #111417;
+
+  --scope-bg: #040608;
+  --scope-tile-bg: #070a0d;
+  --scope-header-bg: #131b24;
+  --scope-softkey-bg: #16202b;
+  --scope-softkey-active: #223244;
+  --scope-grid-line: #1a2128;
+  --scope-divider: #1d2630;
+
+  --scope-ecg: #00ff41;
+  --scope-ecg-dim: #009929;
+  --scope-spo2: #00e5ff;
+  --scope-spo2-dim: #008ca3;
+  --scope-resp: #ffea00;
+  --scope-nibp: #f8fafc;
+  --scope-temp: #d98aff;
+  --scope-mute-yellow: #eab308;
+  --scope-mute-text: #0c1214;
+
+  --alarm-high-bg: #dc2626;
+  --alarm-high-dim: #450a0a;
+  --alarm-high-text: #ffffff;
+  --alarm-med-bg: #eab308;
+  --alarm-med-dim: #422006;
+  --alarm-med-text: #0c1214;
+  --alarm-ok-bg: #132520;
+  --alarm-ok-text: #87d69b;
+
+  --shock-flash: #ffffff;
+  --danger-btn: #dc2626;
+  --danger-btn-hover: #ef4444;
+  --amber-tint: color-mix(in srgb, var(--data-3) 15%, transparent);
+  --danger-tint: color-mix(in srgb, var(--error) 16%, transparent);
+
+  /* 3. Shared Foundation Tokens */
+  --positive: var(--tertiary);
+  --warning: var(--data-3);
+  --focus: var(--primary);
+
+  --display-size: clamp(1.75rem, 1.4rem + 1.2vw, 2.25rem);
+  --headline-size: clamp(1.25rem, 1.1rem + 0.5vw, 1.5rem);
+  --subhead-size: clamp(1.0625rem, 1rem + 0.25vw, 1.1875rem);
+  --body-size: clamp(0.9375rem, 0.9rem + 0.15vw, 1rem);
+  --label-size: 0.75rem;
+
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2.5rem;
+  --space-2xl: 4rem;
+  --space-3xl: 6rem;
+
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --dur-micro: 120ms;
+  --dur-short: 220ms;
+  --dur-long: 420ms;
+}
+
+/* Base Reset */
+*, *::before, *::after { box-sizing: border-box; }
+html, body {
+  overflow-x: clip;
+  margin: 0;
+  padding: 0;
+  background-color: var(--background);
+  color: var(--on-surface);
+  font-family: var(--font-body);
+  font-size: var(--body-size);
+  line-height: 1.5;
+  -webkit-tap-highlight-color: transparent;
+}
+header { position: static !important; }
+button, input, select, textarea { font-family: inherit; }
+
+:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/* Top Application Bar */
+.app-topbar {
+  background: var(--surface-container-low);
+  border-bottom: var(--hairline);
+  padding: var(--space-sm) var(--space-md);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+}
+
+.topbar-brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  min-width: 0;
+}
+
+.brand-title {
+  font-family: var(--font-headline);
+  font-weight: 700;
+  font-size: var(--subhead-size);
+  letter-spacing: var(--heading-tracking);
+  color: var(--on-surface);
+  margin: 0;
+  white-space: nowrap;
+}
+
+.brand-sub {
+  font-family: var(--font-label);
+  font-size: var(--label-size);
+  color: var(--on-surface-variant);
+  letter-spacing: var(--label-tracking);
+  text-transform: uppercase;
+}
+
+.sim-clock-pill {
+  font-family: var(--font-label);
+  font-size: var(--label-size);
+  font-variant-numeric: tabular-nums;
+  background: var(--background);
+  border: var(--hairline);
+  color: var(--primary);
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--rounded);
+}
+
+.view-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+  background: var(--background);
+  padding: var(--space-xs);
+  border-radius: var(--rounded);
+  border: var(--hairline);
+}
+
+.tab-btn {
+  min-height: 44px;
+  padding: 0 var(--space-md);
+  border: none;
+  border-radius: calc(var(--rounded) - 2px);
+  background: transparent;
+  color: var(--on-surface-variant);
+  font-family: var(--font-headline);
+  font-weight: 600;
+  font-size: var(--label-size);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  transition: background-color var(--dur-micro) var(--ease-out), color var(--dur-micro) var(--ease-out);
+}
+
+.tab-btn:hover { color: var(--on-surface); background: var(--surface-container); }
+.tab-btn.is-active {
+  background: var(--primary);
+  color: var(--on-primary);
+}
+
+.topbar-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.util-btn {
+  min-height: 44px;
+  padding: 0 var(--space-md);
+  border-radius: var(--rounded);
+  border: var(--hairline-strong);
+  background: var(--surface-container);
+  color: var(--on-surface);
+  font-family: var(--font-label);
+  font-size: var(--label-size);
+  font-weight: 500;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  transition: background-color var(--dur-micro) var(--ease-out), border-color var(--dur-micro) var(--ease-out);
+}
+
+.util-btn:hover { background: var(--surface-container-high); }
+.util-btn.is-on {
+  background: var(--sage-tint);
+  color: var(--tertiary);
+  border-color: var(--tertiary);
+}
+
+/* Main Workspace Grid */
+.workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-md);
+  padding: var(--space-md);
+  max-width: 1680px;
+  margin: 0 auto;
+}
+.workspace * { min-width: 0; }
+
+.workspace.mode-split {
+  grid-template-columns: minmax(0, 1.55fr) minmax(360px, 1fr);
+  align-items: start;
+}
+
+.is-hidden { display: none !important; }
+
+/* =================================================================== */
+/* EDAN iM60 PHYSICAL MONITOR CHASSIS & SCREEN                         */
+/* =================================================================== */
+.im60-chassis {
+  background: linear-gradient(180deg, var(--bezel-surface) 0%, var(--bezel-surface-dark) 100%);
+  border: 2px solid var(--bezel-border);
+  border-radius: var(--rounded-lg);
+  padding: var(--space-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  position: relative;
+}
+
+.im60-screen {
+  background-color: var(--scope-bg);
+  border: 2px solid var(--bezel-highlight);
+  border-radius: var(--rounded);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  user-select: none;
+}
+
+.shock-flash-overlay {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  background: var(--shock-flash);
+  opacity: 0;
+  z-index: 40;
+}
+
+@keyframes shock-flash-anim {
+  0% { opacity: 0.92; }
+  100% { opacity: 0; }
+}
+.shock-flash-overlay.is-active {
+  animation: shock-flash-anim 0.5s var(--ease-out) forwards;
+}
+
+/* Top Clinical Status Bar on Screen */
+.scope-top-bar {
+  background: var(--scope-header-bg);
+  border-bottom: 1px solid var(--scope-divider);
+  padding: var(--space-xs) var(--space-sm);
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-sm);
+  font-family: var(--font-label);
+  font-size: var(--label-size);
+}
+
+.scope-patient-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+}
+
+.icu-badge {
+  background: var(--primary-container);
+  color: var(--on-primary-container);
+  border: 1px solid var(--primary);
+  padding: 2px var(--space-sm);
+  border-radius: 3px;
+  font-weight: 600;
+}
+
+.patient-bed-tag {
+  color: var(--on-surface);
+  font-weight: 600;
+}
+
+.patient-name-tag {
+  color: var(--primary);
+  font-weight: 600;
+}
+
+.patient-type-tag {
+  color: var(--on-surface-variant);
+}
+
+.alarm-banner {
+  padding: var(--space-xs) var(--space-md);
+  border-radius: 4px;
+  text-align: center;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  background: var(--alarm-ok-bg);
+  color: var(--alarm-ok-text);
+  border: 1px solid var(--outline-variant);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+}
+
+@keyframes flash-high-alarm {
+  0%, 49% { background-color: var(--alarm-high-bg); color: var(--alarm-high-text); }
+  50%, 100% { background-color: var(--alarm-high-dim); color: var(--error); }
+}
+@keyframes flash-med-alarm {
+  0%, 49% { background-color: var(--alarm-med-bg); color: var(--alarm-med-text); }
+  50%, 100% { background-color: var(--alarm-med-dim); color: var(--warning); }
+}
+
+.alarm-banner.level-high {
+  animation: flash-high-alarm 0.8s infinite;
+  border-color: var(--error);
+}
+.alarm-banner.level-med {
+  animation: flash-med-alarm 1.3s infinite;
+  border-color: var(--warning);
+}
+
+.scope-clock-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  color: var(--on-surface);
+  font-variant-numeric: tabular-nums;
+}
+
+.silence-pill {
+  background: var(--alarm-med-dim);
+  color: var(--warning);
+  border: 1px solid var(--warning);
+  padding: 2px var(--space-xs);
+  border-radius: 3px;
+  font-weight: 600;
+}
+
+/* Main Screen Body: Left Waveforms (70%) + Right Numeric Tiles (30%) */
+.scope-main-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 2.35fr) minmax(240px, 1fr);
+  gap: 2px;
+  background: var(--scope-divider);
+}
+
+.waveform-column {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  background: var(--scope-divider);
+}
+
+.wave-channel {
+  position: relative;
+  background: var(--scope-bg);
+  min-height: 112px;
+  height: 118px;
+  overflow: hidden;
+}
+
+.wave-channel.wave-resp {
+  min-height: 92px;
+  height: 96px;
+}
+
+.wave-channel.with-grid {
+  background-image:
+    linear-gradient(to right, var(--scope-grid-line) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--scope-grid-line) 1px, transparent 1px);
+  background-size: 36px 36px;
+}
+
+.wave-label-overlay {
+  position: absolute;
+  top: var(--space-xs);
+  left: var(--space-sm);
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  font-family: var(--font-label);
+  font-size: var(--label-size);
+  font-weight: 600;
+  pointer-events: none;
+}
+
+.wave-label-ecg { color: var(--scope-ecg); }
+.wave-label-spo2 { color: var(--scope-spo2); }
+.wave-label-resp { color: var(--scope-resp); }
+
+.wave-right-tag {
+  position: absolute;
+  top: var(--space-xs);
+  right: var(--space-sm);
+  z-index: 4;
+  font-family: var(--font-label);
+  font-size: var(--label-size);
+  color: var(--on-surface-variant);
+  pointer-events: none;
+}
+
+.mv-calib-bar {
+  position: absolute;
+  right: var(--space-md);
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  pointer-events: none;
+}
+
+.mv-bar-line {
+  width: 3px;
+  height: 36px;
+  background: var(--scope-ecg);
+  border-radius: 1px;
+}
+
+.mv-bar-line.is-white {
+  background: var(--scope-nibp);
+}
+
+.mv-bar-text {
+  font-family: var(--font-label);
+  font-size: var(--label-size);
+  color: var(--scope-nibp);
+  font-weight: 600;
+}
+
+.wave-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* Numeric Tiles Column */
+.numeric-column {
+  display: grid;
+  grid-template-rows: repeat(4, minmax(0, 1fr));
+  gap: 2px;
+  background: var(--scope-divider);
+}
+
+.param-tile {
+  background: var(--scope-tile-bg);
+  padding: var(--space-sm) var(--space-md);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: relative;
+}
+
+.tile-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-xs);
+  font-family: var(--font-label);
+  font-size: var(--label-size);
+}
+
+.tile-title {
+  font-weight: 600;
+  letter-spacing: var(--label-tracking);
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.tile-ecg { color: var(--scope-ecg); }
+.tile-spo2 { color: var(--scope-spo2); }
+.tile-nibp { color: var(--scope-nibp); }
+.tile-resp { color: var(--scope-resp); }
+
+.tile-limits {
+  font-family: var(--font-label);
+  font-size: var(--label-size);
+  color: var(--on-surface-variant);
+  line-height: 1.15;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.tile-main-row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-sm);
+}
+
+.tile-big-num {
+  font-family: var(--font-label);
+  font-weight: 600;
+  font-size: clamp(2.4rem, 3.6vw, 3.6rem);
+  line-height: 0.95;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.04em;
+}
+
+.tile-nibp-num {
+  font-family: var(--font-label);
+  font-weight: 600;
+  font-size: clamp(1.6rem, 2.5vw, 2.35rem);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.03em;
+  color: var(--scope-nibp);
+}
+
+.tile-submeta {
+  font-family: var(--font-label);
+  font-size: var(--label-size);
+  color: var(--on-surface-variant);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+/* 10-segment Pleth Perfusion Bar */
+.perf-bar-wrap {
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 2px;
+  height: 54px;
+  width: 10px;
+  padding: 2px;
+  border: 1px solid var(--outline-variant);
+  background: var(--scope-bg);
+}
+
+.perf-seg {
+  flex: 1;
+  width: 100%;
+  background: var(--outline-variant);
+  border-radius: 1px;
+  transition: background-color 60ms linear;
+}
+
+.perf-seg.is-lit {
+  background: var(--scope-spo2);
+}
+
+.heart-pulse-icon {
+  display: inline-flex;
+  color: var(--scope-ecg);
+  transition: transform 80ms var(--ease-out);
+}
+.heart-pulse-icon.is-beat { transform: scale(1.38); }
+
+/* NIBP Inflation Gauge inside White Tile */
+.nibp-cuff-box {
+  background: var(--surface-container-low);
+  border: 1px solid var(--primary);
+  border-radius: 4px;
+  padding: var(--space-xs) var(--space-sm);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.nibp-cuff-bar {
+  height: 6px;
+  background: var(--scope-bg);
+  border-radius: var(--rounded-full);
+  overflow: hidden;
+}
+
+.nibp-cuff-fill {
+  height: 100%;
+  background: var(--primary);
+  width: 0%;
+  transition: width 150ms linear;
+}
+
+/* Bottom Tile Split: RESP + TEMP */
+.resp-temp-split {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 2px;
+  background: var(--scope-divider);
+}
+
+/* iM60 On-Screen Softkey Bar */
+.scope-softkeys {
+  background: var(--scope-header-bg);
+  border-top: 1px solid var(--scope-divider);
+  padding: var(--space-xs);
+  display: grid;
+  grid-template-columns: repeat(9, minmax(0, 1fr));
+  gap: var(--space-xs);
+}
+
+.softkey-btn {
+  min-height: 44px;
+  padding: var(--space-xs);
+  background: var(--scope-softkey-bg);
+  border: 1px solid var(--outline);
+  border-radius: 4px;
+  color: var(--on-surface);
+  font-family: var(--font-label);
+  font-size: var(--label-size);
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  text-align: center;
+  line-height: 1.1;
+  transition: background-color var(--dur-micro) var(--ease-out);
+}
+
+.softkey-btn:hover { background: var(--scope-softkey-active); }
+.softkey-btn.is-mute {
+  background: var(--scope-mute-yellow);
+  color: var(--scope-mute-text);
+  border-color: var(--warning);
+  font-weight: 700;
+}
+.softkey-btn.is-active-panel {
+  border-color: var(--primary);
+  background: var(--primary-container);
+  color: var(--on-primary-container);
+}
+
+/* Physical Bezel Keys Under Screen */
+.bezel-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  padding: var(--space-xs) var(--space-sm) 0;
+}
+
+.bezel-brand-plate {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  font-family: var(--font-headline);
+  font-weight: 700;
+  color: var(--on-surface);
+  letter-spacing: 0.05em;
+}
+
+.power-led {
+  width: 10px;
+  height: 10px;
+  border-radius: var(--rounded-full);
+  background: var(--tertiary);
+  box-shadow: 0 0 8px var(--tertiary);
+}
+
+.bezel-buttons-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.hw-btn {
+  min-height: 44px;
+  padding: 0 var(--space-md);
+  border-radius: var(--rounded);
+  border: 1px solid var(--bezel-highlight);
+  background: var(--bezel-key-gray);
+  color: var(--on-surface);
+  font-family: var(--font-label);
+  font-size: var(--label-size);
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  transition: transform var(--dur-micro) var(--ease-out), background-color var(--dur-micro) var(--ease-out);
+}
+.hw-btn:active { transform: scale(0.97); }
+.hw-btn.hw-mute {
+  background: var(--bezel-key-orange);
+  color: var(--bezel-key-orange-text);
+  border-color: var(--warning);
+}
+.hw-btn.is-frozen {
+  background: var(--primary-container);
+  border-color: var(--primary);
+  color: var(--on-primary-container);
+}
+
+/* In-Monitor Pop-up Drawer (Admission, Trends, AlarmReview, Menu) */
+.scope-drawer {
+  position: absolute;
+  inset: 38px var(--space-md) 58px var(--space-md);
+  background: var(--surface-container-low);
+  border: 2px solid var(--primary);
+  border-radius: var(--rounded);
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.scope-drawer-head {
+  background: var(--primary-container);
+  color: var(--on-primary-container);
+  padding: var(--space-sm) var(--space-md);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: var(--font-headline);
+  font-weight: 600;
+}
+
+.scope-drawer-body {
+  padding: var(--space-md);
+  overflow-y: auto;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+/* =================================================================== */
+/* TRAINER MOBILE REMOTE PANEL (AURORA MINERAL PANELS)                 */
+/* =================================================================== */
+.trainer-column {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.trainer-column.is-standalone {
+  max-width: 720px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.panel {
+  background: var(--panel-gradient);
+  border: var(--hairline);
+  border-radius: var(--rounded-lg);
+  padding: var(--space-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  container-type: inline-size;
+}
+
+.panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  border-bottom: var(--hairline);
+  padding-bottom: var(--space-sm);
+}
+
+.panel-title {
+  font-family: var(--font-headline);
+  font-size: var(--subhead-size);
+  font-weight: 600;
+  letter-spacing: var(--heading-tracking);
+  margin: 0;
+  color: var(--on-surface);
+}
+
+.status-chip {
+  background: var(--sage-tint);
+  color: var(--tertiary);
+  border: 1px solid color-mix(in srgb, var(--tertiary) 35%, transparent);
+  border-radius: var(--rounded);
+  padding: 2px var(--space-sm);
+  font-family: var(--font-label);
+  font-size: var(--label-size);
+  white-space: nowrap;
+}
+
+.status-chip.is-warn {
+  background: var(--amber-tint);
+  color: var(--warning);
+  border-color: var(--warning);
+}
+
+.status-chip.is-danger {
+  background: var(--danger-tint);
+  color: var(--error);
+  border-color: var(--error);
+}
+
+.field-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.field-label {
+  font-family: var(--font-label);
+  font-size: var(--label-size);
+  letter-spacing: var(--label-tracking);
+  text-transform: uppercase;
+  color: var(--on-surface-variant);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.well-input, .well-select, .well-textarea {
+  width: 100%;
+  min-height: 44px;
+  background: var(--background);
+  border: var(--hairline-strong);
+  border-radius: var(--rounded);
+  color: var(--on-surface);
+  padding: var(--space-sm) var(--space-md);
+  font-size: var(--body-size);
+}
+
+.well-select {
+  padding-right: var(--space-xl);
+}
+
+.well-textarea {
+  min-height: 76px;
+  resize: vertical;
+}
+
+.slider-pair {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 86px;
+  gap: var(--space-sm);
+  align-items: end;
+}
+
+input[type="range"].aurora-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 44px;
+  background: transparent;
+  cursor: pointer;
+}
+input[type="range"].aurora-slider::-webkit-slider-runnable-track {
+  height: 6px;
+  background: var(--surface-container-high);
+  border-radius: var(--rounded-full);
+  border: var(--hairline);
+}
+input[type="range"].aurora-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  height: 22px;
+  width: 22px;
+  margin-top: -9px;
+  border-radius: var(--rounded-full);
+  background: var(--primary);
+  border: 2px solid var(--on-primary);
+}
+
+.btn-primary {
+  min-height: 44px;
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--rounded);
+  border: none;
+  background: var(--primary);
+  color: var(--on-primary);
+  font-family: var(--font-headline);
+  font-weight: 600;
+  font-size: var(--body-size);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+  transition: opacity var(--dur-micro) var(--ease-out);
+}
+.btn-primary:hover { opacity: 0.9; }
+
+.btn-secondary {
+  min-height: 44px;
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--rounded);
+  border: var(--hairline-strong);
+  background: var(--surface-container);
+  color: var(--on-surface);
+  font-family: var(--font-headline);
+  font-weight: 600;
+  font-size: var(--label-size);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+  transition: background-color var(--dur-micro) var(--ease-out);
+}
+.btn-secondary:hover { background: var(--surface-container-high); }
+.btn-secondary.is-selected {
+  background: var(--primary-container);
+  border-color: var(--primary);
+  color: var(--on-primary-container);
+}
+
+.btn-danger {
+  min-height: 44px;
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--rounded);
+  border: 1px solid var(--error);
+  background: var(--danger-btn);
+  color: var(--alarm-high-text);
+  font-family: var(--font-headline);
+  font-weight: 700;
+  font-size: var(--body-size);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+}
+.btn-danger:hover { background: var(--danger-btn-hover); }
+
+.grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-sm);
+}
+
+.grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-sm);
+}
+
+@container (max-width: 399px) {
+  .grid-3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+/* Scenario Phase Cards */
+.phase-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.phase-item {
+  width: 100%;
+  min-height: 44px;
+  text-align: left;
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--rounded);
+  border: var(--hairline);
+  background: var(--background);
+  color: var(--on-surface);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  transition: border-color var(--dur-micro) var(--ease-out), background-color var(--dur-micro) var(--ease-out);
+}
+.phase-item:hover { background: var(--surface-container-high); }
+.phase-item.is-active {
+  border-color: var(--primary);
+  background: var(--primary-container);
+}
+
+.phase-name {
+  font-weight: 600;
+  font-size: var(--body-size);
+}
+.phase-meta {
+  font-family: var(--font-label);
+  font-size: var(--label-size);
+  color: var(--on-surface-variant);
+}
+
+/* Dictaphone & Timeline Log */
+.tag-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+}
+
+.quick-tag-btn {
+  min-height: 36px;
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--rounded);
+  border: var(--hairline-strong);
+  background: var(--background);
+  color: var(--primary);
+  font-family: var(--font-label);
+  font-size: var(--label-size);
+  cursor: pointer;
+}
+.quick-tag-btn:hover { background: var(--primary-container); }
+
+.mic-active-box {
+  background: var(--danger-tint);
+  border: 1px solid var(--error);
+  border-radius: var(--rounded);
+  padding: var(--space-sm);
+  font-family: var(--font-label);
+  font-size: var(--label-size);
+  color: var(--on-surface);
+}
+
+.log-feed {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  max-height: 280px;
+  overflow-y: auto;
+}
+
+.log-entry {
+  background: var(--background);
+  border: var(--hairline);
+  border-radius: var(--rounded);
+  padding: var(--space-sm);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.log-entry-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-sm);
+  font-family: var(--font-label);
+  font-size: var(--label-size);
+  color: var(--primary);
+}
+
+.log-snapshot {
+  font-family: var(--font-label);
+  font-size: var(--label-size);
+  color: var(--on-surface-variant);
+  background: var(--surface-container-low);
+  padding: 2px var(--space-xs);
+  border-radius: 4px;
+}
+
+/* Debriefing Full Report View */
+.debrief-shell {
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(210px, 100%), 1fr));
+  gap: var(--space-md);
+}
+
+.kpi-card {
+  background: var(--panel-gradient);
+  border: var(--hairline);
+  border-radius: var(--rounded-lg);
+  padding: var(--space-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.kpi-val {
+  font-family: var(--font-headline);
+  font-size: var(--display-size);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--on-surface);
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--label-size);
+  font-family: var(--font-label);
+}
+.data-table th {
+  text-align: left;
+  padding: var(--space-sm);
+  border-bottom: var(--hairline-strong);
+  color: var(--on-surface-variant);
+  text-transform: uppercase;
+  letter-spacing: var(--label-tracking);
+}
+.data-table td {
+  padding: var(--space-sm);
+  border-bottom: var(--hairline);
+  color: var(--on-surface);
+  vertical-align: top;
+}
+
+.trend-canvas-box {
+  min-height: 220px;
+  height: 240px;
+  background: var(--background);
+  border: var(--hairline);
+  border-radius: var(--rounded);
+  padding: var(--space-sm);
+}
+
+/* Mobile Responsive Rule */
+@media (max-width: 640px) {
+  .workspace.mode-split { grid-template-columns: 1fr; }
+  .scope-main-grid { grid-template-columns: 1fr; }
+  .numeric-column { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: auto; }
+  .scope-softkeys { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .grid-2, .grid-3 { grid-template-columns: 1fr; }
+  .workspace { padding: var(--space-sm); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+</style>
+</head>
+<body>
+
+<!-- TOP NAVIGATION BAR -->
+<header class="app-topbar">
+  <div class="topbar-brand">
+    <h1 class="brand-title">EDAN iM60 — Simulation Dialyse &amp; DSA</h1>
+    <span class="sim-clock-pill" id="sim-elapsed-pill">T+ 00:00</span>
+  </div>
+
+  <nav class="view-tabs" aria-label="Modes d'affichage">
+    <button type="button" class="tab-btn is-active" id="tab-student" onclick="setViewMode('student')">Tablette (Scope)</button>
+    <button type="button" class="tab-btn" id="tab-trainer" onclick="setViewMode('trainer')">Téléphone (Formateur)</button>
+    <button type="button" class="tab-btn" id="tab-split" onclick="setViewMode('split')">Vue Split</button>
+    <button type="button" class="tab-btn" id="tab-debrief" onclick="setViewMode('debrief')">Débriefing &amp; Journal</button>
+  </nav>
+
+  <div class="topbar-actions">
+    <button type="button" class="util-btn" id="btn-grid-toggle" onclick="toggleScopeGrid()">Grille Scope : ON</button>
+    <button type="button" class="util-btn" id="btn-audio-toggle" onclick="toggleAudio()">Son : OFF</button>
+    <button type="button" class="util-btn" onclick="toggleFullscreen()">Plein écran</button>
+  </div>
+</header>
+
+<main class="workspace" id="main-workspace">
+
+  <!-- =================================================================== -->
+  <!-- 1. MONITEUR EDAN iM60 RÉALISTE (VUE TABLETTE / SCOPE)               -->
+  <!-- =================================================================== -->
+  <section class="im60-chassis" id="view-student" aria-label="Moniteur patient EDAN iM60">
+    <div class="im60-screen">
+      <div class="shock-flash-overlay" id="shock-flash-overlay"></div>
+
+      <!-- Bandeau supérieur réel iM60 -->
+      <div class="scope-top-bar">
+        <div class="scope-patient-meta">
+          <span class="icu-badge">ICU</span>
+          <span class="patient-bed-tag">Poste HD 04</span>
+          <span class="patient-name-tag" id="scope-patient-name">M. P*** (Dialyse)</span>
+          <span class="patient-type-tag">Adult</span>
+          <span id="scope-bell-icon" aria-label="État alarme">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+              <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+            </svg>
+          </span>
+        </div>
+
+        <div class="alarm-banner" id="scope-alarm-banner">AUCUNE ALARME ACTIVE</div>
+
+        <div class="scope-clock-meta">
+          <span class="silence-pill is-hidden" id="alarm-silenced-badge">SILENCE <span id="silence-timer">120</span>s</span>
+          <span id="scope-cpr-badge" class="silence-pill is-hidden">ARTEFACTS RCP</span>
+          <span id="scope-datetime">18/11/2026 14:30:00</span>
+        </div>
+      </div>
+
+      <!-- Corps principal : Tracés 70% gauche / Pavés numériques 30% droite -->
+      <div class="scope-main-grid">
+
+        <!-- Colonne gauche : 4 Canaux (II, I, Pleth, RESP) -->
+        <div class="waveform-column">
+          <!-- Canal 1 : ECG II X1 Monitor -->
+          <div class="wave-channel with-grid" id="chan-ecg-ii">
+            <div class="wave-label-overlay wave-label-ecg">
+              <span>II</span>
+              <span>X1</span>
+              <span>Monitor</span>
+              <span id="ecg-rhythm-tag">RYTHME SINUSAL</span>
+            </div>
+            <div class="wave-right-tag">25 mm/s</div>
+            <div class="mv-calib-bar">
+              <div class="mv-bar-line"></div>
+              <span class="mv-bar-text">1 mV</span>
+            </div>
+            <canvas class="wave-canvas" id="canvas-ecg-ii"></canvas>
+          </div>
+
+          <!-- Canal 2 : ECG I X1 -->
+          <div class="wave-channel with-grid" id="chan-ecg-i">
+            <div class="wave-label-overlay wave-label-ecg">
+              <span>I</span>
+              <span>X1</span>
+            </div>
+            <div class="wave-right-tag">0.5–40 Hz</div>
+            <div class="mv-calib-bar">
+              <div class="mv-bar-line is-white"></div>
+              <span class="mv-bar-text">1 mV</span>
+            </div>
+            <canvas class="wave-canvas" id="canvas-ecg-i"></canvas>
+          </div>
+
+          <!-- Canal 3 : Pleth SpO2 -->
+          <div class="wave-channel with-grid" id="chan-pleth">
+            <div class="wave-label-overlay wave-label-spo2">
+              <span>Pleth</span>
+              <span id="pleth-signal-tag">SIGNAL FORT</span>
+            </div>
+            <div class="wave-right-tag" id="pleth-occlusion-tag"></div>
+            <canvas class="wave-canvas" id="canvas-spo2"></canvas>
+          </div>
+
+          <!-- Canal 4 : RESP -->
+          <div class="wave-channel wave-resp with-grid" id="chan-resp">
+            <div class="wave-label-overlay wave-label-resp">
+              <span>RESP</span>
+              <span>X1</span>
+            </div>
+            <div class="wave-right-tag">12.5 mm/s</div>
+            <canvas class="wave-canvas" id="canvas-resp"></canvas>
+          </div>
+        </div>
+
+        <!-- Colonne droite : Pavés numériques latéraux colorés -->
+        <div class="numeric-column">
+          <!-- Pavé 1 : HR / FC (Vert) -->
+          <div class="param-tile">
+            <div class="tile-header">
+              <div class="tile-title tile-ecg">
+                <span>HR</span>
+                <span class="heart-pulse-icon" id="heart-beat-icon" aria-hidden="true">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                  </svg>
+                </span>
+              </div>
+              <div class="tile-limits">
+                <div>120</div>
+                <div>50</div>
+              </div>
+            </div>
+            <div class="tile-main-row">
+              <div class="tile-submeta" style="flex-direction:column; align-items:flex-start;">
+                <span>Pace Off</span>
+                <span>PVCs 0</span>
+              </div>
+              <span class="tile-big-num tile-ecg" id="val-hr">80</span>
+            </div>
+          </div>
+
+          <!-- Pavé 2 : SpO2 (Cyan) + Barre de perfusion 10 segments -->
+          <div class="param-tile">
+            <div class="tile-header">
+              <div class="tile-title tile-spo2">
+                <span>SpO2</span>
+                <span>%</span>
+              </div>
+              <div class="tile-limits">
+                <div>100</div>
+                <div>90</div>
+              </div>
+            </div>
+            <div class="tile-main-row">
+              <div class="perf-bar-wrap" id="spo2-perf-bars" aria-label="Barre de perfusion pléthysmographique">
+                <div class="perf-seg"></div>
+                <div class="perf-seg"></div>
+                <div class="perf-seg"></div>
+                <div class="perf-seg"></div>
+                <div class="perf-seg"></div>
+                <div class="perf-seg"></div>
+                <div class="perf-seg"></div>
+                <div class="perf-seg"></div>
+                <div class="perf-seg"></div>
+                <div class="perf-seg"></div>
+              </div>
+              <div style="display:flex; flex-direction:column; align-items:flex-end;">
+                <span class="tile-big-num tile-spo2" id="val-spo2">98</span>
+                <span class="tile-submeta">PR <strong id="val-pulse">80</strong></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Pavé 3 : NIBP / PNI (Blanc) -->
+          <div class="param-tile" onclick="triggerNIBPMeasurement()" role="button" tabindex="0" aria-label="Mesure PNI">
+            <div class="tile-header">
+              <div class="tile-title tile-nibp">
+                <span>NIBP</span>
+                <span>mmHg</span>
+              </div>
+              <div class="tile-limits" id="nibp-mode-tag">Manual</div>
+            </div>
+
+            <div id="nibp-display-values">
+              <div class="tile-main-row">
+                <span class="tile-nibp-num"><span id="val-sys">115</span>/<span id="val-dia">75</span></span>
+                <span class="tile-submeta" style="color: var(--scope-nibp); font-weight:600;" id="val-map">(88)</span>
+              </div>
+            </div>
+
+            <div class="nibp-cuff-box is-hidden" id="nibp-inflating-box">
+              <div class="tile-submeta">
+                <span>Gonflage brassard…</span>
+                <strong id="nibp-cuff-pressure">0 mmHg</strong>
+              </div>
+              <div class="nibp-cuff-bar">
+                <div class="nibp-cuff-fill" id="nibp-progress"></div>
+              </div>
+            </div>
+
+            <div class="tile-submeta">
+              <span id="nibp-last-time">Dernière : 14:25</span>
+              <span id="nibp-auto-countdown"></span>
+            </div>
+          </div>
+
+          <!-- Pavé 4 : RR / FR (Jaune) + TEMP -->
+          <div class="resp-temp-split">
+            <div class="param-tile">
+              <div class="tile-header">
+                <span class="tile-title tile-resp">RR</span>
+                <div class="tile-limits">
+                  <div>30</div>
+                  <div>8</div>
+                </div>
+              </div>
+              <div class="tile-main-row" style="justify-content:flex-end;">
+                <span class="tile-big-num tile-resp" id="val-resp">16</span>
+              </div>
+              <div class="tile-submeta"><span>rpm</span></div>
+            </div>
+
+            <div class="param-tile">
+              <div class="tile-header">
+                <span class="tile-title" style="color: var(--scope-temp);">TEMP</span>
+                <span class="tile-limits">°C</span>
+              </div>
+              <div class="tile-main-row" style="justify-content:flex-end;">
+                <span class="tile-nibp-num" style="color: var(--scope-temp);" id="val-temp">37.0</span>
+              </div>
+              <div class="tile-submeta"><span>T1</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Drawer interne Edan iM60 (Admission, Trend Graph, Trend Table, AlarmReview, Menu) -->
+      <div class="scope-drawer is-hidden" id="scope-drawer">
+        <div class="scope-drawer-head">
+          <span id="scope-drawer-title">Menu Moniteur</span>
+          <button type="button" class="btn-secondary" onclick="closeScopeDrawer()">Fermer</button>
+        </div>
+        <div class="scope-drawer-body" id="scope-drawer-body"></div>
+      </div>
+
+      <!-- Bandeau inférieur de boutons tactiles réels de l'iM60 -->
+      <div class="scope-softkeys">
+        <button type="button" class="softkey-btn is-mute" onclick="silenceAlarms()" id="soft-mute">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
+            <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+            <path d="M18.63 13A17.89 17.89 0 0 1 18 8"/>
+            <path d="M6.26 6.26A5.86 5.86 0 0 0 6 8c0 7-3 9-3 9h14"/>
+            <path d="M18 8a6 6 0 0 0-9.33-5"/>
+            <line x1="1" y1="1" x2="23" y2="23"/>
+          </svg>
+          <span>Mute</span>
+        </button>
+        <button type="button" class="softkey-btn" onclick="cycleScopeDrawer(-1)">◀</button>
+        <button type="button" class="softkey-btn" onclick="openScopeDrawer('admission')" id="soft-admission">Admission</button>
+        <button type="button" class="softkey-btn" onclick="openScopeDrawer('trend-graph')" id="soft-trend-graph">Trend Graph</button>
+        <button type="button" class="softkey-btn" onclick="openScopeDrawer('trend-table')" id="soft-trend-table">Trend Table</button>
+        <button type="button" class="softkey-btn" onclick="openScopeDrawer('alarm-review')" id="soft-alarm-review">AlarmReview</button>
+        <button type="button" class="softkey-btn" onclick="triggerNIBPMeasurement()">NIBP</button>
+        <button type="button" class="softkey-btn" onclick="openScopeDrawer('menu')" id="soft-menu">Menu</button>
+        <button type="button" class="softkey-btn" onclick="cycleScopeDrawer(1)">▶</button>
+      </div>
+    </div>
+
+    <!-- Boîtier physique et touches matérielles en dessous de l'écran -->
+    <div class="bezel-controls">
+      <div class="bezel-brand-plate">
+        <span class="power-led" title="Secteur AC connecté"></span>
+        <span>EDAN</span>
+        <span class="brand-sub">iM60 Patient Monitor</span>
+      </div>
+      <div class="bezel-buttons-row">
+        <button type="button" class="hw-btn hw-mute" onclick="silenceAlarms()">Mute (120s)</button>
+        <button type="button" class="hw-btn" onclick="acknowledgeAlarms()">Acquitter</button>
+        <button type="button" class="hw-btn" id="btn-hw-freeze" onclick="toggleFreeze()">Freeze</button>
+        <button type="button" class="hw-btn" onclick="triggerNIBPMeasurement()">NIBP Start/Stop</button>
+        <button type="button" class="hw-btn" onclick="openScopeDrawer('menu')">Menu / Config</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- =================================================================== -->
+  <!-- 2. INTERFACE FORMATEUR (TÉLÉPHONE / TÉLÉCOMMANDE)                  -->
+  <!-- =================================================================== -->
+  <section class="trainer-column is-hidden" id="view-trainer" aria-label="Télécommande Formateur">
+
+    <!-- Panneau 1 : Scénarios Dialyse Module 2 & Progression Hyperkaliémie -->
+    <article class="panel">
+      <div class="panel-head">
+        <h2 class="panel-title">Scénarios Dialyse &amp; Progression</h2>
+        <span class="status-chip" id="sync-status-chip">Sync multi-onglets</span>
+      </div>
+
+      <div class="field-group">
+        <label class="field-label" for="select-clinical-scenario">Scénario clinique actif (Module 2)</label>
+        <select class="well-select" id="select-clinical-scenario" onchange="loadClinicalScenarioPreset()">
+          <option value="hyperk_seq">Scénario 2 — Bradycardie sévère / Hyperkaliémie (M. P)</option>
+          <option value="avk_fall">Scénario 1 — Chute sous AVK à l'arrivée (M. W)</option>
+          <option value="oap_sca">Scénario 3 — Détresse respiratoire OAP / SCA (M. V)</option>
+          <option value="hemorrhage">Scénario 4 — Arrachement ligne AV / Choc hémorragique (Mme A)</option>
+        </select>
+      </div>
+
+      <div class="grid-2">
+        <div class="field-group">
+          <label class="field-label" for="transition-duration">Vitesse de transition (Rampe)</label>
+          <select class="well-select" id="transition-duration">
+            <option value="1">Immédiat (1 s)</option>
+            <option value="5" selected>Rapide (5 s)</option>
+            <option value="12">Progressif (12 s)</option>
+            <option value="25">Lent (25 s)</option>
+          </select>
+        </div>
+        <div class="field-group">
+          <span class="field-label">Action séquentielle</span>
+          <button type="button" class="btn-primary" onclick="nextScenarioStep()">
+            <span>Étape suivante</span>
+            <span id="next-step-badge">(Phase 2)</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="phase-list" id="scenario-phase-list"></div>
+    </article>
+
+    <!-- Panneau 2 : Versant Cardiaque, Calibration FC & DSA -->
+    <article class="panel">
+      <div class="panel-head">
+        <h2 class="panel-title">Versant Cardiaque &amp; DSA</h2>
+        <span class="status-chip" id="trainer-cpr-chip">RCP : Arrêtée</span>
+      </div>
+
+      <div class="field-group">
+        <label class="field-label" for="ctrl-ecg-morphology">Rythme / Morphologie ECG (Calibration 80 bpm)</label>
+        <select class="well-select" id="ctrl-ecg-morphology" onchange="onCardiacRhythmSelect()">
+          <option value="normal">Normal (Sinusal 80 bpm — 6 à 7 complexes)</option>
+          <option value="hyperk_mild">HyperK modérée (Ondes T amples et pointues)</option>
+          <option value="bradycardia">Bradycardie hyperK (~41 bpm — P aplatie, QRS élargi)</option>
+          <option value="brady_extreme">Pré-ACR critique (22–26 bpm — Onde sinusoïdale continue)</option>
+          <option value="vfib">Fibrillation ventriculaire (FV — Chocable DSA)</option>
+          <option value="asystole">Asystolie (Ligne plate — Non chocable DSA)</option>
+          <option value="pea">AESP / Dissociation électromécanique (Sans pouls)</option>
+          <option value="post_rosc">RACS (Reprise d'activité circulatoire spontanée)</option>
+        </select>
+      </div>
+
+      <div class="field-group">
+        <label class="field-label" for="ctrl-hr-slider">
+          <span>Fréquence Cardiaque (FC)</span>
+          <span><strong id="lbl-hr">80</strong> bpm</span>
+        </label>
+        <div class="slider-pair">
+          <input type="range" class="aurora-slider" id="ctrl-hr-slider" min="0" max="200" value="80" oninput="syncHrFromSlider(this.value)">
+          <input type="number" class="well-input" id="ctrl-hr-num" min="0" max="200" value="80" oninput="syncHrFromNumber(this.value)">
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <button type="button" class="btn-secondary" id="btn-toggle-cpr" onclick="toggleCPR()">RCP Active (~105 cpm)</button>
+        <button type="button" class="btn-secondary" onclick="pauseCPRForDSAAnalysis()">Pause Analyse DSA</button>
+      </div>
+
+      <div class="grid-2" style="align-items:end;">
+        <div class="field-group">
+          <label class="field-label" for="post-shock-outcome">Rythme cible après choc DSA</label>
+          <select class="well-select" id="post-shock-outcome">
+            <option value="post_rosc">RACS (95 bpm • 108/65)</option>
+            <option value="vfib">Persistance FV</option>
+            <option value="asystole">Asystolie</option>
+            <option value="pea">AESP</option>
+          </select>
+        </div>
+        <button type="button" class="btn-danger" onclick="deliverDSAShock()">Choc DSA délivré</button>
+      </div>
+    </article>
+
+    <!-- Panneau 3 : SpO2, Conflit Brassard PNI & Tensions Scénarios -->
+    <article class="panel">
+      <div class="panel-head">
+        <h2 class="panel-title">SpO2, Conflit Brassard &amp; Mesure PNI</h2>
+        <span class="status-chip" id="trainer-nibp-chip">PNI : Prêt</span>
+      </div>
+
+      <!-- Conflit Brassard PNI / SpO2 -->
+      <div class="grid-2">
+        <div class="field-group">
+          <span class="field-label">Capteur SpO2 sur même bras que brassard</span>
+          <div class="grid-2">
+            <button type="button" class="btn-secondary is-selected" id="btn-same-arm-yes" onclick="setSameArmConflict(true)">Oui</button>
+            <button type="button" class="btn-secondary" id="btn-same-arm-no" onclick="setSameArmConflict(false)">Non</button>
+          </div>
+        </div>
+        <div class="field-group">
+          <label class="field-label" for="ctrl-spo2-quality">Qualité du signal SpO2</label>
+          <select class="well-select" id="ctrl-spo2-quality" onchange="onManualControlChange()">
+            <option value="strong">Fort (onde dicrote nette)</option>
+            <option value="weak_hypo">Faible / Hypo TA (onde aplatie)</option>
+            <option value="weak_agitation">Faible / Agitation (artéfacts)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="grid-3">
+        <div class="field-group">
+          <label class="field-label" for="ctrl-spo2-slider">SpO2 (<span id="lbl-spo2">98</span> %)</label>
+          <div class="slider-pair">
+            <input type="range" class="aurora-slider" id="ctrl-spo2-slider" min="30" max="100" value="98" oninput="syncSpo2FromSlider(this.value)">
+            <input type="number" class="well-input" id="ctrl-spo2-num" min="30" max="100" value="98" oninput="syncSpo2FromNumber(this.value)">
+          </div>
+        </div>
+        <div class="field-group">
+          <label class="field-label" for="ctrl-resp-slider">FR (<span id="lbl-resp">16</span> rpm)</label>
+          <div class="slider-pair">
+            <input type="range" class="aurora-slider" id="ctrl-resp-slider" min="0" max="45" value="16" oninput="syncRespFromSlider(this.value)">
+            <input type="number" class="well-input" id="ctrl-resp-num" min="0" max="45" value="16" oninput="syncRespFromNumber(this.value)">
+          </div>
+        </div>
+        <div class="field-group">
+          <label class="field-label" for="ctrl-temp-num">Temp (°C)</label>
+          <input type="number" class="well-input" id="ctrl-temp-num" min="33" max="42" step="0.1" value="37.0" oninput="onManualControlChange()">
+        </div>
+      </div>
+
+      <!-- Propositions de tensions adaptées aux 4 scénarios -->
+      <div class="field-group">
+        <span class="field-label">Tensions adaptées aux 4 scénarios (ou saisie libre)</span>
+        <div class="grid-2">
+          <button type="button" class="btn-secondary" onclick="applyBPPreset(150, 90, 'strong', 'Chute AVK')">Chute AVK : 150/90</button>
+          <button type="button" class="btn-secondary" onclick="applyBPPreset(100, 70, 'weak_hypo', 'Brady HyperK')">Brady HyperK : 100/70</button>
+          <button type="button" class="btn-secondary" onclick="applyBPPreset(180, 100, 'strong', 'OAP / SCA')">OAP / SCA : 180/100</button>
+          <button type="button" class="btn-secondary" onclick="applyBPPreset(80, 40, 'weak_hypo', 'Choc Hémo')">Choc Hémo : 80/40</button>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="field-group">
+          <label class="field-label" for="ctrl-sys-slider">Systolique (<span id="lbl-sys">115</span> mmHg)</label>
+          <div class="slider-pair">
+            <input type="range" class="aurora-slider" id="ctrl-sys-slider" min="0" max="240" value="115" oninput="syncSysFromSlider(this.value)">
+            <input type="number" class="well-input" id="ctrl-sys-num" min="0" max="240" value="115" oninput="syncSysFromNumber(this.value)">
+          </div>
+        </div>
+        <div class="field-group">
+          <label class="field-label" for="ctrl-dia-slider">Diastolique (<span id="lbl-dia">75</span> mmHg)</label>
+          <div class="slider-pair">
+            <input type="range" class="aurora-slider" id="ctrl-dia-slider" min="0" max="150" value="75" oninput="syncDiaFromSlider(this.value)">
+            <input type="number" class="well-input" id="ctrl-dia-num" min="0" max="150" value="75" oninput="syncDiaFromNumber(this.value)">
+          </div>
+        </div>
+      </div>
+
+      <div class="grid-2" style="align-items:end;">
+        <div class="field-group">
+          <label class="field-label" for="ctrl-nibp-interval">Mode PNI Automatique</label>
+          <select class="well-select" id="ctrl-nibp-interval" onchange="setNIBPAutoInterval(this.value)">
+            <option value="0">Manuel (à la demande)</option>
+            <option value="60">Auto — 1 min</option>
+            <option value="300">Auto — 5 min</option>
+            <option value="600">Auto — 10 min</option>
+            <option value="18">Continu / STAT (cycles 15s)</option>
+          </select>
+        </div>
+        <button type="button" class="btn-primary" onclick="triggerNIBPMeasurement()">Lancer Mesure PNI (15 s)</button>
+      </div>
+    </article>
+
+    <!-- Panneau 4 : Dictaphone Formateur & Journal Instantané -->
+    <article class="panel">
+      <div class="panel-head">
+        <h2 class="panel-title">Dictaphone Formateur &amp; Horodatage</h2>
+        <span class="status-chip" id="speech-status-chip">Prêt</span>
+      </div>
+
+      <div class="grid-2">
+        <button type="button" class="btn-primary" id="btn-dictaphone" onclick="toggleVoiceDictation()">Dicter une observation</button>
+        <button type="button" class="btn-secondary" onclick="setViewMode('debrief')">Ouvrir Fiche Débriefing</button>
+      </div>
+
+      <div class="mic-active-box is-hidden" id="speech-live-box">
+        <div>Écoute active… Parlez clairement près du micro :</div>
+        <div id="speech-interim-text" style="margin-top:4px; color: var(--primary);"></div>
+      </div>
+
+      <div class="field-group">
+        <span class="field-label">Marqueurs rapides (avec capture snapshot clinique)</span>
+        <div class="tag-row">
+          <button type="button" class="quick-tag-btn" onclick="logQuickEvent('Appel renfort / Médecin prévenu')">Appel médecin</button>
+          <button type="button" class="quick-tag-btn" onclick="logQuickEvent('Gluconate de Calcium 10% IV administré')">Gluconate Ca IV</button>
+          <button type="button" class="quick-tag-btn" onclick="logQuickEvent('Insuline-Glucose + Salbutamol nébulisé')">Insuline-Glucose</button>
+          <button type="button" class="quick-tag-btn" onclick="logQuickEvent('Compression directe ligne AV / sécurisation')">Compression AV</button>
+          <button type="button" class="quick-tag-btn" onclick="logQuickEvent('Pause mentale 10s / Reformulation leader')">Reformulation leader</button>
+        </div>
+      </div>
+
+      <div class="field-group">
+        <label class="field-label" for="trainer-note-input">Observation manuelle ou dictée à enregistrer</label>
+        <textarea class="well-textarea" id="trainer-note-input" placeholder="Saisir ou dicter une observation pédagogique…"></textarea>
+        <button type="button" class="btn-secondary" onclick="submitTrainerNote()">Enregistrer avec Snapshot Clinique</button>
+      </div>
+
+      <div class="log-feed" id="trainer-log-feed"></div>
+    </article>
+
+  </section>
+
+  <!-- =================================================================== -->
+  <!-- 3. FICHE DE DÉBRIEFING COMPLÈTE EN FIN DE SIMULATION                -->
+  <!-- =================================================================== -->
+  <section class="debrief-shell is-hidden" id="view-debrief" aria-label="Fiche de débriefing simulation">
+    <article class="panel">
+      <div class="panel-head">
+        <div>
+          <h2 class="panel-title">Fiche de Débriefing — Urgences en Hémodialyse</h2>
+          <span class="brand-sub" id="debrief-scenario-subtitle">Scénario actif</span>
+        </div>
+        <div class="topbar-actions">
+          <button type="button" class="btn-secondary" onclick="exportDebriefText()">Exporter Rapport (.txt)</button>
+          <button type="button" class="btn-secondary" onclick="exportDebriefCSV()">Exporter Journal (.csv)</button>
+          <button type="button" class="btn-secondary" id="btn-reset-session" onclick="resetSimulationSession(this)">Réinitialiser Session</button>
+        </div>
+      </div>
+
+      <div class="kpi-grid" id="debrief-kpi-grid"></div>
+    </article>
+
+    <article class="panel">
+      <div class="panel-head">
+        <h2 class="panel-title">Évolution des Constantes (FC, SpO2, PAM)</h2>
+        <span class="brand-sub">Tendances temps réel</span>
+      </div>
+      <div class="trend-canvas-box">
+        <canvas class="wave-canvas" id="canvas-debrief-trends"></canvas>
+      </div>
+    </article>
+
+    <article class="panel">
+      <div class="panel-head">
+        <h2 class="panel-title">Journal Chronologique &amp; Snapshots Cliniques</h2>
+        <span class="status-chip" id="debrief-count-chip">0 entrées</span>
+      </div>
+      <div style="overflow-x:auto;">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Heure</th>
+              <th>Temps Sim</th>
+              <th>Événement / Dictée</th>
+              <th>Constantes (FC • SpO2 • PNI • FR)</th>
+              <th>Rythme ECG / État</th>
+            </tr>
+          </thead>
+          <tbody id="debrief-table-body"></tbody>
+        </table>
+      </div>
+    </article>
+
+    <article class="panel">
+      <div class="panel-head">
+        <h2 class="panel-title">Guide de Débriefing Pédagogique &amp; Thérapeutique (Sources)</h2>
+        <span class="brand-sub">e-cardiogram (P. Taboulet) &amp; Module 2 Dialyse</span>
+      </div>
+      <div class="grid-2" id="debrief-questions-grid"></div>
+    </article>
+  </section>
+
+</main>
+
+<api-shim></api-shim>
+<script>
+/**
+ * 1. RÉFÉRENCE DES COULEURS CSS POUR CANVAS (ZERO HEX DANS LE CORPS)
+ */
+var THEME = {
+  ecg: '#00ff41',
+  spo2: '#00e5ff',
+  resp: '#ffea00',
+  nibp: '#f8fafc',
+  grid: '#1a2128',
+  primary: '#63c7d6',
+  tertiary: '#87d69b',
+  warning: '#e8b954',
+  error: '#f27474',
+  muted: '#94a8b0'
+};
+
+function readThemeTokens() {
+  var cs = getComputedStyle(document.documentElement);
+  function tok(name, fallback) {
+    var v = cs.getPropertyValue(name);
+    return v && v.trim() ? v.trim() : fallback;
+  }
+  THEME.ecg = tok('--scope-ecg', THEME.ecg);
+  THEME.spo2 = tok('--scope-spo2', THEME.spo2);
+  THEME.resp = tok('--scope-resp', THEME.resp);
+  THEME.nibp = tok('--scope-nibp', THEME.nibp);
+  THEME.grid = tok('--scope-grid-line', THEME.grid);
+  THEME.primary = tok('--primary', THEME.primary);
+  THEME.tertiary = tok('--tertiary', THEME.tertiary);
+  THEME.warning = tok('--warning', THEME.warning);
+  THEME.error = tok('--error', THEME.error);
+  THEME.muted = tok('--on-surface-variant', THEME.muted);
+}
+
+/**
+ * 2. SCÉNARIOS CLINIQUES ISSUS DES SOURCES & PHASES HYPERKALIÉMIE
+ */
+var CLINICAL_SCENARIOS = {
+  hyperk_seq: {
+    id: 'hyperk_seq',
+    label: `Scénario 2 — Bradycardie sévère / Hyperkaliémie (M. P)`,
+    patientName: `M. P*** (Interdialyse long)`,
+    admission: `Lundi 10h — Malaise et difficultés à la marche à l'arrivée avec ambulanciers. Interdialyse long du week-end. Générateurs en désinfection (30 min). Asthénie majeure.`,
+    debriefQuestions: [
+      `Qu'est-ce qui a été priorisé à l'arrivée, et pourquoi ?`,
+      `À quel moment l'équipe a-t-elle déclenché l'aide et le chariot d'urgence ?`,
+      `Quels signes ECG (ondes T pointues, P aplatie, QRS élargi, onde sinusoïdale) ont orienté vers l'hyperkaliémie ?`,
+      `Protocole thérapeutique (e-cardiogram / P. Taboulet) : Gluconate de Ca 10% IV (3 amp. dans 100 mL G5% en 10-15 min) + Insuline 10 UI / 250 mL G10% + Salbutamol nébulisé + Bicarbonates si QRS larges.`
+    ],
+    phases: [
+      { name: `1. Arrivée / HyperK débutante`, hr: 80, spo2: 98, sys: 115, dia: 75, resp: 16, temp: 37.0, morphology: 'hyperk_mild', spo2Quality: 'strong' },
+      { name: `2. Bradycardie modérée (FC 41)`, hr: 41, spo2: 98, sys: 100, dia: 70, resp: 15, temp: 37.0, morphology: 'bradycardia', spo2Quality: 'weak_hypo' },
+      { name: `3. Pré-ACR critique (FC 23, Sinusoïdale)`, hr: 23, spo2: 95, sys: 60, dia: 35, resp: 15, temp: 37.0, morphology: 'brady_extreme', spo2Quality: 'weak_hypo' },
+      { name: `4. ACR NON chocable (Asystolie)`, hr: 0, spo2: 0, sys: 0, dia: 0, resp: 0, temp: 36.8, morphology: 'asystole', spo2Quality: 'weak_hypo' },
+      { name: `5. ACR Chocable (Fibrillation Ventriculaire)`, hr: 0, spo2: 0, sys: 0, dia: 0, resp: 0, temp: 36.8, morphology: 'vfib', spo2Quality: 'weak_hypo' },
+      { name: `6. Post-Choc / RACS (Récupération)`, hr: 95, spo2: 95, sys: 108, dia: 65, resp: 18, temp: 36.8, morphology: 'post_rosc', spo2Quality: 'strong' }
+    ]
+  },
+  avk_fall: {
+    id: 'avk_fall',
+    label: `Scénario 1 — Chute sous AVK à l'arrivée (M. W)`,
+    patientName: `M. W*** (70 ans • AVK)`,
+    admission: `Chute dans l'ascenseur à l'arrivée en dialyse. Conscient, orienté, céphalées présentes, nausées, notion de choc crânien la veille sous AVK (non dit spontanément). HGT : 1,21 g/L.`,
+    debriefQuestions: [
+      `Qu'est-ce qui a fait classer la situation « à haut risque » (chute + céphalées + AVK) ?`,
+      `Quelles informations manquaient lors de l'appel médical ?`,
+      `Comment la boucle fermée et la reformulation régulière ont-elles été appliquées ?`,
+      `Décision d'équipe : report de dialyse vs avis neurochirurgical urgent.`
+    ],
+    phases: [
+      { name: `1. État initial à l'arrivée`, hr: 80, spo2: 98, sys: 150, dia: 90, resp: 16, temp: 37.0, morphology: 'normal', spo2Quality: 'strong' },
+      { name: `2. Aggravation neuro / HTIC (Bradycardie)`, hr: 52, spo2: 95, sys: 185, dia: 105, resp: 12, temp: 37.0, morphology: 'bradycardia', spo2Quality: 'strong' },
+      { name: `3. Trouble conscience / Désaturation`, hr: 44, spo2: 86, sys: 190, dia: 110, resp: 8, temp: 36.9, morphology: 'bradycardia', spo2Quality: 'weak_agitation' }
+    ]
+  },
+  oap_sca: {
+    id: 'oap_sca',
+    label: `Scénario 3 — Détresse respiratoire OAP / SCA (M. V)`,
+    patientName: `M. V*** (BPCO • PPID +5 kg)`,
+    admission: `Mardi matin — Assis à l'entrée de la dialyse. Dyspnée, sueurs, œdèmes, PPID +5 kg, VSR haut. Risque de SCA camouflé par suspicion d'OAP de surcharge.`,
+    debriefQuestions: [
+      `Comment reconnaître un SCA camouflé par une suspicion d'OAP de surcharge chez un patient BPCO ?`,
+      `Quelles priorités de sécurité (O2, position, monitorage, appel) avant la mise en dialyse UF isolée ?`,
+      `Réaction lors de l'apparition des douleurs thoraciques et de l'ACR après appel médecin.`
+    ],
+    phases: [
+      { name: `1. Détresse respi / OAP probable`, hr: 100, spo2: 93, sys: 180, dia: 100, resp: 30, temp: 36.6, morphology: 'normal', spo2Quality: 'weak_agitation' },
+      { name: `2. Douleur thoracique mise en dialyse (SCA)`, hr: 99, spo2: 94, sys: 177, dia: 100, resp: 30, temp: 36.8, morphology: 'hyperk_mild', spo2Quality: 'weak_hypo' },
+      { name: `3. ACR sur SCA (Fibrillation Ventriculaire)`, hr: 0, spo2: 0, sys: 0, dia: 0, resp: 0, temp: 36.7, morphology: 'vfib', spo2Quality: 'weak_hypo' },
+      { name: `4. RACS post-choc DSA`, hr: 92, spo2: 94, sys: 112, dia: 68, resp: 20, temp: 36.7, morphology: 'post_rosc', spo2Quality: 'strong' }
+    ]
+  },
+  hemorrhage: {
+    id: 'hemorrhage',
+    label: `Scénario 4 — Arrachement ligne AV / Choc hémorragique (Mme A)`,
+    patientName: `Mme A*** (15 min fin séance)`,
+    admission: `15 min avant débranchement — Malaise sur hypotension lors de la verticalisation au bord du lit, déconnexion 1 ligne AV, hémorragie active, agitation puis ACR une fois remise au lit.`,
+    debriefQuestions: [
+      `Qu'est-ce qui a déclenché l'escalade (verticalisation + déconnexion AV) ?`,
+      `Les priorités ont-elles été énoncées : contrôle de l'hémorragie, positionnement, appel médecin, chariot ?`,
+      `Restitution impossible sur 1 AV et gestion du circuit fermé sous stress.`
+    ],
+    phases: [
+      { name: `1. Malaise hypoTA bord du lit`, hr: 90, spo2: 96, sys: 80, dia: 40, resp: 22, temp: 37.0, morphology: 'normal', spo2Quality: 'weak_hypo' },
+      { name: `2. Hémorragie sur déconnexion AV`, hr: 110, spo2: 91, sys: 70, dia: 30, resp: 32, temp: 36.9, morphology: 'normal', spo2Quality: 'weak_hypo' },
+      { name: `3. Choc décompensé (FR 40, SpO2 86%)`, hr: 120, spo2: 86, sys: 80, dia: 30, resp: 40, temp: 36.8, morphology: 'normal', spo2Quality: 'weak_agitation' },
+      { name: `4. SpO2 imprenable / ACR (AESP puis Asystolie)`, hr: 20, spo2: 0, sys: 0, dia: 0, resp: 0, temp: 36.7, morphology: 'pea', spo2Quality: 'weak_hypo' }
+    ]
+  }
+};
+
+var RHYTHM_DEFAULT_HR = {
+  normal: 80,
+  hyperk_mild: 80,
+  bradycardia: 41,
+  brady_extreme: 23,
+  vfib: 0,
+  asystole: 0,
+  pea: 20,
+  post_rosc: 95
+};
+
+/**
+ * 3. ÉTAT GLOBAL DU SIMULATEUR
+ */
+var state = {
+  scenarioId: 'hyperk_seq',
+  currentStep: 0,
+  viewMode: 'student',
+  showGrid: true,
+  isFrozen: false,
+  audioEnabled: false,
+
+  // Constantes temps réel
+  hr: 80,
+  spo2: 98,
+  sys: 115,
+  dia: 75,
+  resp: 16,
+  temp: 37.0,
+  morphology: 'hyperk_mild',
+  spo2Quality: 'strong',
+
+  target: {
+    hr: 80,
+    spo2: 98,
+    sys: 115,
+    dia: 75,
+    resp: 16,
+    temp: 37.0,
+    morphology: 'hyperk_mild',
+    spo2Quality: 'strong'
+  },
+  startValues: null,
+  transitionStartTime: 0,
+  transitionEndTime: 0,
+
+  // Conflit PNI / SpO2 et Cycle PNI 15s
+  sameArmSpO2Conflict: true,
+  isInflatingNIBP: false,
+  cuffOccludingSpO2: false,
+  cuffPressure: 0,
+  nibpAutoIntervalSec: 0,
+  nibpNextAutoAt: 0,
+  displayedSys: 115,
+  displayedDia: 75,
+  lastNIBPTime: '14:25',
+
+  // RCP, DSA & Alarmes
+  cprActive: false,
+  shockArtifactUntil: 0,
+  shockCount: 0,
+  alarmSilencedUntil: 0,
+  alarmAcknowledged: false,
+  lastAlarmMsg: 'AUCUNE ALARME ACTIVE',
+  lastAlarmLevel: 'none',
+
+  // Journal, Tendances & Chronomètre
+  simStartEpoch: Date.now(),
+  lastTrendSampleAt: 0,
+  trendHistory: [],
+  alarmHistory: [],
+  journalEntries: [],
+
+  // Statistiques session
+  stats: {
+    minHr: 80,
+    minSpo2: 98,
+    minSys: 115
+  }
+};
+
+var DRAWER_TABS = ['admission', 'trend-graph', 'trend-table', 'alarm-review', 'menu'];
+var activeDrawerTab = null;
+
+/**
+ * 4. PERSISTANCE VIA NOTEBOOK SHIM API + SYNC MULTI-ONGLETS BROADCASTCHANNEL
+ */
+var syncChannel = null;
+try {
+  syncChannel = new BroadcastChannel('edan_im60_dialysis_sync');
+  syncChannel.onmessage = function(ev) {
+    handleSyncMessage(ev.data);
+  };
+} catch (e) {}
+
+function sendSyncMessage(payload) {
+  if (!syncChannel) return;
+  try {
+    syncChannel.postMessage(Object.assign({ ts: Date.now() }, payload));
+  } catch (e) {}
+}
+
+function handleSyncMessage(data) {
+  if (!data || !data.type) return;
+  if (data.type === 'SET_TARGET') {
+    state.scenarioId = data.scenarioId || state.scenarioId;
+    startTransition(data.target, data.durationSec, data.stepIndex);
+    syncTrainerUI();
+  } else if (data.type === 'TOGGLE_CPR') {
+    setCPRState(data.cprActive, true);
+  } else if (data.type === 'DELIVER_SHOCK') {
+    executeShockVisualAndAudio();
+  } else if (data.type === 'TRIGGER_NIBP') {
+    executeNIBPCycle();
+  } else if (data.type === 'SET_CONFLICT') {
+    state.sameArmSpO2Conflict = !!data.sameArm;
+    updateConflictButtons();
+  } else if (data.type === 'SILENCE_ALARM') {
+    state.alarmSilencedUntil = Date.now() + 120000;
+  } else if (data.type === 'ACK_ALARM') {
+    state.alarmAcknowledged = true;
+  }
+}
+
+function saveAppState() {
+  if (!window.notebookAppApi || typeof window.notebookAppApi.setAppState !== 'function') return;
+  var payload = {
+    scenarioId: state.scenarioId,
+    currentStep: state.currentStep,
+    showGrid: state.showGrid,
+    sameArmSpO2Conflict: state.sameArmSpO2Conflict,
+    nibpAutoIntervalSec: state.nibpAutoIntervalSec,
+    target: state.target,
+    displayedSys: state.displayedSys,
+    displayedDia: state.displayedDia,
+    lastNIBPTime: state.lastNIBPTime,
+    shockCount: state.shockCount,
+    simStartEpoch: state.simStartEpoch,
+    stats: state.stats,
+    trendHistory: state.trendHistory.slice(-120),
+    alarmHistory: state.alarmHistory.slice(-40),
+    journalEntries: state.journalEntries.slice(-80)
+  };
+  try {
+    window.notebookAppApi.setAppState(payload);
+  } catch (e) {}
+}
+
+function restoreFromSavedState(saved) {
+  if (!saved || typeof saved !== 'object') return;
+  if (saved.scenarioId && CLINICAL_SCENARIOS[saved.scenarioId]) {
+    state.scenarioId = saved.scenarioId;
+  }
+  if (typeof saved.currentStep === 'number') state.currentStep = saved.currentStep;
+  if (typeof saved.showGrid === 'boolean') state.showGrid = saved.showGrid;
+  if (typeof saved.sameArmSpO2Conflict === 'boolean') state.sameArmSpO2Conflict = saved.sameArmSpO2Conflict;
+  if (typeof saved.nibpAutoIntervalSec === 'number') state.nibpAutoIntervalSec = saved.nibpAutoIntervalSec;
+  if (saved.target) {
+    state.target = Object.assign({}, state.target, saved.target);
+    state.hr = state.target.hr;
+    state.spo2 = state.target.spo2;
+    state.sys = state.target.sys;
+    state.dia = state.target.dia;
+    state.resp = state.target.resp;
+    state.temp = state.target.temp;
+    state.morphology = state.target.morphology;
+    state.spo2Quality = state.target.spo2Quality || 'strong';
+  }
+  if (typeof saved.displayedSys === 'number') state.displayedSys = saved.displayedSys;
+  if (typeof saved.displayedDia === 'number') state.displayedDia = saved.displayedDia;
+  if (saved.lastNIBPTime) state.lastNIBPTime = saved.lastNIBPTime;
+  if (typeof saved.shockCount === 'number') state.shockCount = saved.shockCount;
+  if (typeof saved.simStartEpoch === 'number') state.simStartEpoch = saved.simStartEpoch;
+  if (saved.stats) state.stats = Object.assign({}, state.stats, saved.stats);
+  if (Array.isArray(saved.trendHistory)) state.trendHistory = saved.trendHistory;
+  if (Array.isArray(saved.alarmHistory)) state.alarmHistory = saved.alarmHistory;
+  if (Array.isArray(saved.journalEntries)) state.journalEntries = saved.journalEntries;
+}
+
+/**
+ * 5. NAVIGATION ENTRE VUES & OPTIONS SCOPE
+ */
+function setViewMode(mode) {
+  state.viewMode = mode;
+  var ws = document.getElementById('main-workspace');
+  var vStudent = document.getElementById('view-student');
+  var vTrainer = document.getElementById('view-trainer');
+  var vDebrief = document.getElementById('view-debrief');
+  var tabs = ['student', 'trainer', 'split', 'debrief'];
+
+  tabs.forEach(function(t) {
+    var btn = document.getElementById('tab-' + t);
+    if (btn) btn.classList.toggle('is-active', t === mode);
+  });
+
+  if (!ws || !vStudent || !vTrainer || !vDebrief) return;
+  ws.classList.remove('mode-split');
+  vTrainer.classList.remove('is-standalone');
+
+  if (mode === 'student') {
+    vStudent.classList.remove('is-hidden');
+    vTrainer.classList.add('is-hidden');
+    vDebrief.classList.add('is-hidden');
+  } else if (mode === 'trainer') {
+    vStudent.classList.add('is-hidden');
+    vTrainer.classList.remove('is-hidden');
+    vTrainer.classList.add('is-standalone');
+    vDebrief.classList.add('is-hidden');
+  } else if (mode === 'split') {
+    ws.classList.add('mode-split');
+    vStudent.classList.remove('is-hidden');
+    vTrainer.classList.remove('is-hidden');
+    vDebrief.classList.add('is-hidden');
+  } else if (mode === 'debrief') {
+    vStudent.classList.add('is-hidden');
+    vTrainer.classList.add('is-hidden');
+    vDebrief.classList.remove('is-hidden');
+    renderDebriefView();
+  }
+  setTimeout(resizeAllCanvases, 40);
+}
+
+function toggleScopeGrid() {
+  state.showGrid = !state.showGrid;
+  applyScopeGridClass();
+  saveAppState();
+}
+
+function applyScopeGridClass() {
+  var btn = document.getElementById('btn-grid-toggle');
+  if (btn) btn.textContent = state.showGrid ? `Grille Scope : ON` : `Grille Scope : OFF`;
+  var ids = ['chan-ecg-ii', 'chan-ecg-i', 'chan-pleth', 'chan-resp'];
+  ids.forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) el.classList.toggle('with-grid', state.showGrid);
+  });
+}
+
+function toggleFullscreen() {
+  if (!document.fullscreenElement) {
+    if (document.documentElement.requestFullscreen) {
+      document.documentElement.requestFullscreen().catch(function() {});
+    }
+  } else {
+    if (document.exitFullscreen) {
+      document.exitFullscreen().catch(function() {});
+    }
+  }
+}
+
+function toggleFreeze() {
+  state.isFrozen = !state.isFrozen;
+  var btn = document.getElementById('btn-hw-freeze');
+  if (btn) {
+    btn.classList.toggle('is-frozen', state.isFrozen);
+    btn.textContent = state.isFrozen ? `Unfreeze` : `Freeze`;
+  }
+}
+
+/**
+ * 6. SYNTHÈSE AUDIO MÉDICALE (WEB AUDIO API)
+ */
+var audioCtx = null;
+var lastAlarmBeepAt = 0;
+
+function initAudio() {
+  if (!audioCtx) {
+    var AC = window.AudioContext || window.webkitAudioContext;
+    if (AC) audioCtx = new AC();
+  }
+  if (audioCtx && audioCtx.state === 'suspended') {
+    audioCtx.resume().catch(function() {});
+  }
+}
+
+function toggleAudio() {
+  initAudio();
+  state.audioEnabled = !state.audioEnabled;
+  var btn = document.getElementById('btn-audio-toggle');
+  if (btn) {
+    btn.textContent = state.audioEnabled ? `Son : ON` : `Son : OFF`;
+    btn.classList.toggle('is-on', state.audioEnabled);
+  }
+  if (state.audioEnabled) playQRSBeep(state.spo2);
+}
+
+function playQRSBeep(spo2Val) {
+  if (!state.audioEnabled || !audioCtx) return;
+  if (state.cuffOccludingSpO2) return;
+  try {
+    var osc = audioCtx.createOscillator();
+    var gain = audioCtx.createGain();
+    osc.type = 'sine';
+    var clamped = Math.max(60, Math.min(100, spo2Val || 95));
+    var freq = 420 + ((clamped - 60) / 40) * 440;
+    osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+    gain.gain.setValueAtTime(0.06, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.08);
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start();
+    osc.stop(audioCtx.currentTime + 0.085);
+  } catch (e) {}
+}
+
+function playAlarmTone(level) {
+  if (!state.audioEnabled || !audioCtx) return;
+  if (Date.now() < state.alarmSilencedUntil || state.alarmAcknowledged) return;
+  var now = performance.now();
+  var interval = level === 'high' ? 950 : 2100;
+  if (now - lastAlarmBeepAt < interval) return;
+  lastAlarmBeepAt = now;
+  try {
+    var osc = audioCtx.createOscillator();
+    var gain = audioCtx.createGain();
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(level === 'high' ? 880 : 620, audioCtx.currentTime);
+    gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.16);
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start();
+    osc.stop(audioCtx.currentTime + 0.17);
+  } catch (e) {}
+}
+
+function playPumpPulse() {
+  if (!state.audioEnabled || !audioCtx) return;
+  try {
+    var osc = audioCtx.createOscillator();
+    var gain = audioCtx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(95, audioCtx.currentTime);
+    gain.gain.setValueAtTime(0.03, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.08);
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start();
+    osc.stop(audioCtx.currentTime + 0.085);
+  } catch (e) {}
+}
+
+function silenceAlarms() {
+  initAudio();
+  state.alarmSilencedUntil = Date.now() + 120000;
+  sendSyncMessage({ type: 'SILENCE_ALARM' });
+}
+
+function acknowledgeAlarms() {
+  state.alarmAcknowledged = true;
+  sendSyncMessage({ type: 'ACK_ALARM' });
+}
+
+/**
+ * 7. GESTION DES SCÉNARIOS, TRANSITIONS, DSA & RCP
+ */
+function getCurrentScenario() {
+  return CLINICAL_SCENARIOS[state.scenarioId] || CLINICAL_SCENARIOS.hyperk_seq;
+}
+
+function loadClinicalScenarioPreset() {
+  var sel = document.getElementById('select-clinical-scenario');
+  if (!sel) return;
+  state.scenarioId = sel.value;
+  state.currentStep = 0;
+  renderScenarioPhaseButtons();
+  applyScenarioStep(0);
+  addJournalEntry(`Chargement scénario : ` + getCurrentScenario().label, 'SCENARIO');
+}
+
+function renderScenarioPhaseButtons() {
+  var list = document.getElementById('scenario-phase-list');
+  var patName = document.getElementById('scope-patient-name');
+  var scenario = getCurrentScenario();
+  if (patName) patName.textContent = scenario.patientName;
+  if (!list) return;
+
+  list.innerHTML = '';
+  scenario.phases.forEach(function(phase, idx) {
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.id = 'step-btn-' + idx;
+    btn.className = 'phase-item' + (idx === state.currentStep ? ' is-active' : '');
+    btn.onclick = function() { applyScenarioStep(idx); };
+
+    var left = document.createElement('div');
+    var title = document.createElement('div');
+    title.className = 'phase-name';
+    title.textContent = phase.name;
+
+    var meta = document.createElement('div');
+    meta.className = 'phase-meta';
+    var bpText = phase.sys > 0 ? phase.sys + '/' + phase.dia : '--/--';
+    var spo2Text = phase.spo2 > 0 ? phase.spo2 + '%' : '--%';
+    meta.textContent = `FC ${phase.hr} • PA ${bpText} • SpO2 ${spo2Text}`;
+
+    left.appendChild(title);
+    left.appendChild(meta);
+
+    var badge = document.createElement('span');
+    badge.className = 'status-chip';
+    badge.textContent = idx === state.currentStep ? `ACTIF` : `Lancer`;
+
+    btn.appendChild(left);
+    btn.appendChild(badge);
+    list.appendChild(btn);
+  });
+
+  var nextBadge = document.getElementById('next-step-badge');
+  if (nextBadge) {
+    var nextIdx = (state.currentStep + 1) % scenario.phases.length;
+    nextBadge.textContent = `(Phase ${nextIdx + 1})`;
+  }
+}
+
+function applyScenarioStep(stepIndex) {
+  var scenario = getCurrentScenario();
+  var phase = scenario.phases[stepIndex];
+  if (!phase) return;
+  var durEl = document.getElementById('transition-duration');
+  var durationSec = durEl ? parseFloat(durEl.value) || 5 : 5;
+
+  var target = {
+    hr: phase.hr,
+    spo2: phase.spo2,
+    sys: phase.sys,
+    dia: phase.dia,
+    resp: phase.resp,
+    temp: phase.temp,
+    morphology: phase.morphology,
+    spo2Quality: phase.spo2Quality || 'strong'
+  };
+
+  startTransition(target, durationSec, stepIndex);
+  syncTrainerUI();
+  sendSyncMessage({
+    type: 'SET_TARGET',
+    scenarioId: state.scenarioId,
+    target: target,
+    durationSec: durationSec,
+    stepIndex: stepIndex
+  });
+  addJournalEntry(`Phase appliquée : ` + phase.name, 'PHASE');
+}
+
+function nextScenarioStep() {
+  var scenario = getCurrentScenario();
+  var nextIdx = (state.currentStep + 1) % scenario.phases.length;
+  applyScenarioStep(nextIdx);
+}
+
+function startTransition(target, durationSec, stepIndex) {
+  state.currentStep = stepIndex;
+  state.target = Object.assign({}, target);
+  state.startValues = {
+    hr: state.hr,
+    spo2: state.spo2,
+    sys: state.sys,
+    dia: state.dia,
+    resp: state.resp,
+    temp: state.temp
+  };
+  state.transitionStartTime = performance.now();
+  state.transitionEndTime = state.transitionStartTime + (durationSec * 1000);
+  state.morphology = target.morphology;
+  state.spo2Quality = target.spo2Quality || 'strong';
+  state.alarmAcknowledged = false;
+  saveAppState();
+}
+
+function onCardiacRhythmSelect() {
+  var sel = document.getElementById('ctrl-ecg-morphology');
+  if (!sel) return;
+  var morph = sel.value;
+  var defaultHr = RHYTHM_DEFAULT_HR[morph];
+  if (typeof defaultHr === 'number') {
+    setDualInput('ctrl-hr-slider', 'ctrl-hr-num', defaultHr);
+  }
+  if (morph === 'asystole' || morph === 'vfib' || morph === 'pea') {
+    setDualInput('ctrl-sys-slider', 'ctrl-sys-num', 0);
+    setDualInput('ctrl-dia-slider', 'ctrl-dia-num', 0);
+  } else if (morph === 'normal' || morph === 'post_rosc') {
+    var sysEl = document.getElementById('ctrl-sys-num');
+    if (sysEl && parseInt(sysEl.value, 10) === 0) {
+      setDualInput('ctrl-sys-slider', 'ctrl-sys-num', 115);
+      setDualInput('ctrl-dia-slider', 'ctrl-dia-num', 75);
+    }
+  }
+  onManualControlChange();
+}
+
+function setDualInput(sliderId, numId, val) {
+  var s = document.getElementById(sliderId);
+  var n = document.getElementById(numId);
+  if (s) s.value = val;
+  if (n) n.value = val;
+}
+
+/* Dedicated dual-input sync handlers (no snap-back) */
+function syncHrFromSlider(val) {
+  var n = document.getElementById('ctrl-hr-num');
+  if (n) n.value = val;
+  onManualControlChange();
+}
+function syncHrFromNumber(val) {
+  var clamped = clampInt(val, 0, 200, 80);
+  var s = document.getElementById('ctrl-hr-slider');
+  if (s) s.value = clamped;
+  onManualControlChange();
+}
+
+function syncSpo2FromSlider(val) {
+  var n = document.getElementById('ctrl-spo2-num');
+  if (n) n.value = val;
+  onManualControlChange();
+}
+function syncSpo2FromNumber(val) {
+  var clamped = clampInt(val, 30, 100, 98);
+  var s = document.getElementById('ctrl-spo2-slider');
+  if (s) s.value = clamped;
+  onManualControlChange();
+}
+
+function syncRespFromSlider(val) {
+  var n = document.getElementById('ctrl-resp-num');
+  if (n) n.value = val;
+  onManualControlChange();
+}
+function syncRespFromNumber(val) {
+  var clamped = clampInt(val, 0, 45, 16);
+  var s = document.getElementById('ctrl-resp-slider');
+  if (s) s.value = clamped;
+  onManualControlChange();
+}
+
+function syncSysFromSlider(val) {
+  var n = document.getElementById('ctrl-sys-num');
+  if (n) n.value = val;
+  onManualControlChange();
+}
+function syncSysFromNumber(val) {
+  var clamped = clampInt(val, 0, 240, 115);
+  var s = document.getElementById('ctrl-sys-slider');
+  if (s) s.value = clamped;
+  onManualControlChange();
+}
+
+function syncDiaFromSlider(val) {
+  var n = document.getElementById('ctrl-dia-num');
+  if (n) n.value = val;
+  onManualControlChange();
+}
+function syncDiaFromNumber(val) {
+  var clamped = clampInt(val, 0, 150, 75);
+  var s = document.getElementById('ctrl-dia-slider');
+  if (s) s.value = clamped;
+  onManualControlChange();
+}
+
+function clampInt(val, min, max, fallback) {
+  var v = parseInt(val, 10);
+  if (isNaN(v)) return fallback;
+  return Math.max(min, Math.min(max, v));
+}
+
+function applyBPPreset(sys, dia, spo2Quality, label) {
+  setDualInput('ctrl-sys-slider', 'ctrl-sys-num', sys);
+  setDualInput('ctrl-dia-slider', 'ctrl-dia-num', dia);
+  var qEl = document.getElementById('ctrl-spo2-quality');
+  if (qEl) qEl.value = spo2Quality;
+  onManualControlChange();
+  addJournalEntry(`Tension preset (${label}) : ${sys}/${dia} mmHg`, 'PNI');
+}
+
+function onManualControlChange() {
+  var hrEl = document.getElementById('ctrl-hr-num');
+  var spo2El = document.getElementById('ctrl-spo2-num');
+  var sysEl = document.getElementById('ctrl-sys-num');
+  var diaEl = document.getElementById('ctrl-dia-num');
+  var respEl = document.getElementById('ctrl-resp-num');
+  var tempEl = document.getElementById('ctrl-temp-num');
+  var morphEl = document.getElementById('ctrl-ecg-morphology');
+  var qualEl = document.getElementById('ctrl-spo2-quality');
+
+  var morph = morphEl ? morphEl.value : 'normal';
+  var hr = clampInt(hrEl ? hrEl.value : 80, 0, 200, 80);
+  var spo2 = clampInt(spo2El ? spo2El.value : 98, 0, 100, 98);
+  var sys = clampInt(sysEl ? sysEl.value : 115, 0, 240, 115);
+  var dia = clampInt(diaEl ? diaEl.value : 75, 0, 150, 75);
+  var resp = clampInt(respEl ? respEl.value : 16, 0, 45, 16);
+  var temp = tempEl ? parseFloat(tempEl.value) || 37.0 : 37.0;
+  var spo2Quality = qualEl ? qualEl.value : 'strong';
+
+  if (morph === 'asystole' || morph === 'vfib') {
+    hr = 0;
+    spo2 = 0;
+    setDualInput('ctrl-hr-slider', 'ctrl-hr-num', 0);
+  } else if (morph === 'pea') {
+    spo2 = 0;
+    sys = 0;
+    dia = 0;
+    if (hr === 0) {
+      hr = 20;
+      setDualInput('ctrl-hr-slider', 'ctrl-hr-num', 20);
+    }
+  }
+
+  var target = {
+    hr: hr,
+    spo2: spo2,
+    sys: sys,
+    dia: dia,
+    resp: resp,
+    temp: temp,
+    morphology: morph,
+    spo2Quality: spo2Quality
+  };
+
+  updateTrainerLabels(target);
+  startTransition(target, 1.2, state.currentStep);
+  sendSyncMessage({
+    type: 'SET_TARGET',
+    scenarioId: state.scenarioId,
+    target: target,
+    durationSec: 1.2,
+    stepIndex: state.currentStep
+  });
+}
+
+function updateTrainerLabels(t) {
+  var lHr = document.getElementById('lbl-hr');
+  var lSpo2 = document.getElementById('lbl-spo2');
+  var lResp = document.getElementById('lbl-resp');
+  var lSys = document.getElementById('lbl-sys');
+  var lDia = document.getElementById('lbl-dia');
+  if (lHr) lHr.textContent = Math.round(t.hr);
+  if (lSpo2) lSpo2.textContent = t.spo2 > 0 ? Math.round(t.spo2) : '--';
+  if (lResp) lResp.textContent = Math.round(t.resp);
+  if (lSys) lSys.textContent = t.sys > 0 ? Math.round(t.sys) : '--';
+  if (lDia) lDia.textContent = t.dia > 0 ? Math.round(t.dia) : '--';
+}
+
+function syncTrainerUI() {
+  var selScen = document.getElementById('select-clinical-scenario');
+  if (selScen) selScen.value = state.scenarioId;
+
+  var t = state.target;
+  setDualInput('ctrl-hr-slider', 'ctrl-hr-num', Math.round(t.hr));
+  setDualInput('ctrl-spo2-slider', 'ctrl-spo2-num', t.spo2 > 0 ? Math.round(t.spo2) : 50);
+  setDualInput('ctrl-sys-slider', 'ctrl-sys-num', Math.round(t.sys));
+  setDualInput('ctrl-dia-slider', 'ctrl-dia-num', Math.round(t.dia));
+  setDualInput('ctrl-resp-slider', 'ctrl-resp-num', Math.round(t.resp));
+
+  var tempEl = document.getElementById('ctrl-temp-num');
+  if (tempEl) tempEl.value = Number(t.temp).toFixed(1);
+
+  var morphEl = document.getElementById('ctrl-ecg-morphology');
+  if (morphEl) morphEl.value = t.morphology;
+
+  var qualEl = document.getElementById('ctrl-spo2-quality');
+  if (qualEl) qualEl.value = t.spo2Quality || 'strong';
+
+  var autoEl = document.getElementById('ctrl-nibp-interval');
+  if (autoEl) autoEl.value = String(state.nibpAutoIntervalSec);
+
+  updateTrainerLabels(t);
+  renderScenarioPhaseButtons();
+  updateConflictButtons();
+}
+
+function toggleCPR() {
+  setCPRState(!state.cprActive, false);
+}
+
+function setCPRState(active, fromSync) {
+  state.cprActive = !!active;
+  var chip = document.getElementById('trainer-cpr-chip');
+  var btn = document.getElementById('btn-toggle-cpr');
+  var badge = document.getElementById('scope-cpr-badge');
+
+  if (chip) {
+    chip.textContent = state.cprActive ? `RCP : ACTIVE (~105 cpm)` : `RCP : Arrêtée`;
+    chip.classList.toggle('is-warn', state.cprActive);
+  }
+  if (btn) btn.classList.toggle('is-selected', state.cprActive);
+  if (badge) badge.classList.toggle('is-hidden', !state.cprActive);
+
+  if (!fromSync) {
+    sendSyncMessage({ type: 'TOGGLE_CPR', cprActive: state.cprActive });
+    addJournalEntry(state.cprActive ? `Début RCP (~105 cpm)` : `Arrêt RCP`, 'RCP');
+  }
+}
+
+function pauseCPRForDSAAnalysis() {
+  if (state.cprActive) {
+    setCPRState(false, false);
+    addJournalEntry(`Pause RCP pour analyse DSA`, 'DSA');
+  }
+}
+
+function deliverDSAShock() {
+  setCPRState(false, false);
+  state.shockCount += 1;
+  executeShockVisualAndAudio();
+  sendSyncMessage({ type: 'DELIVER_SHOCK' });
+
+  var outEl = document.getElementById('post-shock-outcome');
+  var outcomeKey = outEl ? outEl.value : 'post_rosc';
+  var postMap = {
+    post_rosc: { hr: 95, spo2: 95, sys: 108, dia: 65, resp: 18, temp: state.temp, morphology: 'post_rosc', spo2Quality: 'strong', stepIdx: 5 },
+    vfib:      { hr: 0,  spo2: 0,  sys: 0,   dia: 0,  resp: 0,  temp: state.temp, morphology: 'vfib',      spo2Quality: 'weak_hypo', stepIdx: 4 },
+    asystole:  { hr: 0,  spo2: 0,  sys: 0,   dia: 0,  resp: 0,  temp: state.temp, morphology: 'asystole',  spo2Quality: 'weak_hypo', stepIdx: 3 },
+    pea:       { hr: 20, spo2: 0,  sys: 0,   dia: 0,  resp: 0,  temp: state.temp, morphology: 'pea',       spo2Quality: 'weak_hypo', stepIdx: 3 }
+  };
+  var cfg = postMap[outcomeKey] || postMap.post_rosc;
+  addJournalEntry(`Choc DSA n°${state.shockCount} délivré → cible ${outcomeKey}`, 'DSA');
+
+  setTimeout(function() {
+    var target = {
+      hr: cfg.hr,
+      spo2: cfg.spo2,
+      sys: cfg.sys,
+      dia: cfg.dia,
+      resp: cfg.resp,
+      temp: cfg.temp,
+      morphology: cfg.morphology,
+      spo2Quality: cfg.spo2Quality
+    };
+    startTransition(target, 1.2, cfg.stepIdx);
+    syncTrainerUI();
+    sendSyncMessage({
+      type: 'SET_TARGET',
+      scenarioId: state.scenarioId,
+      target: target,
+      durationSec: 1.2,
+      stepIndex: cfg.stepIdx
+    });
+  }, 450);
+}
+
+function executeShockVisualAndAudio() {
+  state.shockArtifactUntil = performance.now() + 450;
+  var overlay = document.getElementById('shock-flash-overlay');
+  if (overlay) {
+    overlay.classList.remove('is-active');
+    void overlay.offsetWidth;
+    overlay.classList.add('is-active');
+  }
+  if (state.audioEnabled && audioCtx) {
+    try {
+      var osc = audioCtx.createOscillator();
+      var gain = audioCtx.createGain();
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(145, audioCtx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(36, audioCtx.currentTime + 0.35);
+      gain.gain.setValueAtTime(0.18, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.36);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.38);
+    } catch (e) {}
+  }
+}
+
+/**
+ * 8. MESURE PNI COMPLÈTE (CYCLE 15s) & CONFLIT BRASSARD / SpO2
+ */
+function setSameArmConflict(yes) {
+  state.sameArmSpO2Conflict = !!yes;
+  updateConflictButtons();
+  sendSyncMessage({ type: 'SET_CONFLICT', sameArm: state.sameArmSpO2Conflict });
+  saveAppState();
+}
+
+function updateConflictButtons() {
+  var yesBtn = document.getElementById('btn-same-arm-yes');
+  var noBtn = document.getElementById('btn-same-arm-no');
+  if (yesBtn) yesBtn.classList.toggle('is-selected', state.sameArmSpO2Conflict);
+  if (noBtn) noBtn.classList.toggle('is-selected', !state.sameArmSpO2Conflict);
+}
+
+function setNIBPAutoInterval(valStr) {
+  var sec = parseInt(valStr, 10) || 0;
+  state.nibpAutoIntervalSec = sec;
+  state.nibpNextAutoAt = sec > 0 ? Date.now() + (sec * 1000) : 0;
+  var tag = document.getElementById('nibp-mode-tag');
+  if (tag) {
+    if (sec === 0) tag.textContent = `Manual`;
+    else if (sec <= 20) tag.textContent = `STAT`;
+    else tag.textContent = `Auto ${Math.round(sec / 60)}m`;
+  }
+  saveAppState();
+}
+
+function triggerNIBPMeasurement() {
+  initAudio();
+  executeNIBPCycle();
+  sendSyncMessage({ type: 'TRIGGER_NIBP' });
+}
+
+var nibpIntervalHandle = null;
+
+function executeNIBPCycle() {
+  if (state.isInflatingNIBP) return;
+  state.isInflatingNIBP = true;
+
+  var displayVals = document.getElementById('nibp-display-values');
+  var inflatingBox = document.getElementById('nibp-inflating-box');
+  var cuffText = document.getElementById('nibp-cuff-pressure');
+  var progressEl = document.getElementById('nibp-progress');
+  var trainerChip = document.getElementById('trainer-nibp-chip');
+
+  if (displayVals) displayVals.classList.add('is-hidden');
+  if (inflatingBox) inflatingBox.classList.remove('is-hidden');
+  if (trainerChip) {
+    trainerChip.textContent = `PNI : Gonflage (15 s)`;
+    trainerChip.classList.add('is-warn');
+  }
+
+  /* Cycle réaliste exactement de 15 secondes (30 pas de 500 ms) */
+  var totalSteps = 30;
+  var step = 0;
+
+  if (nibpIntervalHandle) clearInterval(nibpIntervalHandle);
+  nibpIntervalHandle = setInterval(function() {
+    step += 1;
+    var pct = (step / totalSteps) * 100;
+    var pressure = 0;
+    if (step <= 12) {
+      pressure = Math.round((step / 12) * 175);
+    } else if (step <= 26) {
+      pressure = Math.round(175 - ((step - 12) / 14) * 135);
+    } else {
+      pressure = Math.round(40 - ((step - 26) / 4) * 40);
+    }
+    state.cuffPressure = pressure;
+
+    /* Occlusion artérielle si capteur SpO2 sur le même bras et pression > 55 mmHg */
+    state.cuffOccludingSpO2 = state.sameArmSpO2Conflict && pressure > 55;
+
+    if (cuffText) cuffText.textContent = `${pressure} mmHg`;
+    if (progressEl) progressEl.style.width = `${pct}%`;
+    if (step <= 12 && step % 2 === 0) playPumpPulse();
+
+    if (step >= totalSteps) {
+      clearInterval(nibpIntervalHandle);
+      nibpIntervalHandle = null;
+      state.isInflatingNIBP = false;
+      state.cuffOccludingSpO2 = false;
+      state.cuffPressure = 0;
+
+      state.displayedSys = Math.round(state.sys);
+      state.displayedDia = Math.round(state.dia);
+      state.lastNIBPTime = new Date().toTimeString().slice(0, 5);
+
+      if (displayVals) displayVals.classList.remove('is-hidden');
+      if (inflatingBox) inflatingBox.classList.add('is-hidden');
+      if (trainerChip) {
+        trainerChip.textContent = `PNI : Prêt (${state.lastNIBPTime})`;
+        trainerChip.classList.remove('is-warn');
+      }
+      var lastEl = document.getElementById('nibp-last-time');
+      if (lastEl) lastEl.textContent = `Dernière : ` + state.lastNIBPTime;
+
+      if (state.nibpAutoIntervalSec > 0) {
+        state.nibpNextAutoAt = Date.now() + (state.nibpAutoIntervalSec * 1000);
+      }
+      saveAppState();
+    }
+  }, 500);
+}
+
+/**
+ * 9. MOTEUR PHYSIOLOGIQUE & TRACÉS CALIBRÉS SUR FC 80 BPM (FENÊTRE 5.0 SECONDES)
+ */
+var canvases = {
+  ecg2: document.getElementById('canvas-ecg-ii'),
+  ecg1: document.getElementById('canvas-ecg-i'),
+  spo2: document.getElementById('canvas-spo2'),
+  resp: document.getElementById('canvas-resp')
+};
+
+var ctxs = {
+  ecg2: canvases.ecg2 ? canvases.ecg2.getContext('2d') : null,
+  ecg1: canvases.ecg1 ? canvases.ecg1.getContext('2d') : null,
+  spo2: canvases.spo2 ? canvases.spo2.getContext('2d') : null,
+  resp: canvases.resp ? canvases.resp.getContext('2d') : null
+};
+
+var traceBuffers = { ecg2: [], ecg1: [], spo2: [], resp: [] };
+var sweepX = 0;
+var pixelRemainder = 0;
+var WINDOW_SECONDS = 5.0; // À 25 mm/s -> 5.0 s affichées = 6.67 complexes à 80 bpm
+
+function resizeAllCanvases() {
+  Object.keys(canvases).forEach(function(key) {
+    var c = canvases[key];
+    if (!c || !c.parentElement) return;
+    var rect = c.parentElement.getBoundingClientRect();
+    if (rect.width > 0 && rect.height > 0) {
+      c.width = Math.floor(rect.width);
+      c.height = Math.floor(rect.height);
+      traceBuffers[key] = new Array(c.width).fill(null);
+    }
+  });
+  sweepX = 0;
+  pixelRemainder = 0;
+}
+window.addEventListener('resize', resizeAllCanvases);
+
+function gaussian(x, center, width, amplitude) {
+  return amplitude * Math.exp(-Math.pow(x - center, 2) / (2 * Math.pow(width, 2)));
+}
+
+function computeECGSample(phase, timeSec, morph, lead) {
+  if (performance.now() < state.shockArtifactUntil) {
+    return (Math.random() > 0.5 ? 1.35 : -1.35);
+  }
+  var noise = (Math.sin(timeSec * 125) * 0.008) + ((Math.random() - 0.5) * 0.01);
+  var val = 0;
+  var leadScale = lead === 1 ? 0.72 : 1.0;
+
+  if (morph === 'asystole') {
+    val = Math.sin(timeSec * 1.1) * 0.014 + noise * 0.5;
+  } else if (morph === 'vfib') {
+    val = (
+      Math.sin(timeSec * 23 + (lead === 1 ? 0.8 : 0)) * 0.36 +
+      Math.sin(timeSec * 37 + 1.1) * 0.24 +
+      Math.cos(timeSec * 53 + 2.0) * 0.16 +
+      noise
+    ) * leadScale;
+  } else if (morph === 'hyperk_sine' || (morph === 'brady_extreme' && state.hr <= 26)) {
+    /* Onde sinusoïdale continue très étalée : absence de P, fusion QRS-T */
+    val = Math.sin(phase * Math.PI * 2 - Math.PI / 2) * 0.76 * leadScale + noise;
+  } else if (morph === 'brady_extreme') {
+    val -= gaussian(phase, 0.23, 0.022, 0.16) * leadScale;
+    val += gaussian(phase, 0.29, 0.032, 0.84) * leadScale;
+    val -= gaussian(phase, 0.36, 0.030, 0.38) * (lead === 1 ? 0.95 : 1.0);
+    val += gaussian(phase, 0.50, 0.052, 0.74) * leadScale + noise;
+  } else if (morph === 'bradycardia') {
+    /* Bradycardie hyperK : onde P aplatie, QRS élargi, onde T ample et pointue */
+    val += gaussian(phase, 0.14, 0.024, 0.05) * leadScale;
+    val -= gaussian(phase, 0.24, 0.014, 0.14) * leadScale;
+    val += gaussian(phase, 0.29, 0.020, 0.90) * leadScale;
+    val -= gaussian(phase, 0.34, 0.018, 0.28) * (lead === 1 ? 0.95 : 1.0);
+    val += gaussian(phase, 0.52, 0.034, 0.62) * leadScale + noise;
+  } else if (morph === 'hyperk_mild') {
+    /* Hyperkaliémie débutante : onde P normale, QRS fin, onde T ample et pointue */
+    val += gaussian(phase, 0.14, 0.020, 0.13) * leadScale;
+    val -= gaussian(phase, 0.255, 0.008, 0.12) * leadScale;
+    val += gaussian(phase, 0.285, 0.011, 0.95) * leadScale;
+    val -= gaussian(phase, 0.315, 0.010, 0.22) * leadScale;
+    val += gaussian(phase, 0.51, 0.025, 0.66) * leadScale + noise;
+  } else if (morph === 'pea') {
+    val += gaussian(phase, 0.28, 0.026, 0.54) * leadScale;
+    val -= gaussian(phase, 0.34, 0.030, 0.30) * leadScale;
+    val += gaussian(phase, 0.52, 0.052, 0.22) * leadScale + noise;
+  } else {
+    /* Normal ou Post-RACS */
+    var isRosc = morph === 'post_rosc';
+    val += gaussian(phase, 0.14, 0.020, 0.15) * leadScale;
+    val -= gaussian(phase, 0.255, isRosc ? 0.012 : 0.008, 0.12) * leadScale;
+    val += gaussian(phase, 0.285, isRosc ? 0.016 : 0.011, 0.96) * leadScale;
+    val -= gaussian(phase, 0.315, isRosc ? 0.015 : 0.010, 0.23) * leadScale;
+    var tAsc = gaussian(phase, 0.50, 0.032, isRosc ? 0.36 : 0.27);
+    var tDesc = gaussian(phase, 0.54, 0.050, isRosc ? 0.20 : 0.14);
+    val += Math.max(tAsc, tDesc) * leadScale + noise;
+  }
+
+  /* Artéfacts réguliers de compression RCP (~105 cpm = 1.75 Hz) */
+  if (state.cprActive) {
+    var cprPhase = (timeSec * 1.75) % 1.0;
+    var cprWave = gaussian(cprPhase, 0.25, 0.075, 0.88) - gaussian(cprPhase, 0.55, 0.10, 0.42);
+    val += cprWave * (lead === 1 ? 0.8 : 1.0);
+  }
+  return val;
+}
+
+function computePlethSample(phase, timeSec, hr, spo2, quality) {
+  /* Conflit brassard PNI : occlusion artérielle immédiate -> courbe plate */
+  if (state.cuffOccludingSpO2) {
+    return 0;
+  }
+  /* RCP active : légères oscillations mécaniques à ~105 cpm */
+  if (state.cprActive) {
+    var cprPhase = (timeSec * 1.75) % 1.0;
+    return gaussian(cprPhase, 0.32, 0.095, 0.32);
+  }
+  /* Asystole, FV, AESP ou FC 0 : courbe Pleth totalement plate */
+  if (hr <= 2 || spo2 <= 5 || state.morphology === 'asystole' || state.morphology === 'vfib' || state.morphology === 'pea') {
+    return 0;
+  }
+  /* Pré-ACR extrême : pléthysmographie effondrée */
+  if (state.morphology === 'brady_extreme' || state.morphology === 'hyperk_sine') {
+    var pLow = (phase - 0.18 + 1.0) % 1.0;
+    return gaussian(pLow, 0.18, 0.09, 0.18);
+  }
+
+  var p = (phase - 0.18 + 1.0) % 1.0;
+  if (quality === 'weak_agitation') {
+    var basePulse = gaussian(p, 0.16, 0.09, 0.42);
+    var chaos = Math.sin(timeSec * 21) * 0.14 + Math.cos(timeSec * 33) * 0.10 + ((Math.random() - 0.5) * 0.12);
+    return Math.max(-0.08, basePulse + chaos);
+  }
+
+  var systolic = gaussian(p, 0.15, 0.075, 0.86);
+  var dicrotic = gaussian(p, 0.35, 0.068, quality === 'weak_hypo' ? 0.08 : 0.34);
+  var scale = quality === 'weak_hypo' ? 0.32 : Math.max(0.55, Math.min(1.05, state.sys / 115));
+  return (systolic + dicrotic) * scale;
+}
+
+function computeRespSample(respPhase, respRate) {
+  if (respRate <= 0) return 0;
+  return Math.sin(respPhase * Math.PI * 2) * 0.72;
+}
+
+/**
+ * 10. BOUCLE D'ANIMATION TEMPS RÉEL
+ */
+var lastFrameTime = performance.now();
+var cardiacCyclePhase = 0;
+var respCyclePhase = 0;
+var simTimeSec = 0;
+var beepTriggeredThisBeat = false;
+var animFrameId = null;
+
+function mainLoop(now) {
+  var dt = Math.min(0.05, (now - lastFrameTime) / 1000);
+  lastFrameTime = now;
+
+  /* 1. Rampe fluide vers cibles */
+  if (now < state.transitionEndTime && state.startValues) {
+    var prog = (now - state.transitionStartTime) / (state.transitionEndTime - state.transitionStartTime);
+    var ease = prog < 0.5 ? 2 * prog * prog : 1 - Math.pow(-2 * prog + 2, 2) / 2;
+    state.hr = state.startValues.hr + (state.target.hr - state.startValues.hr) * ease;
+    state.spo2 = state.startValues.spo2 + (state.target.spo2 - state.startValues.spo2) * ease;
+    state.sys = state.startValues.sys + (state.target.sys - state.startValues.sys) * ease;
+    state.dia = state.startValues.dia + (state.target.dia - state.startValues.dia) * ease;
+    state.resp = state.startValues.resp + (state.target.resp - state.startValues.resp) * ease;
+    state.temp = state.startValues.temp + (state.target.temp - state.startValues.temp) * ease;
+  } else if (state.startValues) {
+    state.hr = state.target.hr;
+    state.spo2 = state.target.spo2;
+    state.sys = state.target.sys;
+    state.dia = state.target.dia;
+    state.resp = state.target.resp;
+    state.temp = state.target.temp;
+    state.startValues = null;
+  }
+
+  if (!state.isInflatingNIBP) {
+    state.displayedSys = Math.round(state.sys);
+    state.displayedDia = Math.round(state.dia);
+  }
+
+  /* 2. Mise à jour stats et historique des tendances (toutes les 5 s) */
+  if (state.hr > 0 && state.hr < state.stats.minHr) state.stats.minHr = Math.round(state.hr);
+  if (state.spo2 > 0 && !state.cuffOccludingSpO2 && state.spo2 < state.stats.minSpo2) state.stats.minSpo2 = Math.round(state.spo2);
+  if (state.sys > 0 && state.sys < state.stats.minSys) state.stats.minSys = Math.round(state.sys);
+
+  if (Date.now() - state.lastTrendSampleAt >= 5000) {
+    state.lastTrendSampleAt = Date.now();
+    recordTrendPoint();
+  }
+
+  /* 3. Cycle PNI automatique programmable */
+  if (state.nibpAutoIntervalSec > 0 && !state.isInflatingNIBP && state.nibpNextAutoAt > 0) {
+    var remMs = state.nibpNextAutoAt - Date.now();
+    var cdEl = document.getElementById('nibp-auto-countdown');
+    if (cdEl) cdEl.textContent = remMs > 0 ? Math.ceil(remMs / 1000) + 's' : '0s';
+    if (remMs <= 0) {
+      triggerNIBPMeasurement();
+    }
+  } else {
+    var cdClear = document.getElementById('nibp-auto-countdown');
+    if (cdClear) cdClear.textContent = '';
+  }
+
+  /* 4. Avancement pixel-par-pixel des tracés (5.0s = largeur complète du canvas) */
+  if (!state.isFrozen && canvases.ecg2 && canvases.ecg2.width > 0) {
+    var w = canvases.ecg2.width;
+    var pxPerSec = w / WINDOW_SECONDS;
+    pixelRemainder += pxPerSec * dt;
+    var steps = Math.floor(pixelRemainder);
+    pixelRemainder -= steps;
+
+    if (steps > 0) {
+      var dtPerPx = 1.0 / pxPerSec;
+      for (var s = 0; s < steps; s++) {
+        simTimeSec += dtPerPx;
+        if (state.hr > 0) {
+          cardiacCyclePhase += (state.hr / 60) * dtPerPx;
+          if (cardiacCyclePhase >= 1.0) {
+            cardiacCyclePhase -= 1.0;
+            beepTriggeredThisBeat = false;
+          }
+          if (!beepTriggeredThisBeat && cardiacCyclePhase >= 0.285 && state.morphology !== 'vfib' && state.morphology !== 'asystole' && state.morphology !== 'pea') {
+            beepTriggeredThisBeat = true;
+            playQRSBeep(state.spo2);
+            flashBeatAndPerfusion();
+          }
+        } else {
+          cardiacCyclePhase = 0;
+        }
+
+        if (state.resp > 0) {
+          respCyclePhase = (respCyclePhase + (state.resp / 60) * dtPerPx) % 1.0;
+        }
+
+        var idx = sweepX % w;
+        traceBuffers.ecg2[idx] = computeECGSample(cardiacCyclePhase, simTimeSec, state.morphology, 2);
+        traceBuffers.ecg1[idx] = computeECGSample(cardiacCyclePhase, simTimeSec, state.morphology, 1);
+        traceBuffers.spo2[idx] = computePlethSample(cardiacCyclePhase, simTimeSec, state.hr, state.spo2, state.spo2Quality);
+        traceBuffers.resp[idx] = computeRespSample(respCyclePhase, state.resp);
+
+        for (var gap = 1; gap <= 14; gap++) {
+          var clr = (idx + gap) % w;
+          traceBuffers.ecg2[clr] = null;
+          traceBuffers.ecg1[clr] = null;
+          traceBuffers.spo2[clr] = null;
+          traceBuffers.resp[clr] = null;
+        }
+        sweepX = (sweepX + 1) % w;
+      }
+
+      drawWaveform(ctxs.ecg2, canvases.ecg2, traceBuffers.ecg2, THEME.ecg, 0.60, 0.36);
+      drawWaveform(ctxs.ecg1, canvases.ecg1, traceBuffers.ecg1, THEME.ecg, 0.60, 0.36);
+      drawWaveform(ctxs.spo2, canvases.spo2, traceBuffers.spo2, THEME.spo2, 0.80, 0.65);
+      drawWaveform(ctxs.resp, canvases.resp, traceBuffers.resp, THEME.resp, 0.52, 0.36);
+    }
+  }
+
+  updateNumericDisplay();
+  evaluateAlarms(now);
+  animFrameId = requestAnimationFrame(mainLoop);
+}
+
+function drawWaveform(ctx, canvas, buffer, color, baselineRatio, scaleRatio) {
+  if (!ctx || !canvas) return;
+  var w = canvas.width;
+  var h = canvas.height;
+  ctx.clearRect(0, 0, w, h);
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 2.1;
+  ctx.lineJoin = 'round';
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  var penDown = false;
+  for (var x = 0; x < w; x++) {
+    var val = buffer[x];
+    if (val === null || val === undefined) {
+      penDown = false;
+      continue;
+    }
+    var y = (h * baselineRatio) - (val * h * scaleRatio);
+    if (!penDown) {
+      ctx.moveTo(x, y);
+      penDown = true;
+    } else {
+      ctx.lineTo(x, y);
+    }
+  }
+  ctx.stroke();
+}
+
+function flashBeatAndPerfusion() {
+  var heart = document.getElementById('heart-beat-icon');
+  if (heart) {
+    heart.classList.add('is-beat');
+    setTimeout(function() { heart.classList.remove('is-beat'); }, 120);
+  }
+  var barWrap = document.getElementById('spo2-perf-bars');
+  if (!barWrap) return;
+  var segs = barWrap.querySelectorAll('.perf-seg');
+  var litCount = 0;
+  if (!state.cuffOccludingSpO2 && state.hr > 2 && state.spo2 > 5 && state.morphology !== 'pea' && state.morphology !== 'asystole' && state.morphology !== 'vfib') {
+    if (state.spo2Quality === 'weak_hypo') litCount = 2;
+    else if (state.spo2Quality === 'weak_agitation') litCount = Math.floor(2 + Math.random() * 4);
+    else if (state.morphology === 'brady_extreme' || state.morphology === 'hyperk_sine') litCount = 2;
+    else litCount = Math.max(4, Math.min(10, Math.round((state.sys / 120) * 9)));
+  }
+  for (var i = 0; i < segs.length; i++) {
+    segs[i].classList.toggle('is-lit', i < litCount);
+  }
+  setTimeout(function() {
+    var baseLit = litCount > 0 ? 1 : 0;
+    for (var j = 0; j < segs.length; j++) {
+      segs[j].classList.toggle('is-lit', j < baseLit);
+    }
+  }, 240);
+}
+
+/**
+ * 11. AFFICHAGE NUMÉRIQUE & ALARMES CLINIQUES
+ */
+function updateNumericDisplay() {
+  var hrInt = Math.round(state.hr);
+  var isACR = hrInt === 0 || state.morphology === 'asystole' || state.morphology === 'vfib' || state.morphology === 'pea';
+
+  var valHr = document.getElementById('val-hr');
+  if (valHr) {
+    if (state.cprActive) valHr.textContent = '105';
+    else valHr.textContent = (hrInt === 0 || state.morphology === 'asystole' || state.morphology === 'vfib') ? '0' : String(hrInt);
+  }
+
+  var morphLabels = {
+    normal: `SINUSAL NORMAL`,
+    hyperk_mild: `HYPERK MODÉRÉE (T POINTUES)`,
+    bradycardia: `BRADYCARDIE HYPERK (QRS LARGE)`,
+    brady_extreme: `PRÉ-ACR ONDE SINUSOÏDALE`,
+    hyperk_sine: `ONDE SINUSOÏDALE CRITIQUE`,
+    pea: `AESP • SANS POULS`,
+    vfib: `FIBRILLATION VENTRICULAIRE`,
+    asystole: `ASYSTOLIE` ,
+    post_rosc: `RACS • RYTHME SINUSAL`
+  };
+  var rTag = document.getElementById('ecg-rhythm-tag');
+  if (rTag) rTag.textContent = state.cprActive ? `ARTEFACTS RCP (~105 CPM)` : (morphLabels[state.morphology] || ``);
+
+  /* SpO2 & Conflit Brassard */
+  var valSpo2 = document.getElementById('val-spo2');
+  var valPulse = document.getElementById('val-pulse');
+  var plethTag = document.getElementById('pleth-signal-tag');
+  var occTag = document.getElementById('pleth-occlusion-tag');
+
+  if (state.cuffOccludingSpO2) {
+    if (valSpo2) valSpo2.textContent = '--';
+    if (valPulse) valPulse.textContent = '--';
+    if (plethTag) plethTag.textContent = `PERTE SIGNAL / OCCLUSION PNI`;
+    if (occTag) occTag.textContent = `RECHERCHE POULS...`;
+  } else if (isACR || state.spo2 <= 5) {
+    if (valSpo2) valSpo2.textContent = '--';
+    if (valPulse) valPulse.textContent = state.cprActive ? '105' : '--';
+    if (plethTag) plethTag.textContent = state.cprActive ? `OSCILLATIONS RCP` : `ABSENCE DE POULS`;
+    if (occTag) occTag.textContent = ``;
+  } else {
+    if (valSpo2) valSpo2.textContent = String(Math.round(state.spo2));
+    if (valPulse) valPulse.textContent = String(hrInt);
+    var qMap = { strong: `SIGNAL FORT`, weak_hypo: `SIGNAL FAIBLE (HYPO TA)`, weak_agitation: `ARTEFACTS AGITATION` };
+    if (plethTag) plethTag.textContent = qMap[state.spo2Quality] || `SIGNAL FORT`;
+    if (occTag) occTag.textContent = ``;
+  }
+
+  /* Si occlusion PNI ou ACR, éteindre les barres de perfusion */
+  if (state.cuffOccludingSpO2 || isACR) {
+    var barWrap = document.getElementById('spo2-perf-bars');
+    if (barWrap) {
+      var segs = barWrap.querySelectorAll('.perf-seg');
+      for (var k = 0; k < segs.length; k++) segs[k].classList.remove('is-lit');
+    }
+  }
+
+  /* PNI */
+  var valSys = document.getElementById('val-sys');
+  var valDia = document.getElementById('val-dia');
+  var valMap = document.getElementById('val-map');
+  if (state.displayedSys <= 10 || isACR) {
+    if (valSys) valSys.textContent = '--';
+    if (valDia) valDia.textContent = '--';
+    if (valMap) valMap.textContent = `(--)`;
+  } else {
+    var sys = state.displayedSys;
+    var dia = state.displayedDia;
+    var pam = Math.round(dia + (sys - dia) / 3);
+    if (valSys) valSys.textContent = String(sys);
+    if (valDia) valDia.textContent = String(dia);
+    if (valMap) valMap.textContent = `(${pam})`;
+  }
+
+  /* RESP & TEMP */
+  var valResp = document.getElementById('val-resp');
+  var valTemp = document.getElementById('val-temp');
+  if (valResp) valResp.textContent = (isACR || state.resp <= 0) ? '0' : String(Math.round(state.resp));
+  if (valTemp) valTemp.textContent = Number(state.temp).toFixed(1);
+
+  /* Horloges */
+  var nowDate = new Date();
+  var dtEl = document.getElementById('scope-datetime');
+  if (dtEl) {
+    var dStr = nowDate.toLocaleDateString('fr-FR');
+    var tStr = nowDate.toTimeString().slice(0, 8);
+    dtEl.textContent = `${dStr} ${tStr}`;
+  }
+  var elapsedSec = Math.max(0, Math.floor((Date.now() - state.simStartEpoch) / 1000));
+  var mm = String(Math.floor(elapsedSec / 60)).padStart(2, '0');
+  var ss = String(elapsedSec % 60).padStart(2, '0');
+  var elPill = document.getElementById('sim-elapsed-pill');
+  if (elPill) elPill.textContent = `T+ ${mm}:${ss}`;
+}
+
+function evaluateAlarms(now) {
+  var banner = document.getElementById('scope-alarm-banner');
+  var silenceBadge = document.getElementById('alarm-silenced-badge');
+  var silenceTimer = document.getElementById('silence-timer');
+  var nowEpoch = Date.now();
+
+  if (nowEpoch < state.alarmSilencedUntil) {
+    if (silenceBadge) silenceBadge.classList.remove('is-hidden');
+    if (silenceTimer) silenceTimer.textContent = String(Math.ceil((state.alarmSilencedUntil - nowEpoch) / 1000));
+  } else {
+    if (silenceBadge) silenceBadge.classList.add('is-hidden');
+  }
+
+  var level = 'none';
+  var msg = `AUCUNE ALARME ACTIVE`;
+
+  if (state.morphology === 'asystole' || (state.hr === 0 && state.morphology !== 'vfib')) {
+    level = 'high';
+    msg = `*** ASYSTOLIE • ARRÊT CARDIAQUE ***`;
+  } else if (state.morphology === 'vfib') {
+    level = 'high';
+    msg = `*** FIBRILLATION VENTRICULAIRE ***`;
+  } else if (state.morphology === 'pea') {
+    level = 'high';
+    msg = `*** ABSENCE DE POULS / AESP ***`;
+  } else if (state.hr > 0 && state.hr < 35) {
+    level = 'high';
+    msg = `*** BRADYCARDIE EXTRÊME (FC ${Math.round(state.hr)}) ***`;
+  } else if (state.sys > 0 && state.sys < 80) {
+    level = 'high';
+    msg = `*** HYPOTENSION SÉVÈRE (${Math.round(state.sys)}/${Math.round(state.dia)}) ***`;
+  } else if (!state.cuffOccludingSpO2 && state.spo2 > 0 && state.spo2 < 88) {
+    level = 'high';
+    msg = `*** DÉSATURATION CRITIQUE (SpO2 ${Math.round(state.spo2)}%) ***`;
+  } else if (state.cuffOccludingSpO2) {
+    level = 'med';
+    msg = `** SpO2 : PERTE SIGNAL / RECHERCHE POULS (PNI) **`;
+  } else if (state.hr > 0 && state.hr < 50) {
+    level = 'med';
+    msg = `** BRADYCARDIE (FC ${Math.round(state.hr)} bpm) **`;
+  } else if (state.sys > 0 && state.sys < 100) {
+    level = 'med';
+    msg = `** HYPOTENSION (${Math.round(state.sys)}/${Math.round(state.dia)}) **`;
+  } else if (!state.cuffOccludingSpO2 && state.spo2 > 0 && state.spo2 < 94) {
+    level = 'med';
+    msg = `** SpO2 BASSE (${Math.round(state.spo2)}%) **`;
+  } else if (state.hr > 130) {
+    level = 'med';
+    msg = `** TACHYCARDIE (FC ${Math.round(state.hr)} bpm) **`;
+  }
+
+  if (msg !== state.lastAlarmMsg && level !== 'none') {
+    state.alarmHistory.unshift({
+      time: new Date().toTimeString().slice(0, 8),
+      level: level,
+      msg: msg
+    });
+    if (state.alarmHistory.length > 50) state.alarmHistory.pop();
+  }
+  state.lastAlarmMsg = msg;
+  state.lastAlarmLevel = level;
+
+  if (banner) {
+    banner.textContent = msg;
+    banner.classList.remove('level-high', 'level-med');
+    if (level === 'high') banner.classList.add('level-high');
+    else if (level === 'med') banner.classList.add('level-med');
+  }
+
+  if (level !== 'none') playAlarmTone(level);
+}
+
+/**
+ * 12. TIROIRS INTERNES DU MONITEUR (ADMISSION, TREND GRAPH, TREND TABLE, ALARMREVIEW, MENU)
+ */
+function openScopeDrawer(tab) {
+  if (activeDrawerTab === tab) {
+    closeScopeDrawer();
+    return;
+  }
+  activeDrawerTab = tab;
+  var drawer = document.getElementById('scope-drawer');
+  var titleEl = document.getElementById('scope-drawer-title');
+  var bodyEl = document.getElementById('scope-drawer-body');
+  if (!drawer || !titleEl || !bodyEl) return;
+
+  DRAWER_TABS.forEach(function(t) {
+    var b = document.getElementById('soft-' + t);
+    if (b) b.classList.toggle('is-active-panel', t === tab);
+  });
+
+  drawer.classList.remove('is-hidden');
+  bodyEl.innerHTML = '';
+
+  if (tab === 'admission') {
+    var sc = getCurrentScenario();
+    titleEl.textContent = `Admission Patient — Poste HD 04`;
+    bodyEl.innerHTML = `<div class="panel"><strong>${sc.patientName}</strong><p>${sc.admission}</p><p><strong>Scénario :</strong> ${sc.label}</p></div>`;
+  } else if (tab === 'trend-graph') {
+    titleEl.textContent = `Trend Graph — Tendances FC / SpO2 / PAM`;
+    var box = document.createElement('div');
+    box.className = 'trend-canvas-box';
+    var c = document.createElement('canvas');
+    c.className = 'wave-canvas';
+    c.id = 'canvas-scope-trends';
+    box.appendChild(c);
+    bodyEl.appendChild(box);
+    setTimeout(function() { renderTrendCanvas('canvas-scope-trends'); }, 30);
+  } else if (tab === 'trend-table') {
+    titleEl.textContent = `Trend Table — Relevé tabulaire`;
+    bodyEl.appendChild(buildTrendTableElement());
+  } else if (tab === 'alarm-review') {
+    titleEl.textContent = `AlarmReview — Historique des alarmes`;
+    if (state.alarmHistory.length === 0) {
+      bodyEl.innerHTML = `<p>Aucune alarme enregistrée depuis le début de la session.</p>`;
+    } else {
+      var tbl = document.createElement('table');
+      tbl.className = 'data-table';
+      tbl.innerHTML = `<thead><tr><th>Heure</th><th>Priorité</th><th>Message d'alarme</th></tr></thead>`;
+      var tb = document.createElement('tbody');
+      state.alarmHistory.forEach(function(a) {
+        var tr = document.createElement('tr');
+        tr.innerHTML = `<td>${a.time}</td><td>${a.level === 'high' ? 'CRITIQUE' : 'MOYENNE'}</td><td>${a.msg}</td>`;
+        tb.appendChild(tr);
+      });
+      tbl.appendChild(tb);
+      bodyEl.appendChild(tbl);
+    }
+  } else if (tab === 'menu') {
+    titleEl.textContent = `Menu Configuration EDAN iM60`;
+    var menuDiv = document.createElement('div');
+    menuDiv.className = 'grid-2';
+    var btnGrid = document.createElement('button');
+    btnGrid.type = 'button';
+    btnGrid.className = 'btn-secondary';
+    btnGrid.textContent = state.showGrid ? `Désactiver Grille Scope` : `Activer Grille Scope`;
+    btnGrid.onclick = function() { toggleScopeGrid(); openScopeDrawer('menu'); };
+
+    var btnNIBP = document.createElement('button');
+    btnNIBP.type = 'button';
+    btnNIBP.className = 'btn-primary';
+    btnNIBP.textContent = `Lancer Mesure PNI`;
+    btnNIBP.onclick = function() { closeScopeDrawer(); triggerNIBPMeasurement(); };
+
+    menuDiv.appendChild(btnGrid);
+    menuDiv.appendChild(btnNIBP);
+    bodyEl.appendChild(menuDiv);
+  }
+}
+
+function closeScopeDrawer() {
+  activeDrawerTab = null;
+  var drawer = document.getElementById('scope-drawer');
+  if (drawer) drawer.classList.add('is-hidden');
+  DRAWER_TABS.forEach(function(t) {
+    var b = document.getElementById('soft-' + t);
+    if (b) b.classList.remove('is-active-panel');
+  });
+}
+
+function cycleScopeDrawer(dir) {
+  var idx = activeDrawerTab ? DRAWER_TABS.indexOf(activeDrawerTab) : 0;
+  var next = (idx + dir + DRAWER_TABS.length) % DRAWER_TABS.length;
+  openScopeDrawer(DRAWER_TABS[next]);
+}
+
+function recordTrendPoint() {
+  var pam = state.sys > 0 ? Math.round(state.dia + (state.sys - state.dia) / 3) : 0;
+  state.trendHistory.push({
+    time: new Date().toTimeString().slice(0, 8),
+    hr: Math.round(state.hr),
+    spo2: state.cuffOccludingSpO2 ? 0 : Math.round(state.spo2),
+    sys: Math.round(state.sys),
+    dia: Math.round(state.dia),
+    pam: pam,
+    resp: Math.round(state.resp)
+  });
+  if (state.trendHistory.length > 150) state.trendHistory.shift();
+}
+
+function buildTrendTableElement() {
+  var tbl = document.createElement('table');
+  tbl.className = 'data-table';
+  tbl.innerHTML = `<thead><tr><th>Heure</th><th>FC</th><th>SpO2</th><th>PNI (PAM)</th><th>FR</th></tr></thead>`;
+  var tb = document.createElement('tbody');
+  var slice = state.trendHistory.slice(-15).reverse();
+  if (slice.length === 0) {
+    var tr0 = document.createElement('tr');
+    tr0.innerHTML = `<td colspan="5">Collecte des tendances en cours (échantillon toutes les 5 s)…</td>`;
+    tb.appendChild(tr0);
+  } else {
+    slice.forEach(function(pt) {
+      var tr = document.createElement('tr');
+      var bp = pt.sys > 0 ? `${pt.sys}/${pt.dia} (${pt.pam})` : `--/--`;
+      tr.innerHTML = `<td>${pt.time}</td><td>${pt.hr}</td><td>${pt.spo2 > 0 ? pt.spo2 + '%' : '--'}</td><td>${bp}</td><td>${pt.resp}</td>`;
+      tb.appendChild(tr);
+    });
+  }
+  tbl.appendChild(tb);
+  return tbl;
+}
+
+function renderTrendCanvas(canvasId) {
+  var c = document.getElementById(canvasId);
+  if (!c || !c.parentElement) return;
+  var rect = c.parentElement.getBoundingClientRect();
+  c.width = Math.max(280, Math.floor(rect.width - 16));
+  c.height = Math.max(160, Math.floor(rect.height - 16));
+  var ctx = c.getContext('2d');
+  var w = c.width;
+  var h = c.height;
+  ctx.clearRect(0, 0, w, h);
+
+  var pts = state.trendHistory;
+  if (pts.length < 2) {
+    ctx.fillStyle = THEME.muted;
+    ctx.font = '13px sans-serif';
+    ctx.fillText(`Collecte en cours (patientez 5 à 10 s pour tracer la courbe)…`, 16, h / 2);
+    return;
+  }
+
+  /* Lignes repères */
+  ctx.strokeStyle = THEME.grid;
+  ctx.lineWidth = 1;
+  [0.25, 0.5, 0.75].forEach(function(r) {
+    ctx.beginPath();
+    ctx.moveTo(0, h * r);
+    ctx.lineTo(w, h * r);
+    ctx.stroke();
+  });
+
+  function plotSeries(key, maxVal, color) {
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 2.2;
+    ctx.beginPath();
+    pts.forEach(function(pt, i) {
+      var x = (i / (pts.length - 1)) * (w - 20) + 10;
+      var y = h - 14 - ((Math.min(maxVal, Math.max(0, pt[key])) / maxVal) * (h - 28));
+      if (i === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    });
+    ctx.stroke();
+  }
+
+  plotSeries('hr', 180, THEME.ecg);
+  plotSeries('spo2', 100, THEME.spo2);
+  plotSeries('pam', 160, THEME.nibp);
+}
+
+/**
+ * 13. DICTAPHONE FORMATEUR (WEB SPEECH API) & JOURNAL DE DÉBRIEFING
+ */
+var speechRec = null;
+var isDictating = false;
+
+function toggleVoiceDictation() {
+  var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  var statusChip = document.getElementById('speech-status-chip');
+  var liveBox = document.getElementById('speech-live-box');
+  var interimEl = document.getElementById('speech-interim-text');
+  var btn = document.getElementById('btn-dictaphone');
+
+  if (!SR) {
+    if (statusChip) {
+      statusChip.textContent = `Micro non supporté — utilisez la saisie rapide`;
+      statusChip.classList.add('is-warn');
+    }
+    return;
+  }
+
+  if (isDictating && speechRec) {
+    speechRec.stop();
+    return;
+  }
+
+  speechRec = new SR();
+  speechRec.lang = 'fr-FR';
+  speechRec.continuous = true;
+  speechRec.interimResults = true;
+
+  speechRec.onstart = function() {
+    isDictating = true;
+    if (btn) btn.textContent = `Arrêter la dictée`;
+    if (statusChip) {
+      statusChip.textContent = `Écoute active`;
+      statusChip.classList.add('is-danger');
+    }
+    if (liveBox) liveBox.classList.remove('is-hidden');
+  };
+
+  speechRec.onresult = function(event) {
+    var interim = '';
+    var finalTxt = '';
+    for (var i = event.resultIndex; i < event.results.length; i++) {
+      var tr = event.results[i][0].transcript;
+      if (event.results[i].isFinal) finalTxt += tr + ' ';
+      else interim += tr;
+    }
+    if (interimEl) interimEl.textContent = interim;
+    if (finalTxt.trim()) {
+      var ta = document.getElementById('trainer-note-input');
+      if (ta) ta.value = (ta.value ? ta.value + ' ' : '') + finalTxt.trim();
+      addJournalEntry(`Dictée : ` + finalTxt.trim(), 'DICTÉE');
+    }
+  };
+
+  speechRec.onerror = function() {
+    isDictating = false;
+    if (btn) btn.textContent = `Dicter une observation`;
+    if (statusChip) {
+      statusChip.textContent = `Micro indisponible`;
+      statusChip.classList.remove('is-danger');
+      statusChip.classList.add('is-warn');
+    }
+    if (liveBox) liveBox.classList.add('is-hidden');
+  };
+
+  speechRec.onend = function() {
+    isDictating = false;
+    if (btn) btn.textContent = `Dicter une observation`;
+    if (statusChip) {
+      statusChip.textContent = `Prêt`;
+      statusChip.classList.remove('is-danger');
+    }
+    if (liveBox) liveBox.classList.add('is-hidden');
+  };
+
+  try {
+    speechRec.start();
+  } catch (e) {}
+}
+
+function captureClinicalSnapshot() {
+  var sys = state.displayedSys > 10 ? state.displayedSys : 0;
+  var dia = state.displayedDia > 10 ? state.displayedDia : 0;
+  var pam = sys > 0 ? Math.round(dia + (sys - dia) / 3) : 0;
+  var elapsed = Math.max(0, Math.floor((Date.now() - state.simStartEpoch) / 1000));
+  var mm = String(Math.floor(elapsed / 60)).padStart(2, '0');
+  var ss = String(elapsed % 60).padStart(2, '0');
+  var scenario = getCurrentScenario();
+  var phaseObj = scenario.phases[state.currentStep];
+
+  return {
+    time: new Date().toTimeString().slice(0, 8),
+    simTime: `T+${mm}:${ss}`,
+    hr: Math.round(state.hr),
+    spo2: state.cuffOccludingSpO2 ? '--' : (state.spo2 > 5 ? Math.round(state.spo2) + '%' : '--%'),
+    bp: sys > 0 ? `${sys}/${dia} (${pam})` : `--/--`,
+    resp: Math.round(state.resp),
+    morphology: state.morphology,
+    phase: phaseObj ? phaseObj.name : ``,
+    cpr: state.cprActive
+  };
+}
+
+function addJournalEntry(text, category) {
+  var snap = captureClinicalSnapshot();
+  state.journalEntries.unshift({
+    id: Date.now() + Math.random(),
+    category: category || 'NOTE',
+    text: text,
+    snapshot: snap
+  });
+  if (state.journalEntries.length > 100) state.journalEntries.pop();
+  renderTrainerLogFeed();
+  if (state.viewMode === 'debrief') renderDebriefView();
+  saveAppState();
+}
+
+function logQuickEvent(label) {
+  addJournalEntry(label, 'ACTION');
+}
+
+function submitTrainerNote() {
+  var ta = document.getElementById('trainer-note-input');
+  if (!ta) return;
+  var txt = ta.value.trim();
+  if (!txt) return;
+  addJournalEntry(txt, 'NOTE');
+  ta.value = '';
+}
+
+function renderTrainerLogFeed() {
+  var feed = document.getElementById('trainer-log-feed');
+  if (!feed) return;
+  feed.innerHTML = '';
+
+  if (state.journalEntries.length === 0) {
+    feed.innerHTML = `<div class="log-entry"><div class="log-snapshot">Aucune observation enregistrée. Utilisez la dictée vocale ou les marqueurs rapides ci-dessus.</div></div>`;
+    return;
+  }
+
+  state.journalEntries.slice(0, 12).forEach(function(item) {
+    var card = document.createElement('div');
+    card.className = 'log-entry';
+
+    var head = document.createElement('div');
+    head.className = 'log-entry-head';
+    head.textContent = `${item.snapshot.time} (${item.snapshot.simTime}) • ${item.category}`;
+
+    var body = document.createElement('div');
+    body.textContent = item.text;
+
+    var snap = document.createElement('div');
+    snap.className = 'log-snapshot';
+    snap.textContent = `FC ${item.snapshot.hr} • SpO2 ${item.snapshot.spo2} • PNI ${item.snapshot.bp} • ${item.snapshot.morphology}${item.snapshot.cpr ? ' • RCP' : ''}`;
+
+    card.appendChild(head);
+    card.appendChild(body);
+    card.appendChild(snap);
+    feed.appendChild(card);
+  });
+}
+
+function renderDebriefView() {
+  var sc = getCurrentScenario();
+  var sub = document.getElementById('debrief-scenario-subtitle');
+  if (sub) sub.textContent = sc.label;
+
+  var kpiGrid = document.getElementById('debrief-kpi-grid');
+  if (kpiGrid) {
+    var elapsed = Math.max(0, Math.floor((Date.now() - state.simStartEpoch) / 1000));
+    var durMin = Math.floor(elapsed / 60) + 'm ' + String(elapsed % 60).padStart(2, '0') + 's';
+    kpiGrid.innerHTML = `
+      <div class="kpi-card"><span class="field-label">Durée Simulation</span><span class="kpi-val">${durMin}</span></div>
+      <div class="kpi-card"><span class="field-label">FC Minimale Observée</span><span class="kpi-val">${state.stats.minHr} bpm</span></div>
+      <div class="kpi-card"><span class="field-label">SpO2 Minimale</span><span class="kpi-val">${state.stats.minSpo2}%</span></div>
+      <div class="kpi-card"><span class="field-label">Chocs DSA Délivrés</span><span class="kpi-val">${state.shockCount}</span></div>
+    `;
+  }
+
+  var chip = document.getElementById('debrief-count-chip');
+  if (chip) chip.textContent = `${state.journalEntries.length} entrées`;
+
+  var tbody = document.getElementById('debrief-table-body');
+  if (tbody) {
+    tbody.innerHTML = '';
+    if (state.journalEntries.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="5">Aucune entrée enregistrée pour le moment.</td></tr>`;
+    } else {
+      state.journalEntries.slice().reverse().forEach(function(item) {
+        var tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${item.snapshot.time}</td>
+          <td>${item.snapshot.simTime}</td>
+          <td><strong>[${item.category}]</strong> ${item.text}</td>
+          <td>FC ${item.snapshot.hr} • SpO2 ${item.snapshot.spo2} • PNI ${item.snapshot.bp} • FR ${item.snapshot.resp}</td>
+          <td>${item.snapshot.morphology}${item.snapshot.cpr ? ' (RCP)' : ''}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+  }
+
+  var qGrid = document.getElementById('debrief-questions-grid');
+  if (qGrid) {
+    qGrid.innerHTML = '';
+    sc.debriefQuestions.forEach(function(q, i) {
+      var box = document.createElement('div');
+      box.className = 'log-entry';
+      box.innerHTML = `<div class="log-entry-head">Point de débriefing ${i + 1}</div><div>${q}</div>`;
+      qGrid.appendChild(box);
+    });
+  }
+
+  setTimeout(function() { renderTrendCanvas('canvas-debrief-trends'); }, 30);
+}
+
+function exportDebriefText() {
+  var sc = getCurrentScenario();
+  var lines = [
+    `FICHE DE DÉBRIEFING — SIMULATION URGENCES DIALYSE (EDAN iM60)`,
+    `Scénario : ${sc.label}`,
+    `Patient : ${sc.patientName}`,
+    `FC min : ${state.stats.minHr} bpm | SpO2 min : ${state.stats.minSpo2}% | Chocs DSA : ${state.shockCount}`,
+    ``,
+    `--- JOURNAL CHRONOLOGIQUE ---`
+  ];
+  state.journalEntries.slice().reverse().forEach(function(e) {
+    lines.push(`[${e.snapshot.time} | ${e.snapshot.simTime}] (${e.category}) ${e.text} -> FC ${e.snapshot.hr}, SpO2 ${e.snapshot.spo2}, PNI ${e.snapshot.bp}, ECG ${e.snapshot.morphology}`);
+  });
+  lines.push(``, `--- AXES DE DÉBRIEFING ---`);
+  sc.debriefQuestions.forEach(function(q, i) { lines.push(`${i + 1}. ${q}`); });
+
+  var content = lines.join('\n');
+  if (window.notebookAppApi && typeof window.notebookAppApi.triggerFileDownload === 'function') {
+    window.notebookAppApi.triggerFileDownload({
+      content: content,
+      contentType: 'text/plain',
+      encoding: 'UTF-8',
+      filename: 'debriefing-dialyse-im60.txt'
+    });
+  }
+}
+
+function exportDebriefCSV() {
+  var rows = [`Heure,TempsSim,Categorie,Observation,FC,SpO2,PNI,FR,RythmeECG,RCP`];
+  state.journalEntries.slice().reverse().forEach(function(e) {
+    var cleanText = String(e.text).replace(/"/g, '""');
+    rows.push(`"${e.snapshot.time}","${e.snapshot.simTime}","${e.category}","${cleanText}",${e.snapshot.hr},"${e.snapshot.spo2}","${e.snapshot.bp}",${e.snapshot.resp},"${e.snapshot.morphology}",${e.snapshot.cpr}`);
+  });
+  var csv = rows.join('\n');
+  if (window.notebookAppApi && typeof window.notebookAppApi.triggerFileDownload === 'function') {
+    window.notebookAppApi.triggerFileDownload({
+      content: csv,
+      contentType: 'text/csv',
+      encoding: 'UTF-8',
+      filename: 'journal-simulation-im60.csv'
+    });
+  }
+}
+
+function resetSimulationSession(btn) {
+  if (btn && btn.dataset.armed !== 'true') {
+    btn.dataset.armed = 'true';
+    btn.textContent = `Confirmer Réinitialisation ?`;
+    return;
+  }
+  if (btn) {
+    btn.dataset.armed = 'false';
+    btn.textContent = `Réinitialiser Session`;
+  }
+  state.simStartEpoch = Date.now();
+  state.shockCount = 0;
+  state.trendHistory = [];
+  state.alarmHistory = [];
+  state.journalEntries = [];
+  state.stats = { minHr: 80, minSpo2: 98, minSys: 115 };
+  applyScenarioStep(0);
+  renderTrainerLogFeed();
+  renderDebriefView();
+  saveAppState();
+}
+
+/**
+ * 14. INITIALISATION ASYNCHRONE AVEC GEMINI NOTEBOOK SHIM API
+ */
+async function initSimulator() {
+  readThemeTokens();
+  resizeAllCanvases();
+
+  if (window.notebookAppApi && typeof window.notebookAppApi.getAppState === 'function') {
+    try {
+      var saved = await window.notebookAppApi.getAppState();
+      if (saved) restoreFromSavedState(saved);
+    } catch (e) {}
+  }
+
+  applyScopeGridClass();
+  syncTrainerUI();
+  renderTrainerLogFeed();
+
+  if (window.notebookAppApi && window.notebookAppApi.clientType === 'notebooklm-mobile') {
+    setViewMode('trainer');
+  } else {
+    setViewMode('split');
+  }
+
+  if (window.notebookAppApi && typeof window.notebookAppApi.notifyAppReady === 'function') {
+    window.notebookAppApi.notifyAppReady();
+  }
+
+  cancelAnimationFrame(animFrameId);
+  lastFrameTime = performance.now();
+  animFrameId = requestAnimationFrame(mainLoop);
+}
+
+window.addEventListener('DOMContentLoaded', initSimulator);
+</script>
+</body>
+</html>
