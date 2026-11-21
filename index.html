@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <meta name="theme-color" content="#0c1214">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <title>Simulateur EDAN iM60 — Urgences en hémodialyse (v2)</title>
+  <title>Simulateur EDAN iM60 — Urgences en hémodialyse (v5)</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@400;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
@@ -95,7 +95,7 @@
     .lcd-frame { flex: 1 1 auto; display: flex; padding: 6px; border-radius: 10px; background: #1c2228; box-shadow: inset 0 2px 6px rgba(0,0,0,.55); min-height: 0; }
     .lcd { position: relative; flex: 1; display: flex; flex-direction: column; min-height: 560px; overflow: hidden; border-radius: 4px; background: var(--lcd-bg); color: var(--lcd-white); font-family: var(--font-lcd); }
     .monitor-stage.is-full .lcd { min-height: 0; }
-    .lcd.off > *:not(.boot) { visibility: hidden; }
+    .lcd.off > *:not(.boot):not(.stage) { visibility: hidden; }
 
     /* Barre supérieure */
     .lcd-top { display: grid; grid-template-columns: minmax(170px, auto) 1fr auto; align-items: stretch; gap: 6px; height: 34px; padding: 3px 6px; border-bottom: 1px solid var(--lcd-line); font-size: 15px; }
@@ -215,12 +215,8 @@
     .boot-progress { width: 260px; height: 6px; border-radius: 3px; background: #1b2530; overflow: hidden; }
     .boot-progress i { display: block; height: 100%; width: 0; background: #2a8cff; transition: width 1.6s linear; }
     .boot-hint { font: 700 18px var(--font-lcd); padding: 10px 18px; border: 1px solid #2a8cff; border-radius: 4px; color: #fff; }
-    .boot-pair { display: flex; align-items: center; gap: 16px; margin-top: 6px; padding: 10px 16px 10px 10px; border: 1px solid #23415f; border-radius: 8px; background: #06121d; }
     .bp-qr { line-height: 0; }
     .bp-qr svg { display: block; border-radius: 4px; }
-    .bp-txt { display: flex; flex-direction: column; gap: 4px; text-align: left; font: 14px Arial, sans-serif; color: #9fb0bf; }
-    .bp-txt > b { font-size: 16px; color: #fff; }
-    .bp-txt span b { font-size: 18px; color: #fff; letter-spacing: .12em; }
 
     /* Bas du boîtier */
     .bezel-bottom { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 2px 6px 0; flex-wrap: wrap; }
@@ -301,7 +297,7 @@
     .g3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
     .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
     .row > .grow { flex: 1 1 140px; }
-    input[type=text], input[type=number], select, textarea { width: 100%; min-height: 44px; padding: 8px 10px; border-radius: 10px; border: 1px solid var(--line-strong); background: var(--surf-2); font-size: 15px; }
+    input[type=text], input[type=number], input[type=time], select, textarea { width: 100%; min-height: 44px; padding: 8px 10px; border-radius: 10px; border: 1px solid var(--line-strong); background: var(--surf-2); font-size: 15px; }
     textarea { min-height: 80px; resize: vertical; }
     .info { padding: 8px 10px; border-radius: 10px; background: color-mix(in srgb, var(--primary) 12%, transparent); border: 1px solid color-mix(in srgb, var(--primary) 30%, transparent); font-size: 13px; }
     .info.warn { background: var(--warn-soft); border-color: color-mix(in srgb, var(--warn) 40%, transparent); }
@@ -561,6 +557,56 @@
     .lcd-status { height: 26px; font-size: 13px; }
     @media (max-width: 860px) { .scr { grid-template-columns: 1fr; grid-template-rows: 340px auto auto auto; } .pcol, .brow, .nbox, .scr .waves { grid-column: 1; grid-row: auto; } }
 
+    /* ===== v5 : étapes de séance (QR, synthèse, pause), liste PNI, mode test ===== */
+    .stage { position: absolute; inset: 0; z-index: 35; display: flex; align-items: center; justify-content: center; padding: 16px; background: #000; color: #dfe8ef; font-family: Arial, sans-serif; cursor: pointer; }
+    .stage.over { background: rgba(0,0,0,.3); cursor: default; }
+    .stg-qr { display: flex; align-items: center; justify-content: center; gap: 28px; flex-wrap: wrap; }
+    .stg-qr .bp-qr svg { border-radius: 6px; }
+    .stg-txt { display: flex; flex-direction: column; gap: 10px; max-width: 380px; font-size: 16px; color: #9fb0bf; }
+    .stg-logo { font: 800 30px/1 var(--font-ui); letter-spacing: .06em; color: #2a8cff; }
+    .stg-txt > b { font-size: 20px; color: #fff; }
+    .stg-txt .pin b { font-size: 24px; color: #fff; letter-spacing: .14em; }
+    .stg-txt small { font-size: 13px; color: #6f8291; }
+    .stg-txt .m-btn { align-self: flex-start; }
+    .stg-syn { width: 100%; max-width: 940px; max-height: 100%; overflow: auto; display: flex; flex-direction: column; gap: 10px; }
+    .stg-h { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; flex-wrap: wrap; padding-bottom: 6px; border-bottom: 1px solid #2f6fb0; font-size: 20px; font-weight: 700; color: #fff; }
+    .stg-h small { font-size: 13px; font-weight: 400; color: #ffd000; }
+    .stg-kv { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 6px 12px; font-size: 14px; }
+    .stg-kv div { display: flex; flex-direction: column; padding: 6px 8px; background: #10171d; border-radius: 3px; }
+    .stg-kv span { font-size: 11.5px; color: #8a9aa8; text-transform: uppercase; letter-spacing: .05em; }
+    .stg-kv b { color: #fff; }
+    .stg-syn table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+    .stg-syn th { text-align: left; font-weight: 400; color: #8a9aa8; padding: 4px 6px; border-bottom: 1px solid #343e49; }
+    .stg-syn td { padding: 4px 6px; border-bottom: 1px solid #222a33; font-variant-numeric: tabular-nums; }
+    .stg-syn .c-ecg { color: var(--ecg); } .stg-syn .c-nibp { color: var(--nibp); } .stg-syn .c-spo2 { color: var(--spo2); } .stg-syn .c-resp { color: var(--resp); }
+    .stg-foot { font-size: 12.5px; color: #8a9aa8; }
+    .stg-pause { padding: 18px 48px; border: 3px solid #ffd000; border-radius: 6px; background: rgba(0,0,0,.82); color: #ffd000; font: 700 clamp(40px, 7vw, 84px)/1 Arial, sans-serif; letter-spacing: .12em; text-align: center; }
+    .stg-pause.end { font-size: clamp(26px, 4.4vw, 54px); letter-spacing: .06em; }
+    .stg-pause small { display: block; margin-top: 10px; font-size: 16px; letter-spacing: .02em; color: #fff; font-weight: 400; }
+    .nfoot .npr { font-size: 12px; font-variant-numeric: tabular-nums; }
+    .nl-rows { font-size: clamp(11px, 1.15vw, 14px); gap: 0; line-height: 1.25; }
+    .nl-rows div span:nth-child(2) { flex: 1; text-align: right; }
+    .nl-rows div span:nth-child(3) { min-width: 30px; text-align: right; opacity: .8; }
+    .split { position: fixed; inset: 0; display: flex; flex-direction: column; background: #05080a; }
+    .split-bar { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 6px 12px; background: #e8b954; color: #111; font: 700 14px var(--font-ui); }
+    .split-bar a { color: #111; }
+    .split-row { flex: 1; display: flex; min-height: 0; }
+    .split-row iframe { border: 0; height: 100%; display: block; }
+    .split-row .sp-mon { flex: 1; min-width: 0; }
+    .split-row .sp-rem { width: 420px; flex: none; border-left: 2px solid #e8b954; }
+    @media (max-width: 900px) { .split-row { flex-direction: column; } .split-row .sp-mon { height: 45%; width: 100%; } .split-row .sp-rem { width: 100%; height: 55%; border-left: 0; border-top: 2px solid #e8b954; } }
+    .trow.six { grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 5px; }
+    .trow.six .tb { font-size: 11px; }
+    .phase-bar { grid-template-columns: 46px 1fr 46px 52px; }
+    .pb-pause { border-radius: 12px; border: 1px solid var(--warn); background: var(--warn-soft); color: var(--warn); font-size: 18px; cursor: pointer; }
+    .pb-pause.on { background: var(--warn); color: #111; }
+    .r-timer.paused { color: var(--warn); }
+    .pni-res { display: grid; grid-template-columns: 1fr; gap: 8px; }
+    .pni-cd { font: 700 22px var(--font-lcd); color: var(--warn); text-align: center; }
+    .btn.chosen { outline: 3px solid #fff; outline-offset: 1px; }
+    .sheet-box.ring { animation: sheetUp .18s ease-out, ring .45s ease-in-out .2s 3; }
+    @keyframes ring { 0%,100% { box-shadow: none; } 50% { box-shadow: inset 0 0 0 3px var(--warn); } }
+
     @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; } }
   </style>
 </head>
@@ -579,17 +625,16 @@
 
     <div class="lcd-frame">
       <div id="lcd" class="lcd">
-        <!-- Écran de démarrage : déverrouille le son, le plein écran et l'anti-veille -->
-        <div id="boot" class="boot" onclick="bootTap()">
+        <!-- Écran de démarrage (allumage du moniteur) -->
+        <div id="boot" class="boot hidden" onclick="bootTap()">
           <div class="boot-logo">EDAN</div>
           <div class="boot-sub">iM60 Patient Monitor</div>
           <div class="boot-progress"><i id="boot-bar"></i></div>
-          <div id="boot-hint" class="boot-hint">Toucher l'écran pour démarrer</div>
-          <div id="boot-pair" class="boot-pair hidden">
-            <div id="boot-qr" class="bp-qr"></div>
-            <div class="bp-txt"><b>Télécommande formateur</b><span>Scannez avec le smartphone</span><span>PIN <b id="boot-pin">----</b></span></div>
-          </div>
+          <div id="boot-hint" class="boot-hint hidden">Toucher l'écran pour reprendre</div>
         </div>
+
+        <!-- Écrans de séance : QR de connexion, synthèse de la programmation, PAUSE, fin -->
+        <div id="stage" class="stage hidden" onclick="stageTap()"></div>
 
         <div class="lcd-top">
           <div class="tb-patient"><span class="tb-ic" aria-hidden="true">🛏</span><span class="tb-bed" id="tb-bed">LIT 04</span><span class="tb-ic" aria-hidden="true">👤</span><span class="tb-type">Adulte</span><span class="tb-name" id="tb-name">—</span></div>
@@ -642,7 +687,7 @@
               <div class="tlist"><span><i>T1</i><b id="v-temp">--,-</b></span><span><i>T2</i><b>--,-</b></span><span><i>TD</i><b>--,-</b></span></div>
             </div>
             <div class="pt nlist" onclick="openMenu('nibp-review')">
-              <div class="pl"><b>Liste PNI</b><small>(mmHg)</small></div>
+              <div class="pl"><b>Liste PNI</b><small>(mmHg)</small><span>5 dern.</span></div>
               <div id="nibp-list" class="nl-rows"></div>
             </div>
           </div>
@@ -651,7 +696,7 @@
             <div class="pl"><b>NIBP</b><small>(mmHg)</small><span id="lim-sys">160</span><span id="lim-map">90</span></div>
             <div class="ptop"><span id="v-nibp-mode">Manuel</span> <span id="v-nibp-time">--:--</span> <span id="v-nibp-cd"></span></div>
             <div class="nibp-line"><span id="v-nibp" class="nibp-val">---/---</span><span id="v-map" class="nibp-map">(---)</span></div>
-            <div class="nfoot"><span id="v-cuff" class="cuff hidden">0</span><button type="button" id="nibp-go" class="nibp-go" onclick="event.stopPropagation();nibpKey('écran')">▶ Mesurer</button></div>
+            <div class="nfoot"><span id="v-nibp-pr" class="npr">PR ---</span><span id="v-cuff" class="cuff hidden">0</span><button type="button" id="nibp-go" class="nibp-go" onclick="event.stopPropagation();nibpKey('écran')">▶ Mesurer</button></div>
           </div>
         </div>
 
@@ -673,7 +718,7 @@
 
     <div class="bezel-bottom">
       <div class="hw-left">
-        <button type="button" class="hw-power" id="hw-power" title="Marche/Arrêt (appui long)" aria-label="Marche ou arrêt, appui long">
+        <button type="button" class="hw-power" id="hw-power" title="Marche (appui) / Arrêt (appui long)" aria-label="Marche, ou arrêt par appui long">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"/><line x1="12" y1="2" x2="12" y2="12"/></svg>
         </button>
         <div class="hw-leds"><span><i class="led" id="led-ac"></i>⏦</span><span><i class="led amber" id="led-bat"></i>▭</span></div>
@@ -735,7 +780,7 @@
           <div><label class="lbl" for="live-resp">Respiration</label>
             <select id="live-resp" onchange="setTarget('respPattern', this.value)"><option value="normal">Régulière</option><option value="shallow">Superficielle</option><option value="irregular">Irrégulière</option><option value="agonal">Gasps agoniques</option></select></div>
         </div>
-        <div><label class="lbl" for="live-nibpfail">PNI</label>
+        <div><label class="lbl" for="live-nibpfail">PNI (selon le scénario)</label>
           <select id="live-nibpfail" onchange="setTarget('nibpFail', this.value==='1')"><option value="0">Mesurable</option><option value="1">Non mesurable (signal faible)</option></select></div>
       </div></details>
       <details class="fold" id="d-acr"><summary>Raccourcis arrêt cardiaque</summary><div>
@@ -749,11 +794,11 @@
       </div></details>
       <details class="fold" id="d-scope"><summary>Scope</summary><div>
         <div class="g2">
-          <button type="button" class="btn" onclick="sendCmd('NIBP')">Forcer une PNI</button>
+          <button type="button" class="btn" onclick="forcePni()">Forcer une PNI</button>
           <button type="button" class="btn" onclick="sendCmd('PAUSE')">Pause alarme</button>
         </div>
         <div class="lbl">Mode PNI du scope</div><div class="seg-r" id="d-nibp"></div>
-        <button type="button" class="chip" id="d-samearm" onclick="toggleArtifact('sameArm')"></button>
+        <div class="lbl">Côté du brassard (à corriger si l'apprenant le déplace)</div><div class="seg-r" id="d-side"></div>
         <button type="button" class="btn" onclick="sendCmd('RESET_SETTINGS')">Remettre les réglages usine du scope</button>
       </div></details>
       <details class="fold" id="d-conn"><summary>Connexion <span id="conn-sum"></span></summary><div>
@@ -763,12 +808,13 @@
         </div>
         <button type="button" class="btn" onclick="requestSync()">Resynchroniser</button>
         <div class="muted">Relais : <span class="dot" id="remote-sync-dot" style="display:inline-block"></span> <span id="remote-sync-label">Connexion…</span></div>
-        <div class="muted">Le QR code et le PIN s'affichent sur l'écran de démarrage de la tablette, ou Menu › Maintenance (code 5008).</div>
+        <div class="muted">Le QR code et le PIN s'affichent sur la tablette tant que la programmation n'est pas validée, ou Menu › Maintenance (code 5008).</div>
       </div></details>
       <details class="fold" id="d-note"><summary>Note écrite</summary><div>
         <div class="row"><input type="text" id="note-input" class="grow" placeholder="Note horodatée…" onkeydown="if(event.key==='Enter')addTextNote()"><button type="button" class="btn pri" onclick="addTextNote()">Ajouter</button></div>
       </div></details>
       <details class="fold" id="d-session"><summary>Séance</summary><div>
+        <button type="button" class="btn amb" onclick="togglePause()">⏸ Pause de la simulation</button>
         <button type="button" id="btn-end" class="btn red" onclick="endSession(this)">■ Terminer la simulation</button>
         <button type="button" class="btn" onclick="showTab('debrief')">Ouvrir le débriefing</button>
       </div></details>
@@ -787,28 +833,24 @@
     <div class="card">
       <h2>Conditions initiales</h2>
       <div class="g2">
-        <div><label class="lbl" for="prep-bed">Lit</label><input type="text" id="prep-bed" value="LIT 04" onchange="readPrepPatient();saveRemote()"></div>
-        <div><label class="lbl" for="prep-name">Nom affiché</label><input type="text" id="prep-name" value="" onchange="readPrepPatient();saveRemote()"></div>
+        <div><label class="lbl" for="prep-bed">Lit</label><input type="text" id="prep-bed" value="LIT 04" onchange="pushPrep()"></div>
+        <div><label class="lbl" for="prep-name">Nom affiché</label><input type="text" id="prep-name" value="" onchange="pushPrep()"></div>
       </div>
-      <div class="lbl">Capteurs déjà posés au départ</div>
-      <div class="sw" id="prep-sensors"></div>
-      <button type="button" class="chip" id="prep-samearm" onclick="toggleSameArm()"></button>
+      <div><label class="lbl" for="prep-clock">Heure de départ du scénario (horloge du scope)</label><input type="time" id="prep-clock" onchange="prep.clock=this.value;pushPrep()"></div>
+      <div class="muted">Au démarrage, aucun dispositif n'est posé : le scope affiche des mesures vides. Pendant la séance, vous validez chaque pose (ECG, SpO2, brassard) dans l'onglet Simulation.</div>
     </div>
 
     <div class="card">
       <h2>Réglage du scope</h2>
       <div class="lbl">PNI au démarrage</div>
       <div class="seg-r" id="prep-nibp"></div>
-      <div class="g2">
-        <button type="button" class="btn" onclick="sendCmd('RESET_SETTINGS')">Réglages usine</button>
-        <button type="button" class="btn" onclick="previewOnScope()">Pré-charger l'étape 1</button>
-      </div>
-      <div class="muted">« Pré-charger » affiche déjà les constantes de départ sur la tablette, sans lancer le chrono.</div>
+      <button type="button" class="btn" onclick="sendCmd('RESET_SETTINGS')">Réglages usine du scope</button>
+      <div class="muted">La tablette affiche la synthèse de cette programmation pour la relire à deux. Après validation, elle s'éteint et attend que l'apprenant allume le moniteur.</div>
     </div>
 
     <div class="launch">
       <div id="prep-check" class="checks"></div>
-      <div class="row"><button type="button" id="btn-launch" class="btn big pri" onclick="validateLaunch(this)">✓ Valider et lancer la simulation</button></div>
+      <div class="row"><button type="button" id="btn-launch" class="btn big pri" onclick="validateLaunch(this)">✓ Valider la programmation</button></div>
     </div>
   </div>
 
@@ -821,11 +863,12 @@
         <div id="pb-name" class="pb-name">—</div>
       </button>
       <button type="button" id="pb-next" class="pb-nav pri" onclick="nextPhase()" aria-label="Étape suivante">▶</button>
+      <button type="button" id="pb-pause" class="pb-pause" onclick="togglePause()" aria-label="Pause de la simulation">⏸</button>
     </div>
     <div id="pb-cue" class="pb-cue hidden"></div>
 
-    <div class="sec-lbl"><span>Capteurs</span><span>touchez quand c'est posé</span></div>
-    <div class="trow" id="row-sensors"></div>
+    <div class="sec-lbl"><span>Pose des dispositifs</span><span>touchez pour valider</span></div>
+    <div class="trow six" id="row-sensors"></div>
     <div class="sec-lbl"><span>Actions</span></div>
     <div class="trow" id="row-actions"></div>
 
@@ -843,6 +886,7 @@
       <button type="button" id="db-end" class="btn red big hidden" onclick="endSession(this)">■ Terminer la simulation</button>
       <div class="card"><h2>Bilan de la séance</h2><div id="db-summary"></div><div id="db-stats" class="stats"></div></div>
       <div class="card"><h2>Délais clés</h2><div id="db-delays"></div></div>
+      <div class="card"><h2>Tensions mesurées</h2><div id="db-nibp"></div></div>
     </div>
 
     <div id="db-p-chrono" class="r-sub hidden">
@@ -905,6 +949,7 @@
        ===================================================================== */
     const appState = { pin: `4829` };      // utilisé par la couche de synchronisation
     let role = `monitor`;                     // 'monitor' (tablette) ou 'remote' (smartphone)
+    let EMBED = false;                        // vrai dans le mode test double écran
 
     const $ = (id) => document.getElementById(id);
     const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
@@ -1150,19 +1195,37 @@
     /* =====================================================================
        3. ÉTAT PARTAGÉ
        sim  : piloté par le formateur (télécommande) → envoyé au scope.
+              stage : 'prep' (connexion / synthèse) → 'run' → 'pause' ↔ 'run' → 'end'
        mon  : réglages et mesures du scope (propriété de la tablette).
        ===================================================================== */
+    const NO_SENSOR = { ecg: false, spo2: false, cuff: false, temp: false };
     const SIM_DEFAULT = {
       rev: 0, scenarioId: `free`, stepIdx: -1, running: false, startedAt: 0, endedAt: 0, stepStartedAt: 0, sessionId: ``,
+      stage: `prep`, clockStart: ``, pauseTotal: 0, pauseAt: 0, cuffSide: null,
       t: { hr: 76, spo2: 98, rr: 16, sys: 124, dia: 76, temp: 36.8, rhythm: `sinus`, ectopy: `none`, respPattern: `normal`, nibpFail: false },
       transition: 15,
-      sensors: { ecg: true, spo2: true, cuff: true, temp: true },
-      artifacts: { cpr: false, motion: false },
-      sameArm: true,
+      sensors: Object.assign({}, NO_SENSOR),
+      artifacts: { cpr: false, motion: false, weak: false },
+      sameArm: false,
       nibpStart: { mode: `manual`, interval: 300 },
       patient: { bed: `LIT 04`, name: `PATIENT` }
     };
     let sim = deep(SIM_DEFAULT);
+    const simFrozen = () => sim.stage === `pause` || sim.stage === `end`;
+
+    /* Heure simulée : part de l'heure saisie par le formateur à la validation,
+       avance en temps réel et s'arrête pendant les pauses. */
+    function simClock(ts) {
+      if (ts == null) ts = Date.now();
+      if (!sim.startedAt || !sim.clockStart) return ts;
+      const parts = String(sim.clockStart).split(`:`).map(Number);
+      if (isNaN(parts[0])) return ts;
+      const d = new Date(sim.startedAt);
+      d.setHours(parts[0], parts[1] || 0, 0, 0);
+      let el = ts - sim.startedAt - (sim.pauseTotal || 0);
+      if (sim.pauseAt && ts > sim.pauseAt) el -= ts - sim.pauseAt;
+      return d.getTime() + Math.max(0, el);
+    }
 
     const SETTINGS_DEFAULT = {
       alarms: {
@@ -1696,9 +1759,10 @@
        un tracé (ex. T pointues → QRS larges → sinusoïde) pendant une transition.
        ===================================================================== */
     let settings = deep(SETTINGS_DEFAULT);
+    const NIBP_BLANK = () => ({ cycling: false, t0: 0, cuff: 0, peak: 160, stepDur: 1.6, src: ``, endP: 40, failCuff: false, nextAt: 0, statUntil: 0, last: null, history: [], techMsg: ``, forceRes: null, startedTs: 0 });
     const mon = {
-      power: true, booted: false, frozen: false, pausedUntil: 0, sessionId: ``,
-      nibp: { cycling: false, t0: 0, cuff: 0, peak: 160, stepDur: 1.6, src: ``, endP: 40, failCuff: false, nextAt: 0, statUntil: 0, last: null, history: [], techMsg: `` },
+      power: false, booted: false, frozen: false, pausedUntil: 0, sessionId: ``, pauseAt: 0, remoteAt: 0, wasOn: false,
+      nibp: NIBP_BLANK(),
       trends: [], alarmHist: [], events: [], occluded: false
     };
     let live = { hr: 76, spo2: 98, rr: 16, sys: 124, dia: 76, temp: 36.8 };
@@ -1708,7 +1772,7 @@
       rTimes: [], pvcTimes: [], pulsePeaks: [], breathStarts: [], params: rhythmParams(`sinus`), morph: null, rhythmId: `sinus`,
       shockAt: -10, lastTrendAt: 0
     };
-    const disp = { hr: null, spo2: null, pr: null, rr: null, pi: null, st1: null, st2: null, spo2s: 98, jitter: 0, apnea: false, asys: false };
+    const disp = { hr: null, spo2: null, pr: null, rr: null, pi: null, st1: null, st2: null, spo2s: 98, jitter: 0, apnea: false, asys: false, wk: null, wkT: 0 };
 
     /* ---------- Transitions des constantes cibles ---------- */
     function startTransition(durSec) {
@@ -1897,6 +1961,10 @@
       }
       if (sim.artifacts.cpr) v += 0.35 * Math.max(0, cprWave(t - 0.15));
       v *= (0.3 + 0.7 * Math.min(1, perfusion())) * (mon.occluded ? 0.03 : 1);
+      if (sim.artifacts.weak) {
+        // Signal SpO2 faible (patient agité / capteur mal posé) : onde écrasée, irrégulière, parasitée
+        v = v * 0.35 + 0.22 * Math.sin(2 * Math.PI * 1.9 * t + Math.sin(t * 0.7) * 2) * Math.sin(2 * Math.PI * 0.33 * t) + 0.12 * Math.max(0, Math.sin(2 * Math.PI * 0.8 * t + 1)) + (Math.random() - 0.5) * 0.12;
+      }
       if (sim.artifacts.motion) v += 0.3 * Math.sin(2 * Math.PI * 1.1 * t) * Math.sin(2 * Math.PI * 0.3 * t);
       return v + (Math.random() - 0.5) * 0.01;
     }
@@ -1994,6 +2062,19 @@
         disp.pi = +(0.15 + 4.5 * Math.pow(perfusion(), 1.4)).toFixed(perfusion() < 0.25 ? 2 : 1);
       } else { disp.spo2 = null; disp.pr = null; disp.pi = null; }
       disp.spo2NoPulse = sim.sensors.spo2 && !spo2Valid && t > 6;
+      // Signal SpO2 faible : valeurs instables, parfois absentes, souvent fausses
+      if (sim.artifacts.weak && sim.sensors.spo2) {
+        disp.wkT -= dt;
+        if (disp.wkT <= 0 || !disp.wk) {
+          disp.wkT = 1.2 + Math.random() * 1.6;
+          disp.wk = {
+            spo2: Math.random() < 0.2 ? null : clamp(Math.round(live.spo2 - 5 + randn() * 5), 60, 100),
+            pr: Math.random() < 0.2 ? null : Math.round(Math.max(30, (live.hr || 60) * (0.65 + Math.random() * 0.8))),
+            pi: +(0.05 + Math.random() * 0.25).toFixed(2)
+          };
+        }
+        disp.spo2 = disp.wk.spo2; disp.pr = disp.wk.pr; disp.pi = disp.wk.pi; disp.spo2NoPulse = false;
+      } else disp.wk = null;
       // FR (impédance via les électrodes ECG)
       if (!sim.sensors.ecg) { disp.rr = null; disp.apnea = false; }
       else {
@@ -2011,6 +2092,8 @@
     /* =====================================================================
        5. MOTEUR PNI (mesure oscillométrique, mise à jour DISCONTINUE)
        Les chiffres affichés ne changent qu'à la fin d'une mesure.
+       À chaque début de mesure, la télécommande reçoit une fenêtre :
+       OK (selon le scénario) / Non mesurable / Incohérente.
        ===================================================================== */
     const NIBP_INTERVALS = [60, 120, 150, 180, 300, 600, 900, 1800, 3600];
     function nibpModeLabel() {
@@ -2020,15 +2103,16 @@
       return `Manuel`;
     }
     function nibpStart(src) {
-      if (!mon.power || mon.nibp.cycling) return;
+      if (!mon.power || mon.nibp.cycling || simFrozen()) return;
       const N = mon.nibp;
-      N.cycling = true; N.t0 = eng.t; N.src = src; N.cuff = 0; N.failCuff = !sim.sensors.cuff; N.forceOk = null;
+      N.cycling = true; N.t0 = eng.t; N.src = src; N.cuff = 0; N.failCuff = !sim.sensors.cuff; N.forceRes = null;
       N.peak = live.sys > 150 ? Math.min(280, Math.round(live.sys + 35)) : 160;
       const hr = disp.hr || live.hr || 60;
       N.stepDur = clamp(1.6 * 60 / Math.max(hr, 10), 1.0, 4.5);
       N.endP = Math.max(25, Math.round(live.dia - 10));
       N.startedTs = Date.now();
       if (settings.nibp.mode === `auto` && src !== `auto`) N.nextAt = Date.now() + settings.nibp.interval * 1000;
+      if (sim.stage === `run`) publishSyncMessage({ type: `NIBP_START`, src, sid: sim.sessionId });
       renderNibp();
     }
     function nibpStop(reason) {
@@ -2039,7 +2123,7 @@
       renderNibp();
     }
     function nibpKey(src) {
-      if (!mon.power) return;
+      if (!mon.power || simFrozen()) return;
       ensureAudio();
       if (mon.nibp.cycling) {
         nibpStop(``);
@@ -2074,33 +2158,47 @@
       }
       mon.occluded = sim.sameArm && N.cuff > live.sys * 0.95;
     }
+    /* Valeur « incohérente » imposée par le formateur : physiologiquement absurde */
+    function absurdNibp() {
+      const hr = disp.hr || Math.round(live.hr) || 60;
+      let type = Math.floor(Math.random() * 3);   // 0 : différentielle nulle, 1 : pouls PNI ≠ FC, 2 : les deux
+      if (type === 1 && live.sys < 60) type = 2;
+      let sys, dia, pr;
+      if (type !== 1) { sys = 130 + Math.round(Math.random() * 30); dia = sys - 8 - Math.round(Math.random() * 10); }
+      else { sys = Math.round(live.sys + randn() * 3); dia = Math.round(live.dia + randn() * 2); }
+      if (type !== 0) pr = hr < 75 ? 100 + Math.round(Math.random() * 25) : 35 + Math.round(Math.random() * 10);
+      else pr = Math.max(20, hr + Math.round(randn() * 2));
+      return { sys, dia, map: Math.round((sys + 2 * dia) / 3), pr, absurd: true };
+    }
     function nibpFinish() {
       const N = mon.nibp;
       N.cycling = false; N.cuff = 0; mon.occluded = false;
-      const noPulse = !hasPulse();
-      let msg = ``;
-      const fo = N.forceOk; N.forceOk = null;
-      if ((sim.artifacts.motion && fo !== true) || fo === false) msg = `MOUVEMENT EXCESSIF`;
-      else if (noPulse || live.sys < 50 || (disp.hr != null && disp.hr < 25) || sim.t.nibpFail || sim.artifacts.cpr) msg = `SIGNAL FAIBLE`;
-      if (msg) nibpResult(false, msg);
+      const fr = N.forceRes; N.forceRes = null;
+      const scenarioFail = !hasPulse() || live.sys < 50 || (disp.hr != null && disp.hr < 25) || sim.t.nibpFail || sim.artifacts.cpr;
+      if (fr === `fail`) nibpResult(false, Math.random() < 0.5 ? `MOUVEMENT EXCESSIF` : `MESURE IMPOSSIBLE`, { forced: true });
+      else if (fr === `absurd`) nibpResult(true, ``, absurdNibp());
+      else if (fr !== `ok` && (sim.artifacts.motion || sim.artifacts.weak)) nibpResult(false, `MOUVEMENT EXCESSIF`);
+      else if (scenarioFail) nibpResult(false, `SIGNAL FAIBLE`);
       else {
         const sys = Math.round(live.sys + clamp(randn() * 3.5, -8, 8));
         const dia = Math.round(live.dia + clamp(randn() * 2.5, -6, 6));
         const map = Math.round((sys + 2 * dia) / 3 + randn() * 0.8);
-        nibpResult(true, ``, sys, dia, map);
+        const pr = Math.round((disp.hr != null && disp.hr > 0 ? disp.hr : live.hr) + randn() * 1.5);
+        nibpResult(true, ``, { sys, dia, map, pr });
       }
       scheduleNextNibp();
     }
-    function nibpResult(ok, msg, sys, dia, map) {
+    function nibpResult(ok, msg, r) {
       const N = mon.nibp;
       const ts = Date.now();
+      r = r || {};
       const modeTxt = N.src === `auto` ? nibpModeLabel() : N.src === `continu` ? `Continu` : N.src === `formateur` ? `forcée formateur` : `manuelle`;
-      N.last = ok ? { sys, dia, map, ts, ok: true } : { ts, ok: false, msg };
+      N.last = ok ? { sys: r.sys, dia: r.dia, map: r.map, pr: r.pr, ts, sts: simClock(ts), ok: true, absurd: !!r.absurd } : { ts, sts: simClock(ts), ok: false, msg };
       N.techMsg = ok ? `` : `PNI : ${msg}`;
       N.history.unshift(Object.assign({ mode: modeTxt, tgt: `${Math.round(live.sys)}/${Math.round(live.dia)}` }, N.last));
       if (N.history.length > 200) N.history.pop();
-      if (ok) monEvent(`nibp`, `PNI ${sys}/${dia} (${map}) — ${modeTxt}`, { tgt: `cible ${Math.round(live.sys)}/${Math.round(live.dia)}` });
-      else monEvent(`nibp`, `PNI échec : ${msg.toLowerCase()} — ${modeTxt}`);
+      if (ok) monEvent(`nibp`, `PNI ${r.sys}/${r.dia} (${r.map}) FC ${r.pr != null ? r.pr : `---`} — ${modeTxt}${r.absurd ? ` — valeur INCOHÉRENTE (imposée par le formateur)` : ``}`, { tgt: `cible ${Math.round(live.sys)}/${Math.round(live.dia)}` });
+      else monEvent(`nibp`, `PNI échec : ${msg.toLowerCase()} — ${modeTxt}${r.forced ? ` (non mesurable, imposé par le formateur)` : ``}`);
       beep(1250, 0.12, 0.6);
       renderNibp();
       saveMonitor();
@@ -2198,7 +2296,7 @@
     const PRIO_RANK = { high: 3, med: 2, low: 1 };
     const prioMark = (p) => (p === `high` ? `***` : p === `med` ? `**` : `*`);
     const alarmState = { active: [], pending: {}, lastTop: null, lastPlay: 0, rot: 0, rotAt: 0 };
-    const NO_LOG = new Set([`ecg_off`, `spo2_off`, `spo2_np`, `lowperf`, `artef`]);
+    const NO_LOG = new Set([`ecg_off`, `spo2_off`, `spo2_np`, `lowperf`, `artef`, `spo2_weak`]);
 
     function evalAlarms() {
       const A = settings.alarms, L = [];
@@ -2235,6 +2333,7 @@
         if (sim.artifacts.motion) add(`artef`, `low`, `ECG : ARTEFACT`, `tech`, null, 1000);
       }
       if (!sim.sensors.spo2) add(`spo2_off`, `low`, `SpO2 : CAPTEUR DÉCONNECTÉ`, `tech`, null, 0);
+      else if (sim.artifacts.weak) add(`spo2_weak`, `low`, `SpO2 : SIGNAL FAIBLE`, `tech`, null, 0);
       else if (disp.spo2NoPulse) add(`spo2_np`, `low`, `SpO2 : RECHERCHE POULS`, `tech`, null, 0);
       else if (disp.spo2 != null) {
         if (disp.spo2 < settings.desat) add(`desat`, `high`, `SpO2 DÉSATURATION`, `phys`, `spo2`, 3000);
@@ -2265,7 +2364,7 @@
       const prev = new Set(alarmState.active.map((a) => a.id));
       for (const a of keep) {
         if (prev.has(a.id)) continue;
-        mon.alarmHist.unshift({ ts: now, prio: a.prio, text: a.text });
+        mon.alarmHist.unshift({ ts: now, sts: simClock(now), prio: a.prio, text: a.text });
         if (mon.alarmHist.length > 200) mon.alarmHist.pop();
         if (!NO_LOG.has(a.id)) monEvent(`alarm`, `${prioMark(a.prio)} ${a.text}`, { prio: a.prio });
       }
@@ -2314,7 +2413,7 @@
       }
     }
     function alarmPauseKey(fromTrainer) {
-      if (!mon.power) return;
+      if (!mon.power || simFrozen()) return;
       ensureAudio();
       if (mon.pausedUntil > Date.now()) { mon.pausedUntil = 0; monEvent(`learner`, `Pause alarme annulée`); }
       else {
@@ -2442,10 +2541,11 @@
       else if (sim.artifacts.motion) setMsg(`msg-ecg`, `Artefact`, `low`);
       else setMsg(`msg-ecg`, ``);
       if (!sim.sensors.spo2) setMsg(`msg-spo2`, `Capteur off`, `low`);
+      else if (sim.artifacts.weak) setMsg(`msg-spo2`, `Signal faible`, `low`);
       else if (disp.spo2NoPulse) setMsg(`msg-spo2`, `Recherche pouls`, `low`);
       else setMsg(`msg-spo2`, ``);
       setMsg(`msg-resp`, sim.sensors.ecg ? `` : `Dériv. off`, `low`);
-      const d = new Date();
+      const d = new Date(simClock());
       setTxt(`clk-time`, hhmmss(d.getTime()));
       setTxt(`clk-date`, `${pad2(d.getDate())}-${pad2(d.getMonth() + 1)}-${d.getFullYear()}`);
       setTxt(`tb-date`, ``);
@@ -2455,10 +2555,17 @@
       const valEl = $(`v-nibp`);
       if (last && last.ok) { setTxt(`v-nibp`, `${last.sys}/${last.dia}`); setTxt(`v-map`, `(${last.map})`); }
       else { setTxt(`v-nibp`, `---/---`); setTxt(`v-map`, `(---)`); }
+      setTxt(`v-nibp-pr`, `PR ${last && last.ok && last.pr != null ? last.pr : `---`}`);
       valEl.classList.toggle(`dim`, N.cycling);
-      setTxt(`v-nibp-time`, last ? hhmm(last.ts) : `--:--`);
+      setTxt(`v-nibp-time`, last ? hhmm(last.sts || last.ts) : `--:--`);
       const nl = $(`nibp-list`);
-      if (nl) { const key = N.history.length + `|` + (N.history[0] ? N.history[0].ts : 0); if (nl.dataset.k !== key) { nl.dataset.k = key; nl.innerHTML = N.history.length ? N.history.slice(0, 4).map((m) => `<div><span>${hhmm(m.ts)}</span><span>${m.ok ? `${m.sys}/${m.dia}(${m.map})` : `---/---`}</span></div>`).join(``) : `<div class="none">Aucune mesure</div>`; } }
+      if (nl) {
+        const key = N.history.length + `|` + (N.history[0] ? N.history[0].ts : 0);
+        if (nl.dataset.k !== key) {
+          nl.dataset.k = key;
+          nl.innerHTML = N.history.length ? N.history.slice(0, 5).map((m) => `<div><span>${hhmm(m.sts || m.ts)}</span><span>${m.ok ? `${m.sys}/${m.dia} (${m.map})` : `---/---`}</span><span>${m.ok && m.pr != null ? m.pr : `---`}</span></div>`).join(``) : `<div class="none">Aucune mesure</div>`;
+        }
+      }
       setTxt(`v-nibp-mode`, nibpModeLabel());
       const cuff = $(`v-cuff`);
       cuff.classList.toggle(`hidden`, !N.cycling);
@@ -2480,7 +2587,7 @@
        ===================================================================== */
     const MENU_SECS = [
       [`alarms`, `Limites alarmes`], [`nibp`, `PNI`], [`ecg`, `ECG`], [`spo2resp`, `SpO2 / Resp`],
-      [`trend-graph`, `Tendances graph.`], [`trend-table`, `Tendances tableau`], [`nibp-review`, `Revue PNI`],
+      [`trend-graph`, `Tendances graph.`], [`trend-table`, `Tendances tableau`], [`nibp-review`, `Liste PNI`],
       [`alarm-review`, `Revue alarmes`], [`sound`, `Volume`], [`patient`, `Patient`], [`maint`, `Maintenance`]
     ];
     let menuSec = null, maintUnlocked = false, maintCode = ``, trendWin = 30, lastTrendLog = 0;
@@ -2533,7 +2640,7 @@
     let menuFocus = null;
     function openParam(p) { if (!mon.power || !mon.booted) return; openMenu(p === `nibp` ? `nibp` : `alarms`, p); }
     function openMenu(sec, focus) {
-      if (!mon.power || !mon.booted) return;
+      if (!mon.power || !mon.booted || simFrozen()) return;
       ensureAudio();
       menuSec = sec;
       menuFocus = focus || null;
@@ -2546,6 +2653,7 @@
     }
     function closeMenu() { menuSec = null; maintCode = ``; maintUnlocked = false; $(`menu-win`).classList.add(`hidden`); }
     function knobPress() {
+      if (simFrozen()) return;
       const k = $(`knob`);
       k.style.transform = `rotate(${(parseInt(k.dataset.a || `0`, 10) + 30) % 360}deg)`;
       k.dataset.a = (parseInt(k.dataset.a || `0`, 10) + 30) % 360;
@@ -2575,14 +2683,14 @@
           <div class="m-row"><span>Délai d'alarme apnée</span>${spin(`apnea`, settings.apnea + ` s`)}</div>
           <p class="m-note">Asystolie, FV/TV, brady/tachy extrêmes et apnée sont des alarmes vitales non désactivables.</p>`;
       } else if (sec === `nibp`) {
-        const N = mon.nibp, S = settings.nibp, last = N.last;
-        const lastTxt = last ? (last.ok ? `${last.sys}/${last.dia} (${last.map}) mmHg à ${hhmm(last.ts)}` : `échec (${last.msg.toLowerCase()}) à ${hhmm(last.ts)}`) : `aucune`;
+        const S = settings.nibp;
         h = `<div class="m-row"><span>Mode de mesure</span>${seg([[`manual`, `Manuel`], [`auto`, `Auto`], [`stat`, `Continu`]], S.mode, `setNibpMode`)}</div>
           <div class="m-row"><span>Intervalle (mode Auto)</span>${seg(NIBP_INTERVALS.map((s) => [s, s < 3600 ? String(s / 60).replace(`.`, `,`) : `60`]), S.interval, `setNibpInterval`)}</div>
           <p class="m-note">Intervalles en minutes. Le mode Continu enchaîne les mesures (≈ toutes les 30 s) pendant 5 min, puis repasse en manuel.</p>
           <div class="m-row"><span id="mn-status">${nibpMenuStatus()}</span>
             <button type="button" class="m-btn" onclick="nibpKey('manuelle');renderMenu()">▶ Démarrer / ■ Arrêter</button></div>
           <p class="m-note" id="mn-next">${nibpMenuNext()}</p>
+          <div class="m-row"><span>Liste de toutes les tensions de la séance</span><button type="button" class="m-btn ghost" onclick="openMenu('nibp-review')">Liste PNI</button></div>
           <div class="mw-h">Limites d'alarme PNI</div>
           <table class="m-table"><tr><th>Paramètre</th><th>Alarme</th><th>Limite haute</th><th>Limite basse</th></tr>${[[`sys`, `PNI sys.`], [`dia`, `PNI dia.`], [`map`, `PNI PAM`]].map(([k, n]) => { const a = A[k]; return `<tr><td>${n}</td><td><button type="button" class="tgl ${a.on ? `on` : ``}" onclick="toggleAlarm('${k}','${n}')">${a.on ? `ON` : `OFF`}</button></td><td>${spin(`alarms.${k}.hi`, a.hi)}</td><td>${spin(`alarms.${k}.lo`, a.lo)}</td></tr>`; }).join(``)}</table>`;
       } else if (sec === `ecg`) {
@@ -2615,10 +2723,11 @@
         h = rows.length ? `<table class="m-table"><tr><th>Heure</th><th style="color:var(--ecg)">FC</th><th style="color:var(--spo2)">SpO2</th><th style="color:var(--resp)">FR</th><th style="color:var(--nibp)">PNI</th><th style="color:var(--ecg)">ST-${settings.ecg.lead1}</th></tr>${rows.map((r) => `<tr><td>${r.time}</td><td>${r.hr}</td><td>${r.spo2}</td><td>${r.rr}</td><td>${r.nibp}</td><td>${r.st}</td></tr>`).join(``)}</table>` : `<p class="m-note">Pas encore de tendance enregistrée.</p>`;
       } else if (sec === `nibp-review`) {
         const H = mon.nibp.history;
-        h = H.length ? `<table class="m-table"><tr><th>Heure</th><th>Sys/Dia</th><th>PAM</th><th>Mode</th></tr>${H.map((m) => `<tr><td>${hhmmss(m.ts)}</td><td>${m.ok ? `${m.sys}/${m.dia}` : `<span style="color:#7fdcff">${esc(m.msg)}</span>`}</td><td>${m.ok ? m.map : `---`}</td><td>${esc(m.mode)}</td></tr>`).join(``)}</table>` : `<p class="m-note">Aucune mesure PNI.</p>`;
+        h = H.length ? `<table class="m-table"><tr><th>Heure</th><th>Sys/Dia</th><th>PAM</th><th>FC</th><th>Mode</th></tr>${H.map((m) => `<tr><td>${hhmmss(m.sts || m.ts)}</td><td>${m.ok ? `${m.sys}/${m.dia}` : `---/---`}</td><td>${m.ok ? m.map : `---`}</td><td>${m.ok && m.pr != null ? m.pr : `---`}</td><td>${m.ok ? esc(m.mode) : `<span style="color:#7fdcff">Mesure échouée (${esc(String(m.msg || ``).toLowerCase())})</span>`}</td></tr>`).join(``)}</table>` : `<p class="m-note">Aucune mesure PNI.</p>`;
+        h += `<div style="margin-top:12px"><button type="button" class="m-btn ghost" onclick="closeMenu()">◀ Retour</button></div>`;
       } else if (sec === `alarm-review`) {
         const H = mon.alarmHist;
-        h = H.length ? `<div class="m-list">${H.map((a) => `<div><span>${hhmmss(a.ts)}</span><span class="${a.prio}">${prioMark(a.prio)} ${esc(a.text)}</span></div>`).join(``)}</div>` : `<p class="m-note">Aucune alarme enregistrée.</p>`;
+        h = H.length ? `<div class="m-list">${H.map((a) => `<div><span>${hhmmss(a.sts || a.ts)}</span><span class="${a.prio}">${prioMark(a.prio)} ${esc(a.text)}</span></div>`).join(``)}</div>` : `<p class="m-note">Aucune alarme enregistrée.</p>`;
       } else if (sec === `patient`) {
         h = `<div class="m-row"><span>Lit</span><b>${esc(sim.patient.bed)}</b></div>
           <div class="m-row"><span>Patient</span><b>${esc(sim.patient.name)}</b></div>
@@ -2653,7 +2762,7 @@
     function nibpMenuStatus() {
       const N = mon.nibp, last = N.last;
       if (N.cycling) return `Mesure en cours — brassard ${N.cuff} mmHg`;
-      return `Dernière mesure : ` + (last ? (last.ok ? `${last.sys}/${last.dia} (${last.map}) mmHg à ${hhmm(last.ts)}` : `échec (${last.msg.toLowerCase()}) à ${hhmm(last.ts)}`) : `aucune`);
+      return `Dernière mesure : ` + (last ? (last.ok ? `${last.sys}/${last.dia} (${last.map}) mmHg à ${hhmm(last.sts || last.ts)}` : `échec (${last.msg.toLowerCase()}) à ${hhmm(last.sts || last.ts)}`) : `aucune`);
     }
     function nibpMenuNext() {
       const N = mon.nibp, S = settings.nibp;
@@ -2675,16 +2784,16 @@
     function toggleSt() { settings.ecg.st = !settings.ecg.st; monEvent(`learner`, `Analyse ST ${settings.ecg.st ? `activée` : `désactivée`}`); saveMonitor(); renderMenu(); renderParams(); }
     function toggleSound() { settings.sound = !settings.sound; if (settings.sound) ensureAudio(); saveMonitor(); renderMenu(); renderAlarms(); }
     function setTrendWin(v) { trendWin = v; renderMenu(); }
-    function regeneratePin() { appState.pin = String(1000 + Math.floor(Math.random() * 9000)); initSyncChannels(); saveMonitor(); renderMenu(); renderBootQr(); }
+    function regeneratePin() { appState.pin = String(1000 + Math.floor(Math.random() * 9000)); initSyncChannels(); saveMonitor(); renderMenu(); stageKey = ``; renderStage(); }
 
     function trendRows() {
       const out = [], seen = new Set();
       for (let i = mon.trends.length - 1; i >= 0; i--) {
         const s = mon.trends[i];
-        const key = hhmm(s.ts);
+        const key = hhmm(s.sts || s.ts);
         if (seen.has(key)) continue;
         seen.add(key);
-        const nb = mon.nibp.history.find((m) => hhmm(m.ts) === key);
+        const nb = mon.nibp.history.find((m) => hhmm(m.sts || m.ts) === key);
         out.push({ time: key, hr: s.hr ?? `---`, spo2: s.spo2 ?? `--`, rr: s.rr ?? `--`, st: fmtSt(s.st1), nibp: nb ? (nb.ok ? `${nb.sys}/${nb.dia} (${nb.map})` : `échec`) : `` });
         if (out.length >= 120) break;
       }
@@ -2740,40 +2849,93 @@
         c.stroke();
       });
       c.fillStyle = `#6f8291`;
-      c.fillText(hhmm(t0), L, H - 3);
-      c.fillText(hhmm(now), R - 32, H - 3);
+      c.fillText(hhmm(simClock(t0)), L, H - 3);
+      c.fillText(hhmm(simClock(now)), R - 32, H - 3);
     }
 
     /* =====================================================================
-       11. DÉMARRAGE, ALIMENTATION, PLEIN ÉCRAN, ANTI-VEILLE
+       11. DÉMARRAGE, ALIMENTATION, ÉCRANS DE SÉANCE, PLEIN ÉCRAN, ANTI-VEILLE
        ===================================================================== */
     let wakeLock = null;
     async function requestWakeLock() { try { if (`wakeLock` in navigator) wakeLock = await navigator.wakeLock.request(`screen`); } catch (_) {} }
     function goFullscreen() {
+      if (EMBED) return;
       const el = document.documentElement;
       const fn = el.requestFullscreen || el.webkitRequestFullscreen;
       try { const p = fn && fn.call(el); if (p && p.catch) p.catch(() => {}); } catch (_) {}
       $(`view-monitor`).classList.add(`is-full`);
       setTimeout(initLanes, 400);
     }
-    function renderBootQr() {
-      const el = $(`boot-qr`);
-      if (!el) return;
-      el.innerHTML = createQrSvg(getPairingUrl(), 168);
-      $(`boot-pin`).textContent = appState.pin;
+    /* Premier contact sur la tablette : son, plein écran et anti-veille */
+    function unlockTablet() {
+      ensureAudio();
+      if (!document.fullscreenElement) goFullscreen();
+      requestWakeLock();
     }
+    function stageTap() { if ((sim.stage || `prep`) === `prep`) unlockTablet(); }
+    function openSplit() { window.location.href = `${window.location.pathname}?role=split&pin=${appState.pin}`; }
+
+    /* ---------- Écrans de séance affichés par-dessus le scope ---------- */
+    let stageKey = ``;
+    function synHtml() {
+      const sc = scenarioById(sim.scenarioId);
+      const ns = sim.nibpStart || {};
+      const nibpTxt = ns.mode === `auto` ? `Automatique toutes les ${String(ns.interval / 60).replace(`.`, `,`)} min` : `Manuel`;
+      const rows = sc.steps.map((s, i) => `<tr><td>${i + 1}. ${esc(s.label)}</td><td class="c-ecg">${s.hr}</td><td class="c-nibp">${s.sys ? `${s.sys}/${s.dia}` : `—`}${s.nibpFail ? `*` : ``}</td><td class="c-spo2">${s.spo2}</td><td class="c-resp">${s.rr}</td><td>${esc((RHYTHMS[s.rhythm] || {}).label || s.rhythm)}${s.ectopy && s.ectopy !== `none` ? ` + ESV` : ``}</td><td>${s.trans ? `${s.trans} s` : `immédiate`}</td></tr>`).join(``);
+      return `<div class="stg-syn">
+        <div class="stg-h"><span>Programmation de la simulation</span><small>En attente de validation par le formateur</small></div>
+        <div class="stg-kv">
+          <div><span>Scénario</span><b>${esc(sc.title)}</b></div>
+          <div><span>Patient</span><b>${esc(sc.patient)}</b></div>
+          <div><span>Affichage du scope</span><b>${esc(sim.patient.bed || `—`)} · ${esc(sim.patient.name || `—`)}</b></div>
+          <div><span>Heure de départ</span><b>${esc(sim.clockStart ? sim.clockStart.replace(`:`, ` h `) : `—`)}</b></div>
+          <div><span>PNI au démarrage</span><b>${nibpTxt}</b></div>
+          <div><span>Dispositifs</span><b>Aucun posé · validation de chaque pose par le formateur</b></div>
+        </div>
+        <table><tr><th>Étape</th><th>FC</th><th>PA</th><th>SpO2</th><th>FR</th><th>ECG</th><th>Transition</th></tr>${rows}</table>
+        ${sc.steps.some((s) => s.nibpFail) ? `<div class="stg-foot">* PA non mesurable à cette étape.</div>` : ``}
+        <div class="stg-foot">Après validation, l'écran s'éteint : l'apprenant allume le moniteur avec le bouton marche.</div>
+      </div>`;
+    }
+    function renderStage() {
+      if (role !== `monitor`) return;
+      const st = sim.stage || `prep`;
+      let mode = ``;
+      if (st === `prep`) mode = Date.now() - mon.remoteAt < 12000 ? `syn` : `qr`;
+      else if (st === `pause`) mode = `pause`;
+      else if (st === `end`) mode = `end`;
+      const key = `${mode}|${mode === `syn` ? sim.rev : ``}|${appState.pin}`;
+      if (key === stageKey) return;
+      stageKey = key;
+      const el = $(`stage`);
+      el.classList.toggle(`hidden`, !mode);
+      el.classList.toggle(`over`, mode === `pause` || mode === `end`);
+      if (!mode) { el.innerHTML = ``; return; }
+      if (mode === `qr`) {
+        el.innerHTML = `<div class="stg-qr"><div class="bp-qr">${createQrSvg(getPairingUrl(), 240)}</div>
+          <div class="stg-txt"><div class="stg-logo">EDAN iM60</div><b>Télécommande formateur</b>
+            <span>Scannez ce QR code avec l'appareil photo du smartphone du formateur.</span>
+            <span class="pin">PIN <b>${appState.pin}</b></span>
+            ${EMBED ? `` : `<button type="button" class="m-btn ghost" onclick="event.stopPropagation();openSplit()">Mode test double écran</button>`}
+            <small>Touchez l'écran pour passer en plein écran.</small></div></div>`;
+      } else if (mode === `syn`) el.innerHTML = synHtml();
+      else el.innerHTML = mode === `pause`
+        ? `<div class="stg-pause">PAUSE<small>Simulation figée par le formateur</small></div>`
+        : `<div class="stg-pause end">FIN DE SIMULATION<small>Place au débriefing</small></div>`;
+    }
+
+    /* ---------- Allumage / extinction ---------- */
     function bootSequence(needTap) {
+      mon.power = true;
       mon.booted = false;
+      $(`lcd`).classList.remove(`off`);
       $(`boot`).classList.remove(`hidden`);
       $(`boot-hint`).classList.toggle(`hidden`, !needTap);
-      $(`boot-pair`).classList.toggle(`hidden`, !needTap);
-      if (needTap) renderBootQr();
       $(`boot-bar`).style.width = `0`;
       if (!needTap) runBoot();
     }
     function runBoot() {
       $(`boot-hint`).classList.add(`hidden`);
-      $(`boot-pair`).classList.add(`hidden`);
       requestAnimationFrame(() => { $(`boot-bar`).style.width = `100%`; });
       setTimeout(() => {
         mon.booted = true;
@@ -2781,42 +2943,49 @@
         playStartup();
         initLanes();
         renderAll();
+        sendMonStatus();
+        saveMonitor();
       }, 1700);
     }
     function bootTap() {
       if (mon.booted || $(`boot-hint`).classList.contains(`hidden`)) return;
-      ensureAudio();
-      goFullscreen();
-      requestWakeLock();
+      unlockTablet();
       runBoot();
     }
+    /* Écran noir, sans évènement au journal (nouvelle séance, préparation) */
+    function powerOffSilent() {
+      nibpStop(``);
+      mon.power = false; mon.booted = false;
+      closeMenu();
+      $(`boot`).classList.add(`hidden`);
+      $(`lcd`).classList.add(`off`);
+      $(`lightbar`).className = `lightbar`;
+    }
     function setPower(on) {
-      mon.power = on;
-      $(`lcd`).classList.toggle(`off`, !on);
-      $(`led-ac`).classList.toggle(`off`, false);
-      if (!on) {
-        nibpStop(``); closeMenu();
-        $(`boot`).classList.add(`hidden`);
-        $(`lightbar`).className = `lightbar`;
-        mon.booted = false;
-        monEvent(`learner`, `Moniteur éteint`);
-      } else {
-        monEvent(`learner`, `Moniteur rallumé`);
+      if (on) {
+        monEvent(`learner`, `Moniteur allumé`);
         bootSequence(false);
+      } else {
+        powerOffSilent();
+        monEvent(`learner`, `Moniteur éteint`);
       }
+      saveMonitor();
       sendMonStatus();
     }
-    (function bindLongPress() {
+    (function bindPowerKey() {
       const lp = (el, ms, fn) => {
         let tm = null;
-        const start = (e) => { tm = setTimeout(() => { tm = null; fn(); }, ms); };
+        const start = () => { tm = setTimeout(() => { tm = null; fn(); }, ms); };
         const cancel = () => { if (tm) clearTimeout(tm); tm = null; };
         el.addEventListener(`pointerdown`, start);
         [`pointerup`, `pointerleave`, `pointercancel`].forEach((ev) => el.addEventListener(ev, cancel));
         el.addEventListener(`contextmenu`, (e) => e.preventDefault());
       };
       document.addEventListener(`DOMContentLoaded`, () => {
-        lp($(`hw-power`), 1200, () => setPower(!mon.power));
+        if (!$(`hw-power`)) return;
+        // Appui simple : allume le moniteur (séance validée). Appui long : éteint.
+        $(`hw-power`).addEventListener(`click`, () => { if (sim.stage === `run` && !mon.power) { unlockTablet(); setPower(true); } });
+        lp($(`hw-power`), 1200, () => { if (sim.stage === `run` && mon.power) setPower(false); });
         lp($(`brand-logo`), 2000, () => { if (!mon.booted) return; maintUnlocked = true; openMenu(`maint`); });
       });
     })();
@@ -2828,6 +2997,7 @@
     function monEvent(cat, text, extra) {
       if (role !== `monitor`) return;
       const ev = Object.assign({ id: uid(), ts: Date.now(), cat, text, src: `mon`, sid: sim.sessionId || `` }, extra || {});
+      ev.sts = simClock(ev.ts);
       mon.events.push(ev);
       if (mon.events.length > 400) mon.events.shift();
       publishSyncMessage({ type: `EVT`, ev });
@@ -2845,17 +3015,36 @@
     }
     function sendMonStatus() { if (role === `monitor`) publishSyncMessage({ type: `MON`, mon: buildMonStatus() }); }
 
+    /* Pendant la pause, le temps du scope est arrêté : on décale toutes les échéances */
+    function shiftTimers(d) {
+      if (!d || d < 0) return;
+      if (trans) trans.start += d;
+      const N = mon.nibp;
+      if (N.nextAt > 1) N.nextAt += d;
+      if (N.statUntil) N.statUntil += d;
+      if (N.startedTs) N.startedTs += d;
+      if (mon.pausedUntil) mon.pausedUntil += d;
+      for (const k of Object.keys(alarmState.pending)) alarmState.pending[k] += d;
+    }
     function applySimOnMonitor(ns, initial) {
       const old = sim;
       sim = ns;
-      if (ns.sessionId && ns.sessionId !== mon.sessionId) {
-        if (initial) mon.sessionId = ns.sessionId; else newSessionMonitor(ns.sessionId);
+      if (!sim.stage) sim.stage = sim.running ? `run` : `prep`;
+      const os = old.stage || `prep`, st = sim.stage;
+      if (initial) mon.sessionId = ns.sessionId || ``;
+      else if ((ns.sessionId || ``) !== mon.sessionId) newSessionMonitor(ns.sessionId || ``);
+      if (!initial && os !== st) {
+        if ((st === `pause` || st === `end`) && os === `run`) mon.pauseAt = Date.now();
+        if (st === `run` && os === `pause`) { shiftTimers(Date.now() - (mon.pauseAt || Date.now())); mon.pauseAt = 0; }
+        if (st === `prep` && mon.power) powerOffSilent();
       }
       const keys = [`hr`, `spo2`, `rr`, `sys`, `dia`, `temp`];
       if (initial || keys.some((k) => old.t[k] !== ns.t[k])) startTransition(initial ? 0 : ns.transition || 0);
       if (ns.t.rhythm !== eng.rhythmId) setRhythm(ns.t.rhythm, initial ? 0 : ns.transition || 0);
       if (!ns.sensors.cuff && mon.nibp.cycling) mon.nibp.failCuff = true;
+      if (ns.sensors.cuff && mon.nibp.cycling && mon.nibp.failCuff && eng.t - mon.nibp.t0 < 4.5) mon.nibp.failCuff = false;   // brassard validé pendant le gonflage
       renderPatient();
+      renderStage();
       saveMonitor();
       sendMonStatus();
     }
@@ -2864,13 +3053,13 @@
       const snd = settings.sound;
       settings = deep(SETTINGS_DEFAULT);
       settings.sound = snd;
-      mon.nibp = { cycling: false, t0: 0, cuff: 0, peak: 160, stepDur: 1.6, src: ``, endP: 40, failCuff: false, nextAt: 0, statUntil: 0, last: null, history: [], techMsg: `` };
+      mon.nibp = NIBP_BLANK();
       mon.trends = []; mon.alarmHist = []; mon.events = [];
-      mon.pausedUntil = 0; mon.frozen = false;
+      mon.pausedUntil = 0; mon.frozen = false; mon.pauseAt = 0;
       applyNibpStart(sim.nibpStart, false);
       alarmState.active = []; alarmState.pending = {};
       $(`tb-freeze`).classList.add(`hidden`);
-      closeMenu();
+      powerOffSilent();
       renderLabels(); renderAll();
     }
     function applyNibpStart(o, log) {
@@ -2882,11 +3071,8 @@
       saveMonitor(); renderNibp(); renderMenu();
     }
     function handleCmd(cmd, opts) {
-      if (cmd === `NIBP`) {
-        if (!mon.nibp.cycling) nibpKey(`formateur`);
-        if (opts && typeof opts.motionOk === `boolean`) mon.nibp.forceOk = opts.motionOk;
-      }
-      else if (cmd === `NIBP_OPT`) { if (mon.nibp.cycling && opts && typeof opts.motionOk === `boolean`) mon.nibp.forceOk = opts.motionOk; }
+      if (cmd === `NIBP`) { if (!mon.nibp.cycling) nibpKey(`formateur`); }
+      else if (cmd === `NIBP_OPT`) { if (mon.nibp.cycling && opts && [`ok`, `fail`, `absurd`].includes(opts.result)) mon.nibp.forceRes = opts.result; }
       else if (cmd === `NIBP_MODE`) applyNibpStart(opts, true);
       else if (cmd === `PAUSE`) alarmPauseKey(true);
       else if (cmd === `SHOCK`) eng.shockAt = eng.t;
@@ -2903,7 +3089,7 @@
       if (role !== `monitor`) return;
       clearTimeout(saveMonTimer);
       saveMonTimer = setTimeout(() => storeSet(`im60m2`, {
-        pin: appState.pin, settings, sim, sessionId: mon.sessionId,
+        pin: appState.pin, settings, sim, sessionId: mon.sessionId, power: mon.power,
         nibpLast: mon.nibp.last, nibpHist: mon.nibp.history.slice(0, 80), trends: mon.trends.slice(-900),
         alarmHist: mon.alarmHist.slice(0, 120), events: mon.events.slice(-250)
       }), 400);
@@ -2915,6 +3101,7 @@
       if (s.settings) settings = Object.assign(deep(SETTINGS_DEFAULT), s.settings, { alarms: Object.assign(deep(SETTINGS_DEFAULT.alarms), s.settings.alarms || {}), ecg: Object.assign(deep(SETTINGS_DEFAULT.ecg), s.settings.ecg || {}), nibp: Object.assign(deep(SETTINGS_DEFAULT.nibp), s.settings.nibp || {}) });
       if (s.sim) sim = Object.assign(deep(SIM_DEFAULT), s.sim);
       mon.sessionId = s.sessionId || sim.sessionId || ``;
+      mon.wasOn = !!s.power;
       mon.nibp.last = s.nibpLast || null;
       mon.nibp.history = s.nibpHist || [];
       mon.trends = s.trends || [];
@@ -2930,19 +3117,24 @@
       const dt = Math.min(30, Math.max(0, (now - lastFrame) / 1000));
       lastFrame = now;
       if (role === `monitor`) {
-        advanceEngine(dt);
-        nibpTick();
-        computeDisplay(dt);
-        if (mon.power && mon.booted && !mon.frozen) {
-          if (dt < 0.5) for (const L of lanes) drawLane(L, eng.t, dt);
-          else lanes.forEach((L) => (L.lastY = null));
-        }
-        if (now - lastSlow > 250) { lastSlow = now; if (mon.power) { renderParams(); renderNibp(); } }
+        const frozen = simFrozen();   // PAUSE ou FIN : écran figé, le temps du scope s'arrête
+        if (!frozen) {
+          advanceEngine(dt);
+          nibpTick();
+          computeDisplay(dt);
+          if (mon.power && mon.booted && !mon.frozen) {
+            if (dt < 0.5) for (const L of lanes) drawLane(L, eng.t, dt);
+            else lanes.forEach((L) => (L.lastY = null));
+          }
+          if (now - lastSlow > 250) { lastSlow = now; if (mon.power) { renderParams(); renderNibp(); } }
+        } else lanes.forEach((L) => (L.lastY = null));
       }
       requestAnimationFrame(frame);
     }
     function monitorSlowTick() {
       if (role !== `monitor`) return;
+      renderStage();
+      if (simFrozen()) { $(`lightbar`).className = `lightbar`; alarmState.lastTop = null; return; }
       evalAlarms();
       renderAlarms();
       alarmSound();
@@ -2950,7 +3142,7 @@
       const now = Date.now();
       if (mon.booted && now - eng.lastTrendAt >= 5000) {
         eng.lastTrendAt = now;
-        mon.trends.push({ ts: now, hr: disp.hr, spo2: disp.spo2, pr: disp.pr, rr: disp.rr, st1: disp.st1 });
+        mon.trends.push({ ts: now, sts: simClock(now), hr: disp.hr, spo2: disp.spo2, pr: disp.pr, rr: disp.rr, st1: disp.st1 });
         if (mon.trends.length > 1500) mon.trends.shift();
         if (menuSec === `trend-graph`) drawTrendGraph();
         saveMonitor();
@@ -2964,9 +3156,9 @@
     let events = [];
     const DEBRIEF_DEFAULT = { done: {}, crm: {}, guide: { emo: ``, ana: ``, syn: `` } };
     let debrief = deep(DEBRIEF_DEFAULT);
-    const PREP_DEFAULT = { sensors: { ecg: false, spo2: false, cuff: false, temp: false }, sameArm: true, module: 2, nibp: `manual` };
+    const PREP_DEFAULT = { module: 2, nibp: `manual`, clock: `` };
     let prep = deep(PREP_DEFAULT);
-    let monView = null, monViewAt = 0, lastSimSend = 0, lastSyncReq = 0, curTab = `prep`, tlFilter = `all`, dbTab = `bilan`, chkTab = `tech`;
+    let monView = null, monViewAt = 0, lastSimSend = 0, lastSyncReq = 0, lastPing = 0, curTab = `prep`, tlFilter = `all`, dbTab = `bilan`, chkTab = `tech`;
     let rcpCycleAt = 0, cueOpen = false;
 
     let saveRemTimer = null;
@@ -2976,14 +3168,18 @@
     }
     function loadRemote() {
       const s = storeGet(`im60r3`) || storeGet(`im60r2`);
-      if (!s) { selectScenario(`sc1`, true); return; }
-      if (s.pin) appState.pin = s.pin;
-      if (s.sim) sim = Object.assign(deep(SIM_DEFAULT), s.sim);
-      events = s.events || [];
-      debrief = Object.assign(deep(DEBRIEF_DEFAULT), s.debrief || {});
-      prep = Object.assign(deep(PREP_DEFAULT), s.prep || {});
-      if (s.curTab) curTab = s.curTab;
-      rcpCycleAt = s.rcpCycleAt || 0;
+      if (s) {
+        if (s.pin) appState.pin = s.pin;
+        if (s.sim) sim = Object.assign(deep(SIM_DEFAULT), s.sim);
+        events = s.events || [];
+        debrief = Object.assign(deep(DEBRIEF_DEFAULT), s.debrief || {});
+        prep = Object.assign(deep(PREP_DEFAULT), s.prep || {});
+        if (s.curTab) curTab = s.curTab;
+        rcpCycleAt = s.rcpCycleAt || 0;
+      } else selectScenario(`sc1`, true);
+      if (!prep.clock) prep.clock = hhmm(Date.now());
+      if (!sim.stage) sim.stage = sim.running ? `run` : sim.endedAt ? `end` : `prep`;
+      if (!sim.artifacts.weak) sim.artifacts.weak = false;
     }
     function toast(msg) {
       const el = $(`toast`);
@@ -3021,9 +3217,13 @@
       toast(`Synchronisation demandée`);
     }
 
+    /* ---------- Vibration du téléphone à chaque fenêtre (l'écran reste lisible) ---------- */
+    function buzz() { try { if (navigator.vibrate) navigator.vibrate([180, 90, 180, 90, 180]); } catch (_) {} }
+
     /* ---------- Journal ---------- */
     function remEvent(cat, text, extra) {
       const ev = Object.assign({ id: uid(), ts: Date.now(), cat, text, src: `rem`, sid: sim.sessionId || `` }, extra || {});
+      ev.sts = simClock(ev.ts);
       events.push(ev);
       events.sort((a, b) => a.ts - b.ts);
       saveRemote();
@@ -3031,16 +3231,14 @@
       return ev;
     }
     function mergeEvents(list) {
-      let added = 0, pniByTeam = false;
+      let added = 0;
       const have = new Set(events.map((e) => e.id));
       for (const ev of list) {
         if (!ev || !ev.id || have.has(ev.id)) continue;
         if (!sim.sessionId || ev.sid !== sim.sessionId) continue;
         events.push(ev); have.add(ev.id); added++;
-        if (ev.src === `mon` && ev.cat === `learner` && /^PNI lancée \((bouton|écran)/.test(ev.text) && Date.now() - ev.ts < 15000) pniByTeam = true;
       }
-      if (added) { events.sort((a, b) => a.ts - b.ts); saveRemote(); renderLogs(); }
-      if (pniByTeam && sim.running && !sheetKind) openPniSheet(`scope`);
+      if (added) { events.sort((a, b) => a.ts - b.ts); saveRemote(); renderLogs(); if (curTab === `debrief` && dbTab === `bilan`) renderDebrief(); }
     }
     const tPlus = (ts) => (sim.startedAt ? fmtDur(ts - sim.startedAt) : hhmm(ts));
     const CAT_ICON = { step: `▶`, action: `✓`, sensor: `⚡`, nibp: `◉`, alarm: `⚠`, learner: `☝`, note: `✎`, system: `•` };
@@ -3064,6 +3262,7 @@
 
     /* =====================================================================
        14. ONGLET PRÉPARATION — module, scénario, conditions initiales, validation
+       La tablette affiche en direct la synthèse de cette programmation.
        ===================================================================== */
     const MODULES = [[1, `Module 1`], [2, `Module 2`]];
     const scenariosOf = (m) => SCENARIOS.filter((s) => s.module === m).concat(SCENARIOS.filter((s) => !s.module));
@@ -3071,23 +3270,35 @@
       prep.module = m;
       const list = scenariosOf(m);
       if (!list.some((s) => s.id === sim.scenarioId)) selectScenario(list[0].id, true);
-      saveRemote(); renderPrep(); renderHeader();
+      renderPrep(); pushPrep(); renderHeader();
     }
     function selectScenario(id, silent) {
       const sc = scenarioById(id);
       sim.scenarioId = sc.id;
       sim.stepIdx = -1;
-      prep.sensors = Object.assign({}, sc.sensorsStart);
       sim.patient = { bed: sc.bed, name: sc.name };
-      if (!silent) { saveRemote(); renderPrep(); renderHeader(); }
+      if (!silent) { renderPrep(); pushPrep(); renderHeader(); }
     }
-    function toggleSameArm() { prep.sameArm = !prep.sameArm; saveRemote(); renderPrep(); }
     const SENSOR_LBL = { ecg: `Électrodes ECG`, spo2: `Capteur SpO2`, cuff: `Brassard PNI`, temp: `Sonde T°` };
     const SENSOR_SHORT = { ecg: [`ECG`, `💓`], spo2: [`SpO2`, `☝️`], cuff: [`Brassard`, `💪`], temp: [`T°`, `🌡️`] };
-    function togglePrepSensor(k) { prep.sensors[k] = !prep.sensors[k]; saveRemote(); renderPrep(); }
     const NIBP_START = { manual: [`manual`, 300, `Manuel`], a1: [`auto`, 60, `Auto 1 min`], a5: [`auto`, 300, `Auto 5 min`], a15: [`auto`, 900, `Auto 15 min`] };
     const nibpStartOf = (k) => { const v = NIBP_START[k] || NIBP_START.manual; return { mode: v[0], interval: v[1] }; };
-    function setPrepNibp(k) { prep.nibp = k; saveRemote(); renderPrep(); }
+    function setPrepNibp(k) { prep.nibp = k; renderPrep(); pushPrep(); }
+    function readPrepPatient() {
+      const b = $(`prep-bed`), n = $(`prep-name`);
+      if (!b || !n) return;
+      sim.patient = { bed: (b.value || `LIT`).trim().toUpperCase(), name: (n.value || ``).trim().toUpperCase() };
+    }
+    /* Envoie la programmation à la tablette (seulement avant la validation) */
+    function pushPrep() {
+      if (sim.stage !== `prep`) { saveRemote(); renderPrepChecks(); return; }
+      readPrepPatient();
+      sim.clockStart = prep.clock || ``;
+      sim.nibpStart = nibpStartOf(prep.nibp);
+      sim.sensors = Object.assign({}, NO_SENSOR);
+      pushSim();
+      renderPrepChecks();
+    }
 
     function renderPrep() {
       $(`mod-seg`).innerHTML = MODULES.map(([m, l]) => `<button type="button" class="${prep.module === m ? `sel` : ``}" onclick="setModule(${m})">${l}<small>${SCENARIOS.filter((s) => s.module === m).length} sc.</small></button>`).join(``);
@@ -3108,29 +3319,27 @@
         ${sc.tech.length ? `<h3>Attendus techniques</h3><ul class="tight">${sc.tech.map((t) => `<li>${esc(t.t)}</li>`).join(``)}</ul>` : ``}`;
       $(`prep-bed`).value = sim.patient.bed || ``;
       $(`prep-name`).value = sim.patient.name || ``;
-      $(`prep-sensors`).innerHTML = Object.keys(SENSOR_LBL).map((k) => `<button type="button" class="${prep.sensors[k] ? `on` : ``}" onclick="togglePrepSensor('${k}')">${SENSOR_LBL[k]}<br>${prep.sensors[k] ? `posé` : `non posé`}</button>`).join(``);
-      $(`prep-samearm`).className = `chip ${prep.sameArm ? `on` : ``}`;
-      $(`prep-samearm`).textContent = `Brassard et SpO2 sur le même bras : ${prep.sameArm ? `oui` : `non`}`;
+      $(`prep-clock`).value = prep.clock || ``;
       $(`prep-nibp`).innerHTML = Object.entries(NIBP_START).map(([k, v]) => `<button type="button" class="${prep.nibp === k ? `sel` : ``}" onclick="setPrepNibp('${k}')">${v[2]}</button>`).join(``);
       renderPrepChecks();
     }
     function renderPrepChecks() {
-      const on = scopeOnline(), booted = on && monView.power && monView.booted;
+      const box = $(`prep-check`);
+      if (!box) return;
+      const on = scopeOnline();
       const sc = scenarioById(sim.scenarioId);
-      const posed = Object.keys(SENSOR_LBL).filter((k) => prep.sensors[k]).map((k) => SENSOR_SHORT[k][0]);
       const items = [
-        [on, on ? `Tablette connectée (PIN ${appState.pin})` : `Tablette non connectée — scannez son QR code (PIN ${appState.pin})`],
-        [booted, booted ? `Scope démarré` : on ? `Scope en attente : touchez l'écran de la tablette` : `Scope démarré : à vérifier`],
+        [on, on ? `Tablette connectée (PIN ${appState.pin}) : elle affiche la synthèse` : `Tablette non connectée : scannez son QR code (PIN ${appState.pin})`],
         [true, `Scénario : ${sc.short}`],
-        [true, `Capteurs posés au départ : ${posed.length ? posed.join(`, `) : `aucun`} · PNI ${NIBP_START[prep.nibp][2].toLowerCase()}`]
+        [!!prep.clock, prep.clock ? `Heure de départ : ${prep.clock.replace(`:`, ` h `)}` : `Heure de départ à saisir`],
+        [true, `PNI ${NIBP_START[prep.nibp][2].toLowerCase()} · aucun dispositif posé au départ`]
       ];
       const html = items.map(([ok, t]) => `<div class="ck-line ${ok ? `ok` : `ko`}"><span>${ok ? `✓` : `!`}</span>${esc(t)}</div>`).join(``);
-      const box = $(`prep-check`);
       if (box.dataset.h !== html) { box.dataset.h = html; box.innerHTML = html; }
       const btn = $(`btn-launch`);
       if (btn.dataset.armed !== `1`) {
         btn.className = `btn big ${on ? `pri` : `amb`}`;
-        btn.textContent = sim.running ? `Relancer la simulation (séance en cours)` : on ? `✓ Valider et lancer la simulation` : `Lancer sans tablette connectée`;
+        btn.textContent = sim.running ? `Relancer (la séance en cours sera remplacée)` : on ? `✓ Valider la programmation` : `Valider sans tablette connectée`;
       }
     }
     function validateLaunch(btn) {
@@ -3138,54 +3347,60 @@
       if (needConfirm && btn.dataset.armed !== `1`) {
         btn.dataset.armed = `1`;
         btn.className = `btn big amb`;
-        btn.textContent = sim.running ? `Toucher encore : la séance en cours sera remplacée` : `Toucher encore pour lancer sans tablette`;
+        btn.textContent = sim.running ? `Toucher encore : la séance en cours sera remplacée` : `Toucher encore pour valider sans tablette`;
         setTimeout(() => { btn.dataset.armed = ``; renderPrepChecks(); }, 3500);
         return;
       }
       btn.dataset.armed = ``;
       startSession();
     }
-    function readPrepPatient() { sim.patient = { bed: ($(`prep-bed`).value || `LIT`).trim().toUpperCase(), name: ($(`prep-name`).value || ``).trim().toUpperCase() }; }
     function stepTargets(st) {
       return { hr: st.hr, spo2: st.spo2, rr: st.rr, sys: st.sys, dia: st.dia, temp: st.temp != null ? st.temp : sim.t.temp, rhythm: st.rhythm, ectopy: st.ectopy || `none`, respPattern: st.resp || `normal`, nibpFail: !!st.nibpFail };
-    }
-    function previewOnScope() {
-      const sc = scenarioById(sim.scenarioId);
-      readPrepPatient();
-      sim.sensors = Object.assign({}, prep.sensors);
-      sim.sameArm = prep.sameArm;
-      sim.t = stepTargets(sc.steps[0]);
-      sim.transition = 0;
-      pushSim();
-      sendCmd(`NIBP_MODE`, nibpStartOf(prep.nibp), true);
-      toast(`Étape 1 affichée sur le scope (${sc.short})`);
     }
     function startSession() {
       const sc = scenarioById(sim.scenarioId);
       readPrepPatient();
+      closeSheet();
       events = [];
       debrief = deep(DEBRIEF_DEFAULT);
       sim.sessionId = `s` + Date.now().toString(36);
       sim.running = true; sim.startedAt = Date.now(); sim.endedAt = 0;
-      sim.sensors = Object.assign({}, prep.sensors);
-      sim.sameArm = prep.sameArm;
-      sim.artifacts = { cpr: false, motion: false };
+      sim.stage = `run`; sim.pauseTotal = 0; sim.pauseAt = 0;
+      sim.clockStart = prep.clock || hhmm(Date.now());
+      sim.cuffSide = null; sim.sameArm = false;
+      sim.sensors = Object.assign({}, NO_SENSOR);
+      sim.artifacts = { cpr: false, motion: false, weak: false };
       sim.nibpStart = nibpStartOf(prep.nibp);
       rcpCycleAt = 0; cueOpen = false;
-      remEvent(`system`, `Début de la simulation — ${sc.title}`);
+      remEvent(`system`, `Programmation validée — ${sc.title}`, { detail: `Heure simulée de départ ${sim.clockStart.replace(`:`, ` h `)} · scope éteint, en attente d'allumage par l'apprenant` });
       applyStep(0);
       showTab(`live`);
     }
+    function finishPause() {
+      if (sim.stage !== `pause` || !sim.pauseAt) return 0;
+      const d = Date.now() - sim.pauseAt;
+      sim.pauseTotal = (sim.pauseTotal || 0) + d;
+      sim.pauseAt = 0;
+      return d;
+    }
+    const activeDur = (end) => end - sim.startedAt - (sim.pauseTotal || 0) - (sim.pauseAt ? end - sim.pauseAt : 0);
     function endSession(btn) {
-      if (!sim.running) { showTab(`debrief`); return; }
-      const lbl = `■ Terminer la simulation`;
-      if (btn.dataset.armed !== `1`) { btn.dataset.armed = `1`; btn.textContent = `Toucher encore pour confirmer`; setTimeout(() => { btn.dataset.armed = ``; btn.textContent = lbl; }, 3500); return; }
-      btn.dataset.armed = ``; btn.textContent = lbl;
+      if (!sim.running) { closeSheet(); showTab(`debrief`); return; }
+      if (btn.dataset.armed !== `1`) {
+        btn.dataset.lbl = btn.textContent;
+        btn.dataset.armed = `1`; btn.textContent = `Toucher encore pour confirmer`;
+        setTimeout(() => { if (btn.dataset.armed === `1`) { btn.dataset.armed = ``; btn.textContent = btn.dataset.lbl; } }, 3500);
+        return;
+      }
+      btn.dataset.armed = ``; btn.textContent = btn.dataset.lbl || btn.textContent;
       if (voiceOn) stopVoice();
-      sim.running = false; sim.endedAt = Date.now();
-      if (sim.artifacts.cpr || sim.artifacts.motion) sim.artifacts = { cpr: false, motion: false };
-      remEvent(`system`, `Fin de la simulation (durée ${fmtDur(sim.endedAt - sim.startedAt)})`);
+      const d = finishPause();
+      if (d) remEvent(`system`, `Fin de la pause (${fmtDur(d)})`);
+      sim.running = false; sim.endedAt = Date.now(); sim.stage = `end`;
+      if (sim.artifacts.cpr || sim.artifacts.motion || sim.artifacts.weak) sim.artifacts = { cpr: false, motion: false, weak: false };
+      remEvent(`system`, `Fin de la simulation (durée active ${fmtDur(sim.endedAt - sim.startedAt - (sim.pauseTotal || 0))})`);
       pushSim();
+      closeSheet();
       dbTab = `bilan`;
       showTab(`debrief`);
     }
@@ -3194,15 +3409,43 @@
       btn.dataset.armed = ``; btn.textContent = `Nouvelle séance`;
       events = []; debrief = deep(DEBRIEF_DEFAULT);
       sim.running = false; sim.startedAt = 0; sim.endedAt = 0; sim.stepIdx = -1; sim.sessionId = ``;
-      sim.artifacts = { cpr: false, motion: false };
+      sim.stage = `prep`; sim.pauseTotal = 0; sim.pauseAt = 0; sim.cuffSide = null; sim.sameArm = false;
+      sim.artifacts = { cpr: false, motion: false, weak: false };
       selectScenario(sim.scenarioId, true);
-      pushSim();
       showTab(`prep`);
+      pushPrep();
       toast(`Prêt pour une nouvelle séance`);
     }
 
+    /* ---------- Pause de la simulation ---------- */
+    function togglePause() {
+      if (!sim.running) { toast(`Aucune simulation en cours`); return; }
+      if (dropOpen) toggleDrop();
+      if (sim.stage === `pause`) { openSheet(`pause`, pauseHtml()); return; }
+      sim.stage = `pause`; sim.pauseAt = Date.now();
+      pushSim();
+      remEvent(`system`, `⏸ Pause de la simulation (scope figé)`);
+      renderPhaseBar(); renderHeader();
+      openSheet(`pause`, pauseHtml());
+    }
+    function pauseHtml() {
+      return shHead(`⏸ Simulation en pause`, `Le scope est figé et affiche « PAUSE »`) +
+        `<div class="pni-cd" id="pause-cd">${fmtDur(Date.now() - (sim.pauseAt || Date.now()))}</div>
+         <button type="button" class="btn grn big" onclick="resumeSim()">▶ Reprendre la simulation</button>
+         <button type="button" class="btn red big" onclick="endSession(this)">■ Fin de simulation</button>
+         <div class="muted">Vous pouvez fermer cette fenêtre pour faire le point : la pause continue. Touchez ⏸ (en jaune) en haut pour la rouvrir.</div>`;
+    }
+    function resumeSim() {
+      if (sim.stage !== `pause`) { closeSheet(); return; }
+      const d = finishPause();
+      sim.stage = `run`;
+      pushSim();
+      remEvent(`system`, `▶ Reprise de la simulation (pause de ${fmtDur(d)})`);
+      closeSheet(); renderPhaseBar(); renderHeader();
+    }
+
     /* =====================================================================
-       15. ONGLET SIMULATION — étapes, capteurs, actions, attendus
+       15. ONGLET SIMULATION — étapes, dispositifs, actions, attendus
        ===================================================================== */
     function applyStep(idx) {
       const sc = scenarioById(sim.scenarioId);
@@ -3256,16 +3499,29 @@
       sim.sensors[k] = !sim.sensors[k];
       sim.transition = parseInt($(`live-trans`).value, 10) || 0;
       pushSim();
-      if (sim.running) remEvent(`sensor`, `${SENSOR_LBL[k]} ${sim.sensors[k] ? `posé(es)` : `retiré(es)`}`);
+      if (sim.running) remEvent(`sensor`, `${SENSOR_LBL[k]} ${sim.sensors[k] ? `posé(es) — validé par le formateur` : `retiré(es)`}`);
       renderRows();
+      // SpO2 validée APRÈS une prise de tension : on demande maintenant le côté du brassard
+      if (k === `spo2` && sim.sensors.spo2 && sim.running && sim.cuffSide == null && events.some((e) => e.cat === `nibp` && e.src === `mon`)) openSideSheet();
     }
     function toggleArtifact(k) {
-      if (k === `sameArm`) sim.sameArm = !sim.sameArm; else sim.artifacts[k] = !sim.artifacts[k];
+      sim.artifacts[k] = !sim.artifacts[k];
       pushSim();
-      const lbl = { cpr: `Compressions thoraciques (artefact RCP)`, motion: `Agitation du patient`, sameArm: `Brassard et SpO2 sur le même bras` }[k];
-      const on = k === `sameArm` ? sim.sameArm : sim.artifacts[k];
-      if (sim.running && k !== `sameArm`) remEvent(k === `cpr` ? `action` : `step`, `${lbl} : ${on ? `début` : `fin`}`);
+      const lbl = { cpr: `Compressions thoraciques (artefact RCP)`, motion: `Agitation du patient`, weak: `Signal SpO2 faible (agitation, capteur mal posé)` }[k];
+      if (sim.running) remEvent(k === `cpr` ? `action` : `step`, `${lbl} : ${sim.artifacts[k] ? `début` : `fin`}`);
       renderRows(); renderDrop();
+    }
+    function setCuffSide(s) {
+      sim.cuffSide = s || null;
+      sim.sameArm = s === `same`;
+      pushSim();
+      if (sim.running) remEvent(`sensor`, s === `same` ? `Brassard posé du même côté que la SpO2` : s === `other` ? `Brassard posé du côté opposé à la SpO2` : `Côté du brassard : non défini`);
+      renderDrop();
+    }
+    function forcePni() {
+      if (!sim.running) { toast(`Validez d'abord la programmation`); return; }
+      if (scopeOnline() && !monView.power) { toast(`Le scope est éteint`); return; }
+      sendCmd(`NIBP`);
     }
     function quick(kind) {
       const sc = scenarioById(sim.scenarioId);
@@ -3295,18 +3551,20 @@
       renderLive(); renderDrop();
     }
 
-    /* ---------- Lignes de boutons : capteurs + actions ---------- */
+    /* ---------- Lignes de boutons : dispositifs + actions ---------- */
     const tbtn = (cls, icon, label, sub, onclick, subId) => `<button type="button" class="tb ${cls}" onclick="${onclick}"><span class="i">${icon}</span>${label}<small${subId ? ` id="${subId}"` : ``}>${sub}</small></button>`;
     const rcpTxt = () => (rcpCycleAt ? fmtDur(Date.now() - rcpCycleAt) : `en cours`);
     function pniSubText() {
       if (!scopeOnline()) return `mesurer`;
       const M = monView;
+      if (!M.power) return `scope éteint`;
       if (M.cycling) return `⟳ ${M.cuff}`;
       return M.nibp ? (M.nibp.ok ? `${M.nibp.sys}/${M.nibp.dia}` : `échec`) : `mesurer`;
     }
     function renderRows() {
-      $(`row-sensors`).innerHTML = Object.keys(SENSOR_SHORT).map((k) => tbtn(sim.sensors[k] ? `on` : ``, SENSOR_SHORT[k][1], SENSOR_SHORT[k][0], sim.sensors[k] ? `posé` : `non posé`, `toggleSensor('${k}')`)).join(``) +
-        tbtn(``, `🩺`, `PNI`, pniSubText(), `openPniSheet('remote')`, `pni-sub`);
+      $(`row-sensors`).innerHTML = Object.keys(SENSOR_SHORT).map((k) => tbtn(sim.sensors[k] ? `on` : ``, SENSOR_SHORT[k][1], SENSOR_SHORT[k][0], sim.sensors[k] ? `validé` : `à valider`, `toggleSensor('${k}')`)).join(``) +
+        tbtn(``, `🩺`, `PNI`, pniSubText(), `forcePni()`, `pni-sub`) +
+        tbtn(sim.artifacts.weak ? `act` : ``, `〰️`, `SpO2 faible`, sim.artifacts.weak ? `en cours` : `non`, `toggleArtifact('weak')`);
       const A = sim.artifacts;
       $(`row-actions`).innerHTML =
         tbtn(A.cpr ? `act` : ``, `🤲`, `RCP`, A.cpr ? rcpTxt() : `démarrer`, `toggleRcp()`, `rcp-sub`) +
@@ -3331,6 +3589,10 @@
       $(`pb-more`).textContent = cueOpen ? `▴ consigne` : `▾ consigne`;
       $(`pb-next`).disabled = sim.stepIdx >= sc.steps.length - 1;
       $(`pb-prev`).disabled = sim.stepIdx <= 0;
+      const pp = $(`pb-pause`);
+      pp.classList.toggle(`on`, sim.stage === `pause`);
+      pp.textContent = `⏸`;
+      pp.disabled = !sim.running;
     }
 
     /* ---------- RCP, analyse DSA, choc, drogues ---------- */
@@ -3349,9 +3611,19 @@
       remEvent(`action`, `RCP : arrêt du massage (cycle ${d})`);
       renderRows();
     }
-    let sheetKind = ``, sheetTimer = null;
-    function openSheet(kind, html) { clearTimeout(sheetTimer); sheetKind = kind; $(`sheet-box`).innerHTML = html; $(`sheet`).classList.remove(`hidden`); }
-    function closeSheet() { clearTimeout(sheetTimer); sheetKind = ``; $(`sheet`).classList.add(`hidden`); }
+    let sheetKind = ``, sheetTimer = null, pniTimer = null;
+    /* Chaque fenêtre fait vibrer le téléphone ; un liseré coloré clignote autour,
+       sans jamais masquer le contenu. */
+    function openSheet(kind, html) {
+      clearTimeout(sheetTimer); clearInterval(pniTimer);
+      sheetKind = kind;
+      const b = $(`sheet-box`);
+      b.innerHTML = html;
+      b.classList.remove(`ring`); void b.offsetWidth; b.classList.add(`ring`);
+      $(`sheet`).classList.remove(`hidden`);
+      buzz();
+    }
+    function closeSheet() { clearTimeout(sheetTimer); clearInterval(pniTimer); sheetKind = ``; pni = null; $(`sheet`).classList.add(`hidden`); }
     const setSheet = (html) => { $(`sheet-box`).innerHTML = html; };
     const shHead = (title, sub) => `<div class="sh-head"><div><h3>${title}</h3>${sub ? `<div class="muted">${sub}</div>` : ``}</div><button type="button" class="hd-btn" onclick="closeSheet()" aria-label="Fermer">✕</button></div>`;
 
@@ -3422,34 +3694,56 @@
       setSheet(drugHtml());
     }
 
-    /* ---------- PNI : côté du brassard, agitation ---------- */
-    let pni = { src: ``, side: `same`, ok: null };
+    /* ---------- PNI : fenêtre à chaque prise de tension (10 s pour répondre) ---------- */
+    let pni = null;
+    const PNI_SRC = { manuelle: `Bouton PNI du scope`, 'écran': `Écran tactile du scope`, formateur: `Forcée par vous`, auto: `Mode automatique du scope`, continu: `Mode continu du scope` };
+    const PNI_RES_LBL = { ok: `OK`, fail: `Non mesurable`, absurd: `Incohérente` };
+    function pniLeft() { return pni ? Math.max(0, 10 - Math.floor((Date.now() - pni.t0) / 1000)) : 0; }
     function openPniSheet(src) {
-      pni = { src, side: sim.sameArm ? `same` : `other`, ok: null };
-      openSheet(`pni`, pniHtml());
-      if (src === `scope`) sheetTimer = setTimeout(() => { if (sheetKind === `pni`) closeSheet(); }, 30000);
+      if (sheetKind === `pni`) return;
+      openSheet(`pni`, ``);
+      pni = { src, res: null, side: null, sideAsk: sim.cuffSide == null && !!sim.sensors.spo2, t0: Date.now() };
+      setSheet(pniHtml());
+      pniTimer = setInterval(pniTick, 250);
+    }
+    function pniTick() {
+      if (sheetKind !== `pni` || !pni) { clearInterval(pniTimer); return; }
+      const el = $(`pni-cd`);
+      if (el) el.textContent = `${pniLeft()} s`;
+      if (Date.now() - pni.t0 >= 10000) {
+        if (!pni.res) remEvent(`nibp`, `Formateur : pas de réponse en 10 s → mesure selon le scénario`);
+        closeSheet();
+      }
     }
     function pniHtml() {
-      const scope = pni.src === `scope`, motion = sim.artifacts.motion;
-      let h = shHead(scope ? `PNI lancée par l'équipe` : `🩺 Prise de tension`, scope ? `Mesure en cours sur le scope` : `La mesure démarre sur le scope`);
-      if (!sim.sensors.cuff) h += `<div class="info warn">Brassard non posé : la mesure échouera (« brassard lâche »).<div style="margin-top:6px"><button type="button" class="btn sm" onclick="toggleSensor('cuff');setSheet(pniHtml())">Marquer le brassard posé</button></div></div>`;
-      h += `<div class="lbl">Brassard posé du côté de la SpO2 ?</div>
-        <div class="seg-r"><button type="button" class="${pni.side === `same` ? `sel` : ``}" onclick="pniSide('same')">Même bras que la SpO2</button><button type="button" class="${pni.side === `other` ? `sel` : ``}" onclick="pniSide('other')">Bras opposé</button></div>
-        <div class="muted">${pni.side === `same` ? `La courbe de pléth s'écrase pendant le gonflage (comme en vrai).` : `La SpO2 n'est pas perturbée par le gonflage.`}</div>`;
-      if (motion) h += `<div class="lbl">Patient agité : la mesure aboutit ?</div>
-        <div class="seg-r"><button type="button" class="${pni.ok === true ? `sel` : ``}" onclick="pniOk(true)">Oui, valeur obtenue</button><button type="button" class="${pni.ok === false ? `sel` : ``}" onclick="pniOk(false)">Non, échec mouvement</button></div>`;
-      h += `<button type="button" class="btn pri big" onclick="pniGo()">${scope ? `Valider` : `▶ Lancer la PNI`}</button>`;
+      const R = (k, cls, lbl) => `<button type="button" class="btn ${cls} big ${pni.res === k ? `chosen` : ``}" onclick="pniRes('${k}')">${lbl}</button>`;
+      let h = shHead(`🩺 Prise de tension en cours`, `${esc(PNI_SRC[pni.src] || `Scope`)} · sans réponse : mesure selon le scénario dans <b id="pni-cd">${pniLeft()} s</b>`);
+      if (!sim.sensors.cuff) h += `<div class="info warn">Brassard non validé : la mesure échouera (« brassard lâche »).<div style="margin-top:6px"><button type="button" class="btn sm" onclick="toggleSensor('cuff');setSheet(pniHtml())">Valider le brassard</button></div></div>`;
+      h += `<div class="lbl">Résultat affiché sur le scope</div><div class="pni-res">
+        ${R(`ok`, `grn`, `✓ OK — valeur proche du scénario`)}
+        ${R(`fail`, `amb`, `Non mesurable (---/---)`)}
+        ${R(`absurd`, `red`, `Incohérente (ex. 145/130, FC 110)`)}</div>`;
+      if (pni.sideAsk) h += `<div class="lbl">Côté du brassard (question posée une seule fois)</div>
+        <div class="seg-r"><button type="button" class="${pni.side === `same` ? `sel` : ``}" onclick="pniSide('same')">Côté SpO2</button><button type="button" class="${pni.side === `other` ? `sel` : ``}" onclick="pniSide('other')">Opposé à la SpO2</button></div>`;
       return h;
     }
-    function applyPniSide() { const v = pni.side === `same`; if (sim.sameArm !== v) { sim.sameArm = v; pushSim(); } }
-    function pniSide(s) { pni.side = s; if (pni.src === `scope`) applyPniSide(); setSheet(pniHtml()); }
-    function pniOk(v) { pni.ok = v; if (pni.src === `scope`) sendCmd(`NIBP_OPT`, { motionOk: v }, true); setSheet(pniHtml()); }
-    function pniGo() {
-      applyPniSide();
-      const opts = sim.artifacts.motion && pni.ok != null ? { motionOk: pni.ok } : null;
-      if (pni.src === `scope`) { if (opts) sendCmd(`NIBP_OPT`, opts, true); }
-      else sendCmd(`NIBP`, opts);
-      closeSheet();
+    function pniRes(k) {
+      if (!pni) return;
+      pni.res = k;
+      sendCmd(`NIBP_OPT`, { result: k }, true);
+      remEvent(`nibp`, `Formateur : mesure « ${PNI_RES_LBL[k]} »`);
+      if (!pni.sideAsk || pni.side) closeSheet(); else setSheet(pniHtml());
+    }
+    function pniSide(s) {
+      if (!pni) return;
+      pni.side = s;
+      setCuffSide(s);
+      if (pni.res) closeSheet(); else setSheet(pniHtml());
+    }
+    function openSideSheet() {
+      openSheet(`side`, shHead(`Côté du brassard ?`, `Le capteur SpO2 vient d'être validé après une prise de tension`) +
+        `<div class="g2"><button type="button" class="btn big" onclick="setCuffSide('same');closeSheet()">Côté SpO2</button><button type="button" class="btn big" onclick="setCuffSide('other');closeSheet()">Opposé à la SpO2</button></div>
+         <div class="muted">Côté SpO2 : la saturation se perd à chaque gonflage du brassard.</div>`);
     }
 
     /* ---------- Attendus (cases à cocher horodatées) ---------- */
@@ -3513,8 +3807,7 @@
       renderAdj();
       const curMode = scopeOnline() ? monView.mode : ``;
       $(`d-nibp`).innerHTML = Object.entries(NIBP_START).map(([k, v]) => `<button type="button" class="${curMode === v[2] ? `sel` : ``}" onclick="setScopeNibp('${k}')">${v[2]}</button>`).join(``);
-      $(`d-samearm`).className = `chip ${sim.sameArm ? `on` : ``}`;
-      $(`d-samearm`).textContent = `Brassard et SpO2 sur le même bras : ${sim.sameArm ? `oui` : `non`}`;
+      $(`d-side`).innerHTML = [[`same`, `Côté SpO2`], [`other`, `Opposé SpO2`], [null, `Non défini`]].map(([v, l]) => `<button type="button" class="${sim.cuffSide === v ? `sel` : ``}" onclick="setCuffSide(${v ? `'${v}'` : `null`})">${l}</button>`).join(``);
     }
     function setScopeNibp(k) {
       sendCmd(`NIBP_MODE`, nibpStartOf(k));
@@ -3611,18 +3904,19 @@
       for (const e of events) { if (e.cat !== `step` || !/^Étape/.test(e.text)) continue; if (e.ts <= ts) cur = e; else break; }
       return cur;
     }
+    const isNibpResult = (e) => e.cat === `nibp` && e.src === `mon`;
     function computeStats() {
       const sc = scenarioById(sim.scenarioId);
       const end = sim.endedAt || (sim.running ? Date.now() : (events.length ? events[events.length - 1].ts : 0));
-      const nibp = events.filter((e) => e.cat === `nibp`);
+      const nibp = events.filter(isNibpResult);
       const alarms = events.filter((e) => e.cat === `alarm`);
       const items = sc.tech.concat(CRM_CHECK);
       const done = items.filter((i) => debrief.done[i.id]);
       return {
-        sc, end, dur: sim.startedAt ? end - sim.startedAt : 0,
+        sc, end, dur: sim.startedAt ? activeDur(end) : 0,
         nibpN: nibp.length, nibpOk: nibp.filter((e) => !/échec/.test(e.text)).length,
         alarmN: alarms.length, alarmHigh: alarms.filter((e) => e.prio === `high`).length,
-        pauses: events.filter((e) => e.cat === `learner` && /Pause alarme \d/.test(e.text)).length,
+        pauses: events.filter((e) => e.cat === `system` && /^⏸ Pause de la simulation/.test(e.text)).length,
         notes: events.filter((e) => e.cat === `note`).length,
         items, done,
         stepsReached: new Set(events.filter((e) => e.cat === `step` && /^Étape/.test(e.text)).map((e) => e.text)).size
@@ -3632,15 +3926,25 @@
       const rows = [];
       const first = (pred) => events.find(pred);
       const add = (label, ev) => rows.push({ label, ev, step: ev ? stepAt(ev.ts) : null });
+      add(`Allumage du scope`, first((e) => e.cat === `learner` && /^Moniteur allumé/.test(e.text)));
       add(`1re pose des électrodes ECG`, first((e) => e.cat === `sensor` && /Électrodes ECG posé/.test(e.text)));
       add(`1re pose du capteur SpO2`, first((e) => e.cat === `sensor` && /Capteur SpO2 posé/.test(e.text)));
-      add(`1re mesure PNI`, first((e) => e.cat === `nibp`));
+      add(`1re mesure PNI`, first(isNibpResult));
       add(`1er massage cardiaque`, first((e) => e.cat === `action` && /^(RCP : début|Reprise du massage)/.test(e.text)));
       add(`1er choc`, first((e) => e.cat === `action` && /^⚡ Choc/.test(e.text)));
       add(`1re pause d'alarme`, first((e) => e.cat === `learner` && /Pause alarme \d/.test(e.text)));
       const st = computeStats();
       for (const it of st.items) { const d = debrief.done[it.id]; add(it.t, d ? events.find((e) => e.id === d.ev) || { ts: d.ts } : null); }
       return rows;
+    }
+    const evClock = (e) => hhmm(e.sts || e.ts);
+    function nibpTableHtml() {
+      const list = events.filter(isNibpResult);
+      if (!list.length) return `<div class="muted">Aucune tension mesurée pour l'instant.</div>`;
+      return `<table class="ptable"><tr><th>Heure</th><th>Mesure affichée sur le scope</th></tr>${list.map((e) => {
+        const flag = /INCOHÉRENTE/.test(e.text) ? ` <b style="color:var(--err)">incohérente</b>` : /imposé par le formateur/.test(e.text) ? ` <b style="color:var(--warn)">non mesurable</b>` : /échec/.test(e.text) ? ` <b style="color:var(--warn)">échec</b>` : ``;
+        return `<tr><td class="num">${evClock(e)}</td><td>${esc(e.text.replace(/ — valeur INCOHÉRENTE.*| \(non mesurable, imposé.*\)/, ``))}${flag}</td></tr>`;
+      }).join(``)}</table>`;
     }
     function renderDebrief() {
       $(`db-tabs`).innerHTML = DB_TABS.map(([k, l]) => `<button type="button" class="chip ${k === dbTab ? `on` : ``}" onclick="setDbTab('${k}')">${l}</button>`).join(``);
@@ -3649,15 +3953,16 @@
       const s = computeStats();
       if (dbTab === `bilan`) {
         $(`db-summary`).innerHTML = `<div style="font-weight:700">${esc(s.sc.title)}</div>
-          <div class="muted">${esc(s.sc.patient)}${sim.startedAt ? ` · début ${hhmmss(sim.startedAt)}` : ` · séance non démarrée`}${sim.endedAt ? ` · fin ${hhmmss(sim.endedAt)}` : sim.running ? ` · en cours` : ``}</div>`;
+          <div class="muted">${esc(s.sc.patient)}${sim.startedAt ? ` · validée à ${hhmmss(sim.startedAt)} · heure simulée de départ ${esc(sim.clockStart || `—`)}` : ` · séance non démarrée`}${sim.endedAt ? ` · fin ${hhmmss(sim.endedAt)}` : sim.running ? (sim.stage === `pause` ? ` · en pause` : ` · en cours`) : ``}</div>`;
         $(`db-stats`).innerHTML = [
-          [fmtDur(s.dur), `Durée`], [`${s.stepsReached}/${s.sc.steps.length}`, `Étapes jouées`], [`${s.done.length}/${s.items.length}`, `Attendus cochés`],
-          [`${s.nibpN}`, `PNI (${s.nibpOk} réussies)`], [`${s.alarmN}`, `Alarmes (${s.alarmHigh} hautes)`], [`${s.notes}`, `Notes`]
+          [fmtDur(s.dur), `Durée active`], [`${s.stepsReached}/${s.sc.steps.length}`, `Étapes jouées`], [`${s.done.length}/${s.items.length}`, `Attendus cochés`],
+          [`${s.nibpN}`, `PNI (${s.nibpOk} réussies)`], [`${s.alarmN}`, `Alarmes (${s.alarmHigh} hautes)`], [`${s.pauses}`, `Pauses`]
         ].map(([b, l]) => `<div class="stat"><b>${b}</b><span>${l}</span></div>`).join(``);
         const rows = delayRows();
         const doneRows = rows.filter((r) => r.ev), miss = rows.filter((r) => !r.ev);
         $(`db-delays`).innerHTML = (doneRows.length ? `<table class="ptable"><tr><th>Repère</th><th>T+</th><th>Dans l'étape</th></tr>${doneRows.map((r) => `<tr><td>${esc(r.label)}</td><td class="num">${tPlus(r.ev.ts)}</td><td class="num">${r.step ? `${esc(r.step.text.replace(/ — .*/, ``))} +${fmtDur(r.ev.ts - r.step.ts)}` : `—`}</td></tr>`).join(``)}</table>` : `<div class="muted">Aucun repère horodaté pour l'instant.</div>`) +
           (miss.length && sim.startedAt ? `<h3>Non observés</h3><div class="chips">${miss.map((r) => `<span class="chip warnc">${esc(r.label)}</span>`).join(``)}</div>` : ``);
+        $(`db-nibp`).innerHTML = nibpTableHtml();
       }
       if (dbTab === `chrono`) renderTimeline();
       if (dbTab === `guide`) {
@@ -3681,19 +3986,21 @@
     function rateCrm(id, val) { const v = debrief.crm[id] || (debrief.crm[id] = {}); v.rate = v.rate === val ? `` : val; saveRemote(); renderDebrief(); }
     function noteCrm(id, txt) { (debrief.crm[id] || (debrief.crm[id] = {})).note = txt; saveRemote(); }
 
-    /* ---------- Exports ---------- */
+    /* ---------- Exports (heures = heure simulée du scénario) ---------- */
     const RATE_LBL = { ok: `Acquis`, mid: `À renforcer`, ko: `Non observé` };
     function exportCsv() {
-      const lines = [`Heure;T+;Catégorie;Source;Évènement;Détail`];
-      for (const e of events) lines.push([hhmmss(e.ts), sim.startedAt ? fmtDur(e.ts - sim.startedAt) : ``, e.cat, e.src === `mon` ? `scope` : `formateur`, e.text, e.detail || e.tgt || ``].map((x) => `"${String(x).replace(/"/g, `""`)}"`).join(`;`));
+      const lines = [`Heure simulée;T+;Catégorie;Source;Évènement;Détail`];
+      for (const e of events) lines.push([hhmmss(e.sts || e.ts), sim.startedAt ? fmtDur(e.ts - sim.startedAt) : ``, e.cat, e.src === `mon` ? `scope` : `formateur`, e.text, e.detail || e.tgt || ``].map((x) => `"${String(x).replace(/"/g, `""`)}"`).join(`;`));
       downloadFile(lines.join(`\r\n`), `journal_${sim.scenarioId}_${new Date().toISOString().slice(0, 10)}.csv`, `text/csv`);
     }
     function summaryText() {
       const s = computeStats();
-      const L = [`${s.sc.title}`, `${s.sc.patient}`, `Date : ${new Date(sim.startedAt || Date.now()).toLocaleString(`fr-FR`)} — durée ${fmtDur(s.dur)}`, ``,
+      const L = [`${s.sc.title}`, `${s.sc.patient}`, `Date : ${new Date(sim.startedAt || Date.now()).toLocaleString(`fr-FR`)} — heure simulée de départ ${sim.clockStart || `—`} — durée active ${fmtDur(s.dur)}`, ``,
         `Attendus observés (${s.done.length}/${s.items.length}) :`];
       for (const i of s.items) L.push(`  ${debrief.done[i.id] ? `[x] ${i.t} (T+${tPlus(debrief.done[i.id].ts)})` : `[ ] ${i.t}`}`);
-      L.push(``, `PNI prises : ${s.nibpN} — Alarmes : ${s.alarmN} (${s.alarmHigh} hautes) — Notes : ${s.notes}`, ``, `Grille CRM :`);
+      L.push(``, `PNI prises : ${s.nibpN} — Alarmes : ${s.alarmN} (${s.alarmHigh} hautes) — Pauses : ${s.pauses} — Notes : ${s.notes}`, ``, `Tensions :`);
+      for (const e of events.filter(isNibpResult)) L.push(`  ${evClock(e)}  ${e.text}`);
+      L.push(``, `Grille CRM :`);
       for (const c of CRM_GRID) { const v = debrief.crm[c.id] || {}; L.push(`  ${c.t} : ${RATE_LBL[v.rate] || `—`}${v.note ? ` — ${v.note}` : ``}`); }
       if (debrief.guide.syn) L.push(``, `Messages à retenir :`, debrief.guide.syn);
       return L.join(`\n`);
@@ -3705,17 +4012,19 @@
     function exportReport() {
       const s = computeStats();
       const rows = delayRows();
-      const tl = events.map((e) => `<tr class="c-${e.cat}"><td>${sim.startedAt ? fmtDur(e.ts - sim.startedAt) : ``}</td><td>${hhmmss(e.ts)}</td><td>${esc({ step: `Étape`, action: `Action`, sensor: `Capteur`, nibp: `PNI`, alarm: `Alarme`, learner: `Scope`, note: `Note`, system: `Séance` }[e.cat] || e.cat)}</td><td>${esc(e.text)}${e.detail || e.tgt ? `<br><small>${esc(e.detail || e.tgt)}</small>` : ``}</td></tr>`).join(``);
+      const tl = events.map((e) => `<tr class="c-${e.cat}"><td>${sim.startedAt ? fmtDur(e.ts - sim.startedAt) : ``}</td><td>${hhmmss(e.sts || e.ts)}</td><td>${esc({ step: `Étape`, action: `Action`, sensor: `Dispositif`, nibp: `PNI`, alarm: `Alarme`, learner: `Scope`, note: `Note`, system: `Séance` }[e.cat] || e.cat)}</td><td>${esc(e.text)}${e.detail || e.tgt ? `<br><small>${esc(e.detail || e.tgt)}</small>` : ``}</td></tr>`).join(``);
+      const nb = events.filter(isNibpResult).map((e) => `<tr><td>${evClock(e)}</td><td>${esc(e.text)}</td></tr>`).join(``);
       const g = debrief.guide;
       const html = `<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Débriefing — ${esc(s.sc.short)}</title>
 <style>body{font:14px/1.5 system-ui,Segoe UI,Arial,sans-serif;color:#1b2329;max-width:900px;margin:24px auto;padding:0 18px}h1{font-size:22px;margin:0 0 4px}h2{font-size:16px;margin:26px 0 8px;padding-bottom:4px;border-bottom:2px solid #0a7a8a;color:#0a5d69}table{width:100%;border-collapse:collapse;font-size:13px}th,td{text-align:left;padding:5px 6px;border-bottom:1px solid #dfe5e8;vertical-align:top}th{background:#f1f5f6}small{color:#5d6b73}.kpi{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.kpi div{border:1px solid #dfe5e8;border-radius:8px;padding:8px}.kpi b{display:block;font-size:20px}.muted{color:#5d6b73}.c-step td{background:#eef8fa;font-weight:600}.c-alarm td:nth-child(4){color:#b3261e}.c-note td:nth-child(4){font-style:italic}.box{border:1px solid #dfe5e8;border-radius:8px;padding:10px;white-space:pre-wrap;min-height:40px}.ok{color:#1d7a3a}.ko{color:#b3261e}@media print{body{margin:0}h2{break-after:avoid}tr{break-inside:avoid}}</style></head><body>
 <h1>Compte-rendu de simulation — ${esc(s.sc.title)}</h1>
-<div class="muted">${esc(s.sc.patient)} · ${new Date(sim.startedAt || Date.now()).toLocaleString(`fr-FR`)} · durée ${fmtDur(s.dur)}</div>
-<h2>Indicateurs</h2><div class="kpi"><div><b>${fmtDur(s.dur)}</b>Durée</div><div><b>${s.stepsReached}/${s.sc.steps.length}</b>Étapes jouées</div><div><b>${s.done.length}/${s.items.length}</b>Attendus observés</div><div><b>${s.nibpN}</b>PNI prises (${s.nibpOk} réussies)</div><div><b>${s.alarmN}</b>Alarmes (${s.alarmHigh} hautes)</div><div><b>${s.notes}</b>Notes</div></div>
+<div class="muted">${esc(s.sc.patient)} · ${new Date(sim.startedAt || Date.now()).toLocaleString(`fr-FR`)} · heure simulée de départ ${esc(sim.clockStart || `—`)} · durée active ${fmtDur(s.dur)}</div>
+<h2>Indicateurs</h2><div class="kpi"><div><b>${fmtDur(s.dur)}</b>Durée active</div><div><b>${s.stepsReached}/${s.sc.steps.length}</b>Étapes jouées</div><div><b>${s.done.length}/${s.items.length}</b>Attendus observés</div><div><b>${s.nibpN}</b>PNI prises (${s.nibpOk} réussies)</div><div><b>${s.alarmN}</b>Alarmes (${s.alarmHigh} hautes)</div><div><b>${s.pauses}</b>Pauses</div></div>
 <h2>Délais clés</h2><table><tr><th>Repère</th><th>T+</th><th>Dans l'étape</th></tr>${rows.map((r) => `<tr><td>${esc(r.label)}</td><td>${r.ev ? fmtDur(r.ev.ts - sim.startedAt) : `<span class="ko">non observé</span>`}</td><td>${r.ev && r.step ? `${esc(r.step.text.replace(/ — .*/, ``))} +${fmtDur(r.ev.ts - r.step.ts)}` : ``}</td></tr>`).join(``)}</table>
+<h2>Tensions mesurées</h2>${nb ? `<table><tr><th>Heure</th><th>Mesure</th></tr>${nb}</table>` : `<p class="muted">Aucune.</p>`}
 <h2>Grille CRM</h2><table><tr><th>Dimension</th><th>Évaluation</th><th>Observation</th></tr>${CRM_GRID.map((c) => { const v = debrief.crm[c.id] || {}; return `<tr><td>${esc(c.t)}</td><td class="${v.rate === `ok` ? `ok` : v.rate === `ko` ? `ko` : ``}">${RATE_LBL[v.rate] || `—`}</td><td>${esc(v.note || ``)}</td></tr>`; }).join(``)}</table>
 <h2>Débriefing</h2><h3>1. Réactions</h3><div class="box">${esc(g.emo)}</div><h3>2. Analyse</h3><div class="box">${esc(g.ana)}</div><h3>3. Messages à retenir</h3><div class="box">${esc(g.syn)}</div>
-<h2>Chronologie complète</h2><table><tr><th>T+</th><th>Heure</th><th>Type</th><th>Évènement</th></tr>${tl}</table>
+<h2>Chronologie complète</h2><table><tr><th>T+</th><th>Heure simulée</th><th>Type</th><th>Évènement</th></tr>${tl}</table>
 <p class="muted" style="margin-top:24px">Généré par le simulateur EDAN iM60 — urgences en hémodialyse.</p></body></html>`;
       downloadFile(html, `debriefing_${sim.scenarioId}_${new Date().toISOString().slice(0, 10)}.html`, `text/html`);
       toast(`Compte-rendu téléchargé`);
@@ -3772,16 +4081,17 @@
       const sc = scenarioById(sim.scenarioId);
       $(`r-sc-title`).textContent = sc.short;
       const st = sc.steps[sim.stepIdx];
-      $(`r-sub`).textContent = sim.running && st ? `Étape ${sim.stepIdx + 1}/${sc.steps.length} · ${st.label}` : sim.endedAt && sim.startedAt ? `Séance terminée` : `Préparation`;
+      const paused = sim.stage === `pause`;
+      $(`r-sub`).textContent = sim.running && st ? `${paused ? `EN PAUSE · ` : ``}Étape ${sim.stepIdx + 1}/${sc.steps.length} · ${st.label}` : sim.endedAt && sim.startedAt ? `Séance terminée` : `Préparation`;
       const tm = $(`r-timer`);
-      if (sim.running) { tm.textContent = fmtDur(Date.now() - sim.startedAt); tm.classList.remove(`idle`); }
-      else { tm.textContent = sim.endedAt && sim.startedAt ? fmtDur(sim.endedAt - sim.startedAt) : `--:--`; tm.classList.add(`idle`); }
+      if (sim.running) { tm.textContent = (paused ? `⏸ ` : ``) + fmtDur(activeDur(Date.now())); tm.classList.remove(`idle`); tm.classList.toggle(`paused`, paused); }
+      else { tm.textContent = sim.endedAt && sim.startedAt ? fmtDur(sim.endedAt - sim.startedAt - (sim.pauseTotal || 0)) : `--:--`; tm.classList.add(`idle`); tm.classList.remove(`paused`); }
     }
     function renderScopeStatus() {
       const on = scopeOnline();
       let cls = `err`, txt = `Scope ✗`, sum = `tablette non connectée (PIN ${appState.pin})`;
       if (on) {
-        if (!monView.power || !monView.booted) { cls = ``; txt = `Scope ⏻`; sum = `tablette connectée, scope en attente`; }
+        if (!monView.power || !monView.booted) { cls = ``; txt = `Scope ⏻`; sum = `tablette connectée, moniteur éteint`; }
         else { cls = `ok`; txt = `Scope ✓`; sum = `tablette connectée (PIN ${appState.pin})`; }
       }
       $(`scope-dot`).className = `dot ${cls}`;
@@ -3794,7 +4104,9 @@
       renderHeader();
       renderScopeStatus();
       if (voiceOn) $(`vp-time`).textContent = fmtDur(Date.now() - voiceStartAt);
+      const pc = $(`pause-cd`); if (pc && sim.pauseAt) pc.textContent = fmtDur(Date.now() - sim.pauseAt);
       const now = Date.now();
+      if (now - lastPing > 4000) { lastPing = now; publishSyncMessage({ type: `PING` }); }
       if (monView && now - monViewAt < 6000) {
         if (sim.rev && monView.simRev !== sim.rev && now - lastSimSend > 3000) { lastSimSend = now; publishSyncMessage({ type: `SIM`, sim }); }
         if (monView.evLast && monView.sid === sim.sessionId && !events.some((e) => e.id === monView.evLast) && now - lastSyncReq > 6000) { lastSyncReq = now; publishSyncMessage({ type: `SYNC_REQ` }); }
@@ -3812,9 +4124,11 @@
         publishSyncMessage({ type: `EVTS`, events: mon.events.filter((e) => e.sid === sim.sessionId).slice(-150) });
       } else if (sim.rev) publishSyncMessage({ type: `SIM`, sim });
     }
+    const FROM_REMOTE = new Set([`SYNC_REQ`, `SIM`, `CMD`, `PING`]);
     function handleIncomingSyncMessage(msg) {
       if (!msg || !msg.type) return;
       if (role === `monitor`) {
+        if (FROM_REMOTE.has(msg.type)) { const was = Date.now() - mon.remoteAt < 12000; mon.remoteAt = Date.now(); if (!was) renderStage(); }
         if (msg.type === `SYNC_REQ`) broadcastFullState();
         else if (msg.type === `SIM` && msg.sim && msg.sim.rev > sim.rev) applySimOnMonitor(Object.assign(deep(SIM_DEFAULT), msg.sim), false);
         else if (msg.type === `CMD`) handleCmd(msg.cmd, msg.opts);
@@ -3823,6 +4137,7 @@
         else if (msg.type === `SIM_STATE` && msg.sim && msg.sim.rev > sim.rev) { sim = Object.assign(deep(SIM_DEFAULT), msg.sim); saveRemote(); renderRemoteAll(); }
         else if (msg.type === `EVT` && msg.ev) mergeEvents([msg.ev]);
         else if (msg.type === `EVTS` && Array.isArray(msg.events)) mergeEvents(msg.events);
+        else if (msg.type === `NIBP_START`) { if (sim.stage === `run` && msg.sid === sim.sessionId) openPniSheet(msg.src); }
       }
     }
     function switchRole(r) {
@@ -3837,25 +4152,46 @@
         renderRemoteAll();
         renderMic();
         publishSyncMessage({ type: `SYNC_REQ` });
+        if (sim.stage === `prep`) { renderPrep(); pushPrep(); }
       }
+    }
+    /* Mode test : scope et télécommande côte à côte sur un seul écran */
+    function initSplit(pin) {
+      const base = window.location.pathname;
+      document.title = `iM60 — mode test double écran`;
+      document.body.innerHTML = `<div class="split">
+        <div class="split-bar"><span>MODE TEST — double écran (ne pas utiliser devant les apprenants) · PIN ${esc(pin)}</span><a href="${base}">Quitter le mode test</a></div>
+        <div class="split-row">
+          <iframe class="sp-mon" title="Scope" src="${base}?role=monitor&pin=${encodeURIComponent(pin)}&embed=1" allow="fullscreen; autoplay; screen-wake-lock"></iframe>
+          <iframe class="sp-rem" title="Télécommande" src="${base}?role=remote&pin=${encodeURIComponent(pin)}&embed=1" allow="autoplay; microphone; screen-wake-lock"></iframe>
+        </div></div>`;
     }
     function initApp() {
       const params = new URLSearchParams(window.location.search);
       const urlRole = params.get(`role`);
       const urlPin = params.get(`pin`);
+      EMBED = params.get(`embed`) === `1`;
+      if (urlRole === `split`) { initSplit(urlPin && /^\d{4}$/.test(urlPin) ? urlPin : appState.pin); return; }
       role = urlRole === `remote` ? `remote` : `monitor`;
       if (role === `monitor`) loadMonitor(); else loadRemote();
       if (urlPin && /^\d{4}$/.test(urlPin)) appState.pin = urlPin;
-      switchRole(role);
       initSyncChannels();
-      if (role === `monitor`) { applySimOnMonitor(sim, true); renderAll(); bootSequence(true); }
+      switchRole(role);
+      if (role === `monitor`) {
+        applySimOnMonitor(sim, true);
+        renderAll();
+        if ((sim.stage === `run` || sim.stage === `pause`) && mon.wasOn) bootSequence(true);   // rechargement en cours de séance
+        else powerOffSilent();
+        renderStage();
+      }
       requestAnimationFrame(frame);
       setInterval(monitorSlowTick, 500);
       setInterval(() => { if (role === `monitor`) sendMonStatus(); else remoteTick(); }, 1000);
       let rz = null;
       window.addEventListener(`resize`, () => { if (role === `monitor` && mon.booted) { clearTimeout(rz); rz = setTimeout(initLanes, 250); } });
       document.addEventListener(`fullscreenchange`, () => { $(`view-monitor`).classList.toggle(`is-full`, !!document.fullscreenElement || $(`view-monitor`).classList.contains(`is-full`)); setTimeout(initLanes, 300); });
-      document.addEventListener(`visibilitychange`, () => { if (document.visibilityState === `visible` && role === `monitor` && mon.booted) requestWakeLock(); });
+      document.addEventListener(`pointerdown`, () => { if (role === `remote`) requestWakeLock(); }, { once: true });
+      document.addEventListener(`visibilitychange`, () => { if (document.visibilityState === `visible` && ((role === `monitor` && mon.booted) || role === `remote`)) requestWakeLock(); });
       try { if (window.notebookAppApi && window.notebookAppApi.notifyAppReady) window.notebookAppApi.notifyAppReady(); } catch (_) {}
     }
     document.addEventListener(`DOMContentLoaded`, initApp);
