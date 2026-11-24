@@ -38,6 +38,12 @@
   .lib button { text-align: left; padding: 9px 10px; border-radius: 9px; border: 1px solid transparent; background: transparent; cursor: pointer; }
   .lib button:hover { background: #eef0f2; }
   .lib button.sel { background: var(--acc-2); border-color: #b5dada; font-weight: 600; }
+  .modf { display: flex; flex-wrap: wrap; gap: 4px; }
+  .modf button { border: 1px solid var(--line); background: #fff; border-radius: 14px; padding: 3px 10px; font-size: 12.5px; cursor: pointer; }
+  .modf button.sel { background: var(--acc); border-color: var(--acc); color: #fff; }
+  .lib-mod { font-size: 12px; font-weight: 700; color: var(--acc); margin: 8px 2px 2px; text-transform: uppercase; letter-spacing: .5px; }
+  .lib .lib-mod small { display: inline; color: var(--ink-2); font-weight: 400; margin-left: 4px; }
+  aside input[type=email] { width: 100%; }
   .lib small { display: block; font-weight: 400; color: var(--ink-2); font-size: 12px; }
   .aside-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
   .aside-actions .btn { justify-content: center; font-size: 13px; padding: 7px 8px; }
@@ -127,6 +133,7 @@
     .layout { grid-template-columns: 1fr; }
     aside { border-right: none; border-bottom: 1px solid var(--line); }
     .lib { flex-direction: row; flex-wrap: wrap; }
+    .lib-mod { flex-basis: 100%; }
     .tabs { top: 0; position: static; }
     .vitals { grid-template-columns: repeat(3, 1fr); }
     .saed { grid-template-columns: 36px 1fr; }
@@ -149,6 +156,7 @@
 <div class="layout">
   <aside>
     <h2>Bibliothèque</h2>
+    <div class="modf" id="modf"></div>
     <div class="lib" id="lib"></div>
     <div class="aside-actions">
       <button class="btn" type="button" onclick="newScenario()">+ Nouveau</button>
@@ -160,6 +168,9 @@
     </div>
     <input type="file" id="file-open" accept=".json,application/json" class="hidden" onchange="openFile(this)">
     <p class="hint">Tout est gardé automatiquement dans ce navigateur. « Enregistrer le fichier » crée une sauvegarde à garder ou à partager avec un collègue.</p>
+    <h2>Mail des débriefings</h2>
+    <input type="email" id="mail" placeholder="adresse@exemple.nc" oninput="setMail(this.value)">
+    <p class="hint">Adresse proposée sur la télécommande pour envoyer le compte-rendu. Elle part avec chaque scénario envoyé.</p>
     <p class="hint"><span class="private-tag">Formateur</span> = jamais montré aux apprenants.<br><span class="public-tag">Apprenants</span> = affiché sur la tablette.</p>
   </aside>
 
@@ -441,6 +452,9 @@ const DRUGS = [`Gluconate de calcium 10 %`, `Chlorure de calcium 10 %`, `Insulin
 const LIMITS = { hr: [0, 250], spo2: [0, 100], rr: [0, 60], sys: [0, 260], dia: [0, 180], temp: [30, 43] };
 
 const $ = (id) => document.getElementById(id);
+const DEFAULT_MAIL = `sbonnal@atir.asso.nc`;
+function getMail() { try { return localStorage.getItem(`im60_editeur_mail`) || DEFAULT_MAIL; } catch (_) { return DEFAULT_MAIL; } }
+function setMail(v) { try { localStorage.setItem(`im60_editeur_mail`, String(v || ``).trim()); } catch (_) {} }
 const esc = (s) => String(s == null ? `` : s).replace(/[&<>"']/g, (c) => ({ '&': `&amp;`, '<': `&lt;`, '>': `&gt;`, '"': `&quot;`, "'": `&#39;` }[c]));
 const deep = (o) => JSON.parse(JSON.stringify(o));
 const uid = (p) => p + Math.random().toString(36).slice(2, 8);
@@ -522,8 +536,18 @@ function sel(path, label, options, onchange = ``) {
 const clean = (arr) => (arr || []).map((x) => String(x).trim()).filter(Boolean);
 
 /* ---------- Rendu ---------- */
+let modFilter = 0;
+const modsOf = () => [...new Set(lib.map((s) => Number(s.module) || 0))].sort((a, b) => a - b);
+function setModFilter(m) { modFilter = m; renderLib(); }
 function renderLib() {
-  $(`lib`).innerHTML = lib.map((s) => `<button type="button" class="${s.id === curId ? `sel` : ``}" onclick="pick('${s.id}')">${esc(s.short || s.title || `Sans nom`)}<small>${s.steps.length} phase${s.steps.length > 1 ? `s` : ``} · Module ${esc(s.module)}</small></button>`).join(``);
+  const mods = modsOf();
+  if (modFilter && !mods.includes(modFilter)) modFilter = 0;
+  $(`modf`).innerHTML = [[0, `Tous`]].concat(mods.map((m) => [m, m ? `Module ${m}` : `Sans module`])).map(([m, l]) => `<button type="button" class="${modFilter === m ? `sel` : ``}" onclick="setModFilter(${m})">${l}</button>`).join(``);
+  const byName = (a, b) => String(a.short).localeCompare(String(b.short), `fr`, { numeric: true });
+  $(`lib`).innerHTML = mods.filter((m) => !modFilter || m === modFilter).map((m) => {
+    const list = lib.filter((s) => (Number(s.module) || 0) === m).sort(byName);
+    return `<div class="lib-mod">${m ? `Module ${m}` : `Sans module`} <small>${list.length}</small></div>` + list.map((s) => `<button type="button" class="${s.id === curId ? `sel` : ``}" onclick="pick('${s.id}')">${esc(s.short || s.title || `Sans nom`)}<small>${s.steps.length} phase${s.steps.length > 1 ? `s` : ``}</small></button>`).join(``);
+  }).join(``);
 }
 function renderTabs() {
   const errs = issues(cur()).filter((i) => i.level === `err`).length;
@@ -539,7 +563,7 @@ const VIEWS = {
       <div class="grid">
         ${inp(`short`, `Nom court (liste de la télécommande)`)}
         ${inp(`title`, `Titre complet`)}
-        ${sel(`module`, `Module`, [[1, `Module 1`], [2, `Module 2`]])}
+        ${sel(`module`, `Module`, [1, 2, 3, 4, 5, 6, 7, 8, 9].map((m) => [m, `Module ${m}`]), `renderLib()`)}
         ${inp(`startTime`, `Heure simulée de départ`, { type: `time` })}
       </div></div>
       <div class="card private"><h3>Préparation entre formateurs <span class="private-tag">Formateur</span></h3>
@@ -834,6 +858,7 @@ function exportScenario(sc) {
     [`hr`, `spo2`, `rr`, `sys`, `dia`, `temp`, `trans`].forEach((k) => { st[k] = Number(st[k]) || 0; });
   });
   s.module = Number(s.module) || 2;
+  s.mailTo = getMail();
   return Object.assign({ format: `im60-scenario`, version: 1, savedAt: new Date().toISOString() }, s);
 }
 function download(name, text) {
@@ -928,6 +953,7 @@ function toast(m) { const t = $(`toast`); t.textContent = m; t.classList.add(`on
 document.addEventListener(`input`, () => { clearTimeout(window._rt); window._rt = setTimeout(renderTabs, 600); });
 
 load();
+$(`mail`).value = getMail();
 render();
 </script>
 </body>

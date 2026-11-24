@@ -95,7 +95,7 @@
     .lcd-frame { flex: 1 1 auto; display: flex; padding: 6px; border-radius: 10px; background: #1c2228; box-shadow: inset 0 2px 6px rgba(0,0,0,.55); min-height: 0; }
     .lcd { position: relative; flex: 1; display: flex; flex-direction: column; min-height: 560px; overflow: hidden; border-radius: 4px; background: var(--lcd-bg); color: var(--lcd-white); font-family: var(--font-lcd); }
     .monitor-stage.is-full .lcd { min-height: 0; }
-    .lcd.off > *:not(.boot):not(.stage):not(.docview) { visibility: hidden; }
+    .lcd.off > *:not(.boot):not(.stage):not(.docview):not(.lp-hint) { visibility: hidden; }
 
     /* Barre supérieure */
     .lcd-top { display: grid; grid-template-columns: minmax(170px, auto) 1fr auto; align-items: stretch; gap: 6px; height: 34px; padding: 3px 6px; border-bottom: 1px solid var(--lcd-line); font-size: 15px; }
@@ -657,6 +657,13 @@
     .cue-call { margin-top: 6px; padding-top: 6px; border-top: 1px solid var(--line); color: #a9c8ff; }
     .ck .ph-tag { font-style: normal; font-size: 11px; padding: 0 5px; border-radius: 6px; background: var(--surf-3); opacity: .8; }
     .ck.now { outline: 1px solid var(--primary); }
+
+    .lp-hint { position: absolute; inset: 0; z-index: 60; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; background: rgba(0,0,0,.55); color: #fff; font: 600 16px Arial, sans-serif; pointer-events: none; }
+    .lp-ring { width: 74px; height: 74px; border-radius: 50%; background: conic-gradient(#2a8cff var(--p, 0%), #2b343d 0); -webkit-mask: radial-gradient(circle 29px, transparent 98%, #000 100%); mask: radial-gradient(circle 29px, transparent 98%, #000 100%); }
+    .lp-hint.run .lp-ring { animation: lpFill 2.5s linear forwards; }
+    @property --p { syntax: '<percentage>'; inherits: false; initial-value: 0%; }
+    @keyframes lpFill { to { --p: 100%; } }
+    .lcd { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
   </style>
 </head>
 <body>
@@ -685,6 +692,7 @@
         <!-- Écrans de séance : QR de connexion, synthèse de la programmation, PAUSE, fin -->
         <div id="stage" class="stage hidden" onclick="stageTap()"></div>
         <div id="docview" class="docview hidden"></div>
+        <div id="lp-hint" class="lp-hint hidden"><div class="lp-ring"></div><span>Maintenez pour revenir à l'écran d'appairage</span></div>
 
         <div class="lcd-top">
           <div class="tb-patient"><span class="tb-ic" aria-hidden="true">🛏</span><span class="tb-bed" id="tb-bed">LIT 04</span><span class="tb-ic" aria-hidden="true">👤</span><span class="tb-type">Adulte</span><span class="tb-name" id="tb-name">—</span></div>
@@ -975,6 +983,15 @@
           <button type="button" class="btn" onclick="copySummary()">Copier le résumé</button>
           <button type="button" class="btn red" onclick="newSession(this)">Nouvelle séance</button>
         </div>
+      </div>
+      <div class="card">
+        <h2>Envoyer par mail</h2>
+        <div><label class="lbl" for="mail-to">Destinataire</label><input type="email" id="mail-to" oninput="setMailTo(this.value)" autocomplete="email"></div>
+        <div class="g2" style="margin-top:8px">
+          <button type="button" class="btn pri" onclick="mailSummary()">✉ Envoyer le résumé</button>
+          <button type="button" class="btn" onclick="shareReport()">📎 Compte-rendu en pièce jointe</button>
+        </div>
+        <div class="muted" style="margin-top:6px">« Envoyer le résumé » ouvre votre messagerie avec l'adresse, le sujet et le texte déjà remplis. « Pièce jointe » partage le compte-rendu complet : choisissez Gmail, l'adresse vous sera proposée.</div>
       </div>
       <div class="card">
         <h2>Enregistrement audio du débriefing <span class="muted">facultatif</span></h2>
@@ -1528,7 +1545,7 @@
         startTime: e.startTime || ``, steps, tech, crm,
         questions: L((e.debrief || {}).questions), messages: L((e.debrief || {}).messages),
         trainer: e.trainer || {}, briefing: e.briefing || {}, documents: e.documents || [], contacts: e.contacts || [],
-        objTech: L(e.objTech), objCrm: L(e.objCrm), editor: true
+        objTech: L(e.objTech), objCrm: L(e.objCrm), mailTo: e.mailTo || ``, editor: true
       };
     }
     /* Scénarios reçus de l'éditeur : gardés sur l'appareil (format brut) */
@@ -3234,6 +3251,37 @@
       if (!document.fullscreenElement) goFullscreen();
       requestWakeLock();
     }
+
+    /* ---------- Appui long (3 s) sur l'écran : retour à l'écran d'appairage ---------- */
+    let lpTimer = null, lpShowT = null, forceQr = false, forceQrRev = 0;
+    function lpAllowed() { const st = sim.stage || `prep`; return st === `end` || st === `prep` || (st === `run` && !mon.power); }
+    function lpStart(ev) {
+      if (role !== `monitor` || !lpAllowed()) return;
+      if (ev.target && ev.target.closest && ev.target.closest(`button, a, input`)) return;
+      lpCancel();
+      lpShowT = setTimeout(() => { const h = $(`lp-hint`); if (h) { h.classList.remove(`hidden`); void h.offsetWidth; h.classList.add(`run`); } }, 500);
+      lpTimer = setTimeout(lpFire, 3000);
+    }
+    function lpCancel() {
+      clearTimeout(lpTimer); clearTimeout(lpShowT); lpTimer = lpShowT = null;
+      const h = $(`lp-hint`); if (h) { h.classList.add(`hidden`); h.classList.remove(`run`); }
+    }
+    function lpFire() {
+      lpCancel();
+      publishSyncMessage({ type: `MON_RESET` });
+      forceQrRev = sim.rev || 0;
+      const pin = appState.pin;
+      sim = deep(SIM_DEFAULT);
+      mon.remoteAt = 0;
+      if (mon.power) powerOffSilent();
+      sim.doc = -1; forceQr = true;
+      stageKey = ``;
+      appState.pin = pin;
+      saveMonitor();
+      renderPatient(); renderStage(); renderDoc();
+      sendMonStatus();
+    }
+
     function stageTap() { if ((sim.stage || `prep`) === `prep`) unlockTablet(); }
     function openSplit() { window.location.href = `${window.location.pathname}?role=split&pin=${appState.pin}`; }
 
@@ -3263,7 +3311,7 @@
       if (role !== `monitor`) return;
       const st = sim.stage || `prep`;
       let mode = ``;
-      if (st === `prep`) mode = Date.now() - mon.remoteAt < 12000 ? (sim.brief === `learn` ? `learn` : `syn`) : `qr`;
+      if (st === `prep`) mode = !forceQr && Date.now() - mon.remoteAt < 12000 ? (sim.brief === `learn` ? `learn` : `syn`) : `qr`;
       else if (st === `run` && !mon.power && /^(syn|learn|sleep)\|/.test(stageKey)) mode = `sleep`;
       else if (st === `pause`) mode = `pause`;
       else if (st === `end`) mode = `end`;
@@ -3615,6 +3663,7 @@
       if (ns.t.rhythm !== eng.rhythmId) setRhythm(ns.t.rhythm, initial ? 0 : ns.transition || 0);
       if (!ns.sensors.cuff && mon.nibp.cycling) mon.nibp.failCuff = true;
       if (ns.sensors.cuff && mon.nibp.cycling && mon.nibp.failCuff && eng.t - mon.nibp.t0 < 4.5) mon.nibp.failCuff = false;   // brassard validé pendant le gonflage
+      if (!(forceQr && (sim.rev || 0) <= forceQrRev)) forceQr = false;
       renderPatient();
       monitorNeedsScenario();
       renderStage();
@@ -3838,8 +3887,8 @@
        14. ONGLET PRÉPARATION — module, scénario, conditions initiales, validation
        La tablette affiche en direct la synthèse de cette programmation.
        ===================================================================== */
-    const MODULES = [[1, `Module 1`], [2, `Module 2`]];
-    const scenariosOf = (m) => SCENARIOS.filter((s) => s.module === m).concat(SCENARIOS.filter((s) => !s.module));
+    const modulesList = () => [...new Set(SCENARIOS.filter((s) => s.module).map((s) => s.module))].sort((a, b) => a - b).map((m) => [m, `Module ${m}`]);
+    const scenariosOf = (m) => SCENARIOS.filter((s) => s.module === m).sort((a, b) => String(a.short).localeCompare(String(b.short), `fr`, { numeric: true })).concat(SCENARIOS.filter((s) => !s.module));
     function setModule(m) {
       prep.module = m;
       const list = scenariosOf(m);
@@ -3878,7 +3927,7 @@
     }
 
     function renderPrep() {
-      $(`mod-seg`).innerHTML = MODULES.map(([m, l]) => `<button type="button" class="${prep.module === m ? `sel` : ``}" onclick="setModule(${m})">${l}<small>${SCENARIOS.filter((s) => s.module === m).length} sc.</small></button>`).join(``);
+      $(`mod-seg`).innerHTML = modulesList().map(([m, l]) => `<button type="button" class="${prep.module === m ? `sel` : ``}" onclick="setModule(${m})">${l}<small>${SCENARIOS.filter((s) => s.module === m).length} sc.</small></button>`).join(``);
       const empty = !SCENARIOS.some((s) => s.module === prep.module);
       $(`sc-pick`).innerHTML = (empty ? `<div class="info">Aucun scénario n'est encore écrit pour le Module ${prep.module}. Le mode libre permet de piloter les constantes à la main.</div>` : ``) +
         scenariosOf(prep.module).map((s) => `<button type="button" class="sc-opt ${s.id === sim.scenarioId ? `sel` : ``}" onclick="selectScenario('${s.id}')"><b>${esc(s.short)}</b><span>${esc(s.patient)}</span></button>`).join(``);
@@ -4564,6 +4613,7 @@
           <details class="fold"><summary>2. Analyse des faits</summary><div>${qList(GUIDE_GENERAL.ana.concat(s.sc.questions))}${s.sc.trap ? `<div class="info warn"><b>Piège du scénario :</b> ${esc(s.sc.trap)}</div>` : ``}<textarea placeholder="Points forts, écarts, causes…" oninput="debrief.guide.ana=this.value;saveRemote()">${esc(g.ana)}</textarea></div></details>
           <details class="fold"><summary>3. Synthèse — messages à retenir</summary><div>${qList(GUIDE_GENERAL.syn)}<textarea placeholder="2 ou 3 messages clés pour la pratique…" oninput="debrief.guide.syn=this.value;saveRemote()">${esc(g.syn)}</textarea></div></details>`;
       }
+      if (dbTab === `export`) { const mt = $(`mail-to`); if (mt && document.activeElement !== mt) mt.value = mailTo(); }
       if (dbTab === `crm`) {
         $(`db-crm`).innerHTML = CRM_GRID.map((c) => {
           const v = debrief.crm[c.id] || {};
@@ -4600,7 +4650,7 @@
       const txt = summaryText();
       (navigator.clipboard ? navigator.clipboard.writeText(txt) : Promise.reject()).then(() => toast(`Résumé copié`)).catch(() => { downloadFile(txt, `resume_debriefing.txt`, `text/plain`); });
     }
-    function exportReport() {
+    function exportReport(asText) {
       const s = computeStats();
       const rows = delayRows();
       const tl = events.map((e) => `<tr class="c-${e.cat}"><td>${sim.startedAt ? fmtDur(e.ts - sim.startedAt) : ``}</td><td>${hhmmss(e.sts || e.ts)}</td><td>${esc({ step: `Étape`, action: `Action`, sensor: `Dispositif`, nibp: `PNI`, alarm: `Alarme`, learner: `Scope`, note: `Note`, system: `Séance` }[e.cat] || e.cat)}</td><td>${esc(e.text)}${e.detail || e.tgt ? `<br><small>${esc(e.detail || e.tgt)}</small>` : ``}</td></tr>`).join(``);
@@ -4617,8 +4667,40 @@
 <h2>Débriefing</h2><h3>1. Réactions</h3><div class="box">${esc(g.emo)}</div><h3>2. Analyse</h3><div class="box">${esc(g.ana)}</div><h3>3. Messages à retenir</h3><div class="box">${esc(g.syn)}</div>
 <h2>Chronologie complète</h2><table><tr><th>T+</th><th>Heure simulée</th><th>Type</th><th>Évènement</th></tr>${tl}</table>
 <p class="muted" style="margin-top:24px">Généré par le simulateur EDAN iM60 — urgences en hémodialyse.</p></body></html>`;
+      if (asText) return html;
       downloadFile(html, `debriefing_${sim.scenarioId}_${new Date().toISOString().slice(0, 10)}.html`, `text/html`);
       toast(`Compte-rendu téléchargé`);
+    }
+
+
+    /* ---------- Envoi par mail ---------- */
+    const DEFAULT_MAIL = `sbonnal@atir.asso.nc`;
+    function mailTo() {
+      let m = ``;
+      try { m = localStorage.getItem(`im60_mail_to`) || ``; } catch (_) {}
+      return m || scenarioById(sim.scenarioId).mailTo || DEFAULT_MAIL;
+    }
+    function setMailTo(v) { try { localStorage.setItem(`im60_mail_to`, String(v || ``).trim()); } catch (_) {} }
+    function mailSubject() { const s = scenarioById(sim.scenarioId); return `Débriefing simulation iM60 — ${s.short} — ${new Date(sim.startedAt || Date.now()).toLocaleDateString(`fr-FR`)}`; }
+    function mailSummary() {
+      let body = summaryText();
+      const rows = delayRows().filter((r) => r.ev).map((r) => `  ${r.label} : T+${fmtDur(r.ev.ts - sim.startedAt)}`);
+      if (rows.length) body = body.replace(`\n\nPNI prises`, `\n\nDélais clés :\n${rows.join(`\n`)}\n\nPNI prises`);
+      if (body.length > 6000) body = body.slice(0, 6000) + `\n…(résumé tronqué : voir le compte-rendu complet en pièce jointe)`;
+      window.location.href = `mailto:${encodeURIComponent(mailTo())}?subject=${encodeURIComponent(mailSubject())}&body=${encodeURIComponent(body)}`;
+    }
+    async function shareReport() {
+      const html = exportReport(true);
+      const name = `debriefing_${sim.scenarioId}_${new Date().toISOString().slice(0, 10)}.html`;
+      try {
+        const file = new File([html], name, { type: `text/html` });
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          await navigator.share({ files: [file], title: mailSubject(), text: `${mailSubject()}\nDestinataire : ${mailTo()}` });
+          return;
+        }
+      } catch (e) { if (e && e.name === `AbortError`) return; }
+      downloadFile(html, name, `text/html`);
+      toast(`Partage impossible ici : le fichier est téléchargé, joignez-le au mail`);
     }
 
     /* ---------- Enregistrement audio (facultatif) ---------- */
@@ -4691,6 +4773,13 @@
       if (curTab === `prep`) renderPrepChecks();
       if (curTab === `live`) updateLiveTimers();
     }
+    (function initLongPress() {
+      const l = document.getElementById(`lcd`);
+      if (!l) return;
+      l.addEventListener(`pointerdown`, lpStart);
+      [`pointerup`, `pointerleave`, `pointercancel`].forEach((k) => l.addEventListener(k, lpCancel));
+      l.addEventListener(`contextmenu`, (e) => { if (role === `monitor`) e.preventDefault(); });
+    })();
     function remoteTick() {
       pendTick();
       renderHeader();
@@ -4722,6 +4811,14 @@
       if (msg.type === `SCN_CHUNK`) { onScnChunk(msg); return; }
       if (msg.type === `SCN_REQ`) { if (role === `remote` && RAW_SCN[msg.id]) shareScenario(msg.id); return; }
       if (msg.type === `SCN_ACK`) return;
+      if (msg.type === `MON_RESET`) {
+        if (role === `remote` && (sim.stage === `end` || sim.stage === `prep`)) {
+          if (sim.stage === `end`) { sim.stage = `prep`; sim.running = false; saveRemote(); }
+          toast(`La tablette affiche l'écran d'appairage. Touchez l'onglet Préparation pour reprendre la main.`);
+          renderHeader();
+        }
+        return;
+      }
       if (role === `monitor`) {
         if (FROM_REMOTE.has(msg.type)) { const was = Date.now() - mon.remoteAt < 12000; mon.remoteAt = Date.now(); if (!was) renderStage(); }
         if (msg.type === `SYNC_REQ`) broadcastFullState();
