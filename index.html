@@ -742,6 +742,14 @@
     .dr-idle { display: flex; flex-direction: column; gap: 12px; }
     .dr-main .co-ring, .dr-main .co-bar { padding: 12px; border-radius: 14px; border: 2px solid var(--ok); background: #0f2a22; }
     .dr-main .co-ring .btn { min-height: 60px; font-size: 17px; }
+    .pb-acts .act.tel { border-color: #5b7fd6; background: rgba(91,127,214,.16); }
+    .pb-acts .act.tel.done { opacity: .75; }
+    .pb-acts .act.cbk { border-style: dashed; }
+    .ph-b.grn { background: #1f8f4e; }
+    .ph-av.ring { animation: phring 1s ease-in-out infinite; }
+    @keyframes phring { 50% { transform: scale(1.08); box-shadow: 0 0 0 14px rgba(31,143,78,.25); } }
+    .cb-due { padding: 12px; border-radius: 14px; border: 2px solid var(--warn); background: rgba(255,170,0,.12); flex-wrap: wrap; }
+    .co-bar .btn.grn { font-weight: 700; }
   </style>
 </head>
 <body>
@@ -1275,14 +1283,14 @@
           { id: `p3`, label: `HTIC — réaction de Cushing`, cue: `GCS 9, anisocorie, respiration irrégulière. HTA + bradycardie + respiration irrégulière.`, hr: 50, spo2: 94, rr: 10, sys: 198, dia: 108, temp: 37.1, rhythm: `sinus`, resp: `irregular`, ectopy: `none`, nibpFail: false, rosc: false, trans: 60,
             tech: [`Protection des voies aériennes, PLS si besoin`, `Transfert médicalisé pour TDM organisé`, `Rappel du médecin avec l'aggravation`],
             crm: [`Reformulation à voix haute`],
-            call: { on: true, who: `samu`, hear: [`Adresse et service`, `Patient sous AVK, chute avec choc crânien`, `Glasgow 9, anisocorie`, `TA 198/108, FC 50, respiration irrégulière`, `Heure de début de l'aggravation`], ask: [`Quel est le Glasgow ?`, `Les pupilles sont comment ?`, `Il est sous anticoagulant ?`, `À quelle heure les troubles ont commencé ?`], answer: `Suspicion d'hypertension intracrânienne sur hématome sous AVK. Vous envoyez une équipe SMUR. Position semi-assise ou PLS si vomissements, oxygène, surveillance continue.`, presc: [`Oxygène pour une SpO2 ≥ 94 %`, `PLS si vomissements ou troubles de conscience`, `Ne rien donner par la bouche`, `Préparer le dossier, le traitement et l'INR`], avoid: `Ne pas donner de traitement médicamenteux par téléphone.` },
+            call: { on: true, who: `samu`, hear: [`Adresse et service`, `Patient sous AVK, chute avec choc crânien`, `Glasgow 9, anisocorie`, `TA 198/108, FC 50, respiration irrégulière`, `Heure de début de l'aggravation`], ask: [`Quel est le Glasgow ?`, `Les pupilles sont comment ?`, `Il est sous anticoagulant ?`, `À quelle heure les troubles ont commencé ?`], answer: `Suspicion d'hypertension intracrânienne sur hématome sous AVK. Tu engages une équipe SMUR. Position semi-assise ou PLS si vomissements, oxygène, surveillance continue.`, presc: [`Oxygène pour une SpO2 ≥ 94 %`, `PLS si vomissements ou troubles de conscience`, `Ne rien donner par la bouche`, `Préparer le dossier, le traitement et l'INR`], avoid: `Ne pas donner de traitement médicamenteux par téléphone.` },
             next: [{ label: `En attente du SAMU`, to: `p4` }] },
           { id: `p4`, label: `En attente du SAMU`, cue: `Surveillance rapprochée (PNI automatique), O2 si besoin, transmissions structurées.`, hr: 56, spo2: 96, rr: 12, sys: 186, dia: 100, temp: 37.1, rhythm: `sinus`, resp: `irregular`, ectopy: `none`, nibpFail: false, rosc: false, trans: 30,
             tech: [`PNI répétée / mode automatique`, `Transmissions SAED au SAMU`],
             crm: [],
             next: [] }
         ],
-        contacts: [{ id: `nephro`, name: `Néphrologue d'astreinte`, persona: `Dr Martin, calme et précis, un peu pressé. Vouvoie l'infirmier.` }, { id: `samu`, name: `Médecin régulateur du SAMU (15)`, persona: `Médecin régulateur, directif, questions courtes, veut l'adresse et l'heure.` }],
+        contacts: [{ id: `nephro`, kind: `medecin`, name: `Néphrologue d'astreinte`, persona: `Dr Martin, calme et précis, un peu pressé. Vouvoie l'infirmier.` }, { id: `samu`, kind: `samu`, name: `SAMU — Centre 15`, persona: `Médecin régulateur, directif, questions courtes, vouvoie l'infirmier, veut l'heure de début des troubles.`, arm: `Voix posée, rapide et très structurée.` }],
         call: {
           S: `Qui appelle, d'où ; M. W., 70 ans ; chute dans l'ascenseur à l'arrivée ; céphalées`,
           A: `Hémodialysé ; sous AVK ; chute avec choc crânien la veille`,
@@ -1351,7 +1359,7 @@
             actions: [],
             next: [] }
         ],
-        contacts: [{ id: `nephro`, name: `Néphrologue d'astreinte`, persona: `Dr Martin, calme et précis, un peu pressé. Vouvoie l'infirmier.` }, { id: `samu`, name: `Médecin régulateur du SAMU (15)`, persona: `Médecin régulateur, directif, questions courtes, veut l'adresse et l'heure.` }],
+        contacts: [{ id: `nephro`, kind: `medecin`, name: `Néphrologue d'astreinte`, persona: `Dr Martin, calme et précis, un peu pressé. Vouvoie l'infirmier.` }, { id: `samu`, kind: `samu`, name: `SAMU — Centre 15`, persona: `Médecin régulateur, directif, questions courtes, vouvoie l'infirmier, veut l'heure de début des troubles.`, arm: `Voix posée, rapide et très structurée.` }],
         call: {
           S: `Qui appelle, d'où ; M. P., lit 2 ; bradycardie à 41 avec malaise`,
           A: `Hémodialysé anurique ; dernière dialyse il y a 72 h ; traitements`,
@@ -1411,7 +1419,7 @@
             tech: [`Transmissions au SAMU`], crm: [],
             next: [] }
         ],
-        contacts: [{ id: `nephro`, name: `Néphrologue d'astreinte`, persona: `Dr Martin, calme et précis, un peu pressé. Vouvoie l'infirmier.` }, { id: `samu`, name: `Médecin régulateur du SAMU (15)`, persona: `Médecin régulateur, directif, questions courtes, veut l'adresse et l'heure.` }],
+        contacts: [{ id: `nephro`, kind: `medecin`, name: `Néphrologue d'astreinte`, persona: `Dr Martin, calme et précis, un peu pressé. Vouvoie l'infirmier.` }, { id: `samu`, kind: `samu`, name: `SAMU — Centre 15`, persona: `Médecin régulateur, directif, questions courtes, vouvoie l'infirmier, veut l'heure de début des troubles.`, arm: `Voix posée, rapide et très structurée.` }],
         call: {
           S: `Qui appelle ; M. V. ; détresse respiratoire dans le sas`,
           A: `IRC terminale, BPCO sévère ; +5 kg au-dessus du poids sec`,
@@ -1461,7 +1469,7 @@
           { id: `p5`, label: `RACS (facultatif)`, cue: `Reprise d'une activité circulatoire sous remplissage + adrénaline.`, hr: 118, spo2: 91, rr: 22, sys: 86, dia: 48, temp: 37.0, rhythm: `sinus`, resp: `normal`, ectopy: `none`, nibpFail: false, rosc: true, trans: 15,
             tech: [], crm: [], next: [] }
         ],
-        contacts: [{ id: `nephro`, name: `Néphrologue d'astreinte`, persona: `Dr Martin, calme et précis, un peu pressé. Vouvoie l'infirmier.` }, { id: `samu`, name: `Médecin régulateur du SAMU (15)`, persona: `Médecin régulateur, directif, questions courtes, veut l'adresse et l'heure.` }],
+        contacts: [{ id: `nephro`, kind: `medecin`, name: `Néphrologue d'astreinte`, persona: `Dr Martin, calme et précis, un peu pressé. Vouvoie l'infirmier.` }, { id: `samu`, kind: `samu`, name: `SAMU — Centre 15`, persona: `Médecin régulateur, directif, questions courtes, vouvoie l'infirmier, veut l'heure de début des troubles.`, arm: `Voix posée, rapide et très structurée.` }],
         call: {
           S: `Qui appelle ; Mme A. ; hémorragie sur déconnexion de l'aiguille, malaise`,
           A: `Hémodialysée, FAV bras gauche ; fin de séance`,
@@ -1631,16 +1639,160 @@
         ]
       }
     ];
+    /* ---------- Appels : code commun à l'éditeur et au simulateur (v8) ----------
+       Une phase peut contenir plusieurs appels (calls[]), un par interlocuteur.
+       Chaque appel est relié à une action « ☎ Appel … » de la phase.
+       SAMU : fonctionnement réel du centre 15 — l'ARM décroche, localise, identifie,
+       évalue la gravité en deux questions, puis passe le médecin régulateur. */
+    const ARM_ITEMS = [`Adresse exacte (centre, ville, étage, salle, code)`, `Numéro de rappel`, `Qui appelle (nom, fonction)`, `Patient : nom, âge`, `Motif en une phrase`, `Conscient ? Respire normalement ?`];
+    const isSamuCt = (ct) => !!ct && (ct.kind ? ct.kind === `samu` : (ct.id === `samu` || /samu|centre 15|\(15\)/i.test(ct.name || ``)));
+    const callLabelFor = (ct) => (isSamuCt(ct) ? `Appel SAMU` : `Appel médecin`);
+    function migrateStepCalls(st, contacts) {
+      if (!Array.isArray(st.actions)) st.actions = [];
+      if (!Array.isArray(st.calls)) {
+        st.calls = [];
+        if (st.call && st.call.on) { const c = Object.assign({}, st.call); delete c.on; delete c.prompt; st.calls.push(c); }
+      }
+      delete st.call;
+      st.calls.forEach((c) => {
+        if (!c.who && contacts && contacts[0]) c.who = contacts[0].id;
+        if (!st.actions.some((a) => a.kind === `call` && a.who === c.who)) {
+          const ct = (contacts || []).find((x) => x.id === c.who);
+          st.actions.unshift({ kind: `call`, who: c.who, label: callLabelFor(ct), times: 1, to: ``, delay: 0 });
+        }
+      });
+      return st;
+    }
+    /* ctx : { patient, trigger, stepLabel, cue, vit, common, address }
+       v9 : consignes cadrées. Une trame fixe, une question à la fois, les éléments obtenus sont notés
+       (fonction en mode Live, champ JSON en mode classique) et la décision prévue n'est donnée
+       à l'IA que lorsque l'essentiel a été transmis (verifier_decision). mode : `live` ou `json`. */
+    function buildCallPrompts(ctx, c, ct, mode) {
+      const LV = mode !== `json`;
+      const N = (arr) => (arr || []).map((x) => String(x).trim()).filter(Boolean);
+      const L = (arr) => N(arr).map((x) => `- ${x}`).join(`\n`) || `- (rien de précisé)`;
+      const NUM = (arr) => N(arr).map((x, i) => `${i + 1}. ${x}`).join(`\n`) || `(aucun élément précisé)`;
+      const T = (s) => String(s || ``).trim();
+      const sim = `C'est une simulation de formation pour des infirmiers d'un centre d'hémodialyse. Ne sors jamais du rôle, ne dis jamais que tu es une IA, ne fais jamais de cours.`;
+      const talk = `Façon de parler : comme au vrai téléphone. Une ou deux phrases courtes à chaque fois, une seule question à la fois, en français, sans liste. Tu laisses l'appelant parler et tu attends sa réponse. Tu n'expliques jamais ton raisonnement.`;
+      const note = LV ? `appelle la fonction noter_element avec son numéro (sans le dire à voix haute)` : `ajoute son numéro dans le champ « elements »`;
+      const know = [
+        ``, `VÉRITÉ DE LA SIMULATION (sert seulement à réagir juste ; ne révèle jamais une information que l'appelant ne t'a pas donnée lui-même) :`,
+        `- Patient : ${T(ctx.patient) || `patient hémodialysé`}.`,
+        `- Ce qui se passe : ${T(ctx.trigger)} ${T(ctx.stepLabel)}. ${T(ctx.cue)}`,
+        `- Constantes réelles en ce moment : ${ctx.vit}.`
+      ];
+      const vous = `Dans les consignes du formateur, « vous » peut te désigner, toi le médecin (par exemple « vous envoyez le SMUR » veut dire : tu engages le SMUR).`;
+      const common = T(ctx.common) ? [``, `CONSIGNES COMMUNES DU FORMATEUR :`, T(ctx.common)] : [];
+      const decide = LV
+        ? `Quand tu crois avoir l'essentiel, reformule en une phrase ce que tu as compris, puis appelle la fonction verifier_decision. Elle te dit si tu peux décider et te donne ta décision prévue et tes prescriptions. Si elle répond « pas encore », pose une question courte sur ce qui manque. Tu ne donnes ni diagnostic ni traitement avant qu'elle t'ait autorisé.`
+        : `Tu ne connais pas encore ta décision : elle te sera donnée dans une note interne entre crochets quand l'essentiel aura été transmis. Avant cette note, tu ne donnes ni diagnostic ni traitement : tu poses les questions.`;
+      const hang = LV ? `puis appelle la fonction raccrocher` : `et mets « raccrocher » à true`;
+      const urg = LV ? `appelle verifier_decision avec urgence_vitale à true` : `mets « urgence » à true`;
+      const body = c ? [
+        ``, `ÉLÉMENTS QUE L'APPELANT DOIT TE TRANSMETTRE (numérotés) :`, NUM(c.hear),
+        ``, `QUESTIONS PRÉVUES SI UN ÉLÉMENT MANQUE :`, L(c.ask),
+        LV ? `` : `\nTA DÉCISION PRÉVUE ET TES PRESCRIPTIONS ARRIVERONT DANS LA NOTE INTERNE.`
+      ] : [
+        ``, `Aucune fiche n'est prévue pour cet appel à ce moment. Fais préciser la situation (qui, quoi, constantes, ce qu'on attend de toi), puis décide de façon réaliste et prudente, et fais reformuler toute consigne.`
+      ];
+      if (!isSamuCt(ct)) {
+        const nm = T(ct && ct.name) || `médecin`;
+        return { main: [
+          `Tu joues le rôle de : ${nm}.${T(ct && ct.persona) ? ` ${T(ct.persona)}` : ``}`,
+          `Une infirmière ou un infirmier du centre d'hémodialyse t'appelle. ${sim}`, talk, vous,
+          ``, `TRAME DE L'APPEL (respecte l'ordre) :`,
+          `1. Tu décroches et tu te présentes en une phrase. Si l'appelant ne dit pas qui il est et pour quel patient, demande-le d'abord.`,
+          `2. Tu le laisses faire son message. Chaque fois qu'il transmet un des éléments numérotés ci-dessous, ${note}.`,
+          `3. Pour chaque élément encore manquant, pose UNE question courte (inspire-toi des questions prévues). Si un élément n'a pas été dit, tu le demandes : tu ne le devines pas.`,
+          `4. ${decide}`,
+          `5. Quand tu décides : tu dis ce que tu décides (tu viens, dans combien de temps, ou tu renvoies vers le 15), puis tes prescriptions une par une, puis « Répétez-moi ce que vous allez faire ». Tu corriges si la reformulation est fausse ou incomplète.`,
+          `6. Tu conclus en une phrase (« Rappelez-moi si… »), tu dis au revoir ${hang}.`
+        ].concat(body, know, common).join(`\n`) };
+      }
+      const arm = [
+        `Tu joues le rôle de l'ARM (assistant ou assistante de régulation médicale) qui décroche au SAMU, centre 15.${T(ct.arm) ? ` ${T(ct.arm)}` : ``}`,
+        sim, talk,
+        `Comme un vrai ARM, tu ne donnes aucun avis médical et aucun traitement : tu localises, tu identifies, tu évalues la gravité, puis tu passes le médecin régulateur. Tu ne sais rien du patient : tout vient de l'appelant.`,
+        ``, `ÉLÉMENTS À OBTENIR, DANS CET ORDRE (numérotés) :`,
+        ARM_ITEMS.map((x, i) => `${i + 1}. ${x}`).join(`\n`),
+        `La première question est toujours l'adresse exacte. Chaque fois que tu obtiens un élément, ${note}.`,
+        `Si l'appelant se lance dans les détails médicaux, recentre-le poliment (« D'accord, je note. Vous êtes où exactement ? ») : les détails sont pour le médecin.`,
+        `Si le patient ne répond pas et ne respire pas normalement : dis que tu engages tout de suite une équipe SMUR, demande de commencer le massage cardiaque et d'apporter le défibrillateur, puis passe le médecin sans attendre le reste.`,
+        LV ? `Dès que tu as au moins l'adresse, le numéro de rappel et le motif, dis : « Je vous passe le médecin régulateur, ne quittez pas. » puis appelle la fonction transferer_au_regulateur et tais-toi.`
+          : `Dès que tu as au moins l'adresse, le numéro de rappel et le motif, dis : « Je vous passe le médecin régulateur, ne quittez pas. » et mets « transfert » à true.`,
+        T(ctx.address) ? `Adresse réelle du centre (vérifie que l'appelant la donne précisément, fais-la préciser sinon) : ${T(ctx.address)}` : ``
+      ].filter((x) => x !== ``).join(`\n`);
+      const main = [
+        `Tu joues le rôle du médecin régulateur du SAMU, centre 15.${T(ct.persona) ? ` ${T(ct.persona)}` : ``}`,
+        `L'ARM vient de te passer l'appel d'une infirmière ou d'un infirmier du centre d'hémodialyse : l'adresse et le motif sont déjà notés, ne les redemande pas. ${sim}`,
+        talk + ` Ton ton est calme, directif, efficace.`, vous,
+        ``, `TRAME DE LA RÉGULATION (respecte l'ordre) :`,
+        `1. Tu te présentes en une phrase (« Médecin régulateur, je vous écoute. Faites-moi votre bilan. ») et tu laisses l'appelant faire son bilan sans l'interrompre.`,
+        `2. Chaque fois qu'il transmet un des éléments numérotés ci-dessous, ${note}.`,
+        `3. Pour chaque élément encore manquant, pose UNE question courte (inspire-toi des questions prévues). Tu veux toujours l'heure de début des troubles. Si un élément n'a pas été dit, tu le demandes : tu ne le devines pas.`,
+        `4. ${decide}`,
+        `5. Annonce de la décision, dans cet ordre : le moyen engagé et le délai (par exemple « J'engage une équipe SMUR, elle sera chez vous dans une vingtaine de minutes »), puis les consignes d'attente une par une, puis « Répétez-moi ce que vous allez faire ». Tu corriges si la reformulation est fausse ou incomplète.`,
+        `6. Tu conclus : « Vous restez près de lui, vous me rappelez au 15 immédiatement si ça change. » Puis tu dis au revoir ${hang}.`,
+        `À tout moment, si l'appelant décrit un arrêt cardiaque, tu engages le SMUR tout de suite, tu fais masser sans interruption et tu ${urg}.`
+      ].concat(body, know, common).join(`\n`);
+      return { arm, main };
+    }
+    /* Décision prévue, donnée à l'IA seulement quand l'essentiel est transmis */
+    function callDecision(c) {
+      const N = (arr) => (arr || []).map((x) => String(x).trim()).filter(Boolean);
+      if (!c) return { decision: `Aucune décision prévue : décide de façon réaliste et prudente.`, prescriptions: [], a_ne_pas_dire: `` };
+      return { decision: String(c.answer || ``).trim() || `Décide de façon réaliste et prudente.`, prescriptions: N(c.presc), a_ne_pas_dire: String(c.avoid || ``).trim() };
+    }
+    /* Réponses toutes prêtes (l'interlocuteur renvoie vers quelqu'un d'autre) */
+    const CALL_PRESETS = {
+      medecin: [
+        [`Renvoie vers le 15`, `Il a l'air de dire que ça le dépasse : « Qu'est-ce que vous voulez que j'y fasse d'ici ? Raccrochez et appelez le 15 tout de suite. Rappelez-moi après. »`, `Ne donne aucune prescription : tu renvoies vers le SAMU.`],
+        [`Prend en charge, arrive`, `Tu prends la situation en main, tu donnes les consignes et tu annonces que tu arrives (délai réaliste).`, ``],
+        [`Injoignable / occupé`, `Tu es occupé (au bloc, en consultation) : « Je ne peux pas me déplacer, je suis bloqué. Si ça s'aggrave, appelez le 15. » Tu donnes au maximum une consigne simple.`, ``]
+      ],
+      samu: [
+        [`Renvoie vers l'astreinte`, `Le régulateur estime que ce n'est pas (encore) une urgence vitale : « Avez-vous appelé le médecin d'astreinte ? Appelez-le d'abord, et rappelez le 15 si ça s'aggrave. »`, `N'envoie pas de moyens tant que l'astreinte n'a pas été jointe, sauf signe de détresse vitale.`],
+        [`Envoie le SMUR`, `Le régulateur engage une équipe SMUR, donne les consignes d'attente et demande de rappeler le 15 si quelque chose change.`, ``],
+        [`Conseil seul`, `Le régulateur donne un conseil médical sans envoyer de moyens et demande de rappeler le 15 en cas d'aggravation.`, ``]
+      ]
+    };
+    /* Rappel : l'interlocuteur rappelle les apprenants pour prendre des nouvelles */
+    function buildCallbackPrompt(ctx, c, ct, mode) {
+      const LV = mode !== `json`;
+      const L = (arr) => (arr || []).map((x) => String(x).trim()).filter(Boolean).map((x) => `- ${x}`).join(`\n`) || `- (rien de précisé)`;
+      const T = (s) => String(s || ``).trim();
+      const cb = (c && c.cb) || {};
+      const who = isSamuCt(ct) ? `le médecin régulateur du SAMU (centre 15)` : `: ${T(ct && ct.name) || `médecin`}`;
+      return [
+        `Tu joues le rôle de ${who}.${T(ct && ct.persona) ? ` ${T(ct.persona)}` : ``}`,
+        `Tu RAPPELLES toi-même le centre d'hémodialyse pour prendre des nouvelles du patient, après un premier appel de l'équipe. C'est une simulation de formation : ne sors jamais du rôle, ne dis jamais que tu es une IA.`,
+        `Façon de parler : comme au vrai téléphone. Une ou deux phrases courtes, une seule question à la fois, sans liste. Tu attends les réponses.`,
+        `Tu parles le premier : tu te présentes et tu demandes des nouvelles du patient.`,
+        ``, `VÉRITÉ DE LA SIMULATION (ne la révèle pas, l'équipe doit te le dire elle-même) :`,
+        `- Patient : ${T(ctx.patient) || `patient hémodialysé`}.`,
+        `- Moment actuel de la simulation : ${T(ctx.stepLabel)}. ${T(ctx.cue)}`,
+        `- Constantes réelles actuelles : ${ctx.vit}.`,
+        c && T(c.answer) ? `- Lors du premier appel, ta décision était : ${T(c.answer)} (« vous » peut te désigner, toi).` : ``,
+        c && (c.presc || []).length ? `- Tu avais prescrit :\n${L(c.presc)}` : ``,
+        ``, `CE QUE TU VEUX SAVOIR, une question à la fois :`, L(cb.ask && cb.ask.length ? cb.ask : [`Comment va le patient ?`, `Les constantes actuelles ?`, `Ce qui a été fait depuis mon appel ?`]),
+        ``, `SELON LES NOUVELLES :`, T(cb.note) || `Si ça va mieux, tu donnes la suite de la surveillance. Si ça s'aggrave, tu demandes d'appeler le 15 ou tu annonces que tu arrives.`,
+        `Quand tu as ce qu'il te faut, tu conclus en une phrase, tu dis au revoir ${LV ? `puis appelle la fonction raccrocher` : `et mets « raccrocher » à true`}.`,
+        T(ctx.common) ? `\nCONSIGNES COMMUNES :\n${T(ctx.common)}` : ``
+      ].filter((x) => x !== ``).join(`\n`);
+    }
+    const CB_DELAYS = [[0, `à la main seulement`], [60, `1 min après l'appel`], [120, `2 min après`], [180, `3 min après`], [300, `5 min après`], [600, `10 min après`]];
     /* Conversion du format de l'éditeur vers le format interne du simulateur */
     function fromEditor(e) {
       const L = (a) => (a || []).map((x) => String(x).trim()).filter(Boolean);
-      const steps = (e.steps || []).map((s) => ({
+      const contacts = (e.contacts || []).map((c) => Object.assign({}, c, { kind: c.kind || (isSamuCt(c) ? `samu` : `medecin`) }));
+      const steps = (e.steps || []).map((s0) => migrateStepCalls(deep(s0), contacts)).map((s) => ({
         id: s.id, label: s.label || `Phase`, cue: s.cue || ``,
         hr: +s.hr || 0, spo2: +s.spo2 || 0, rr: +s.rr || 0, sys: +s.sys || 0, dia: +s.dia || 0, temp: s.temp === `` || s.temp == null ? 37 : +s.temp,
         rhythm: s.rhythm || `sinus`, resp: s.resp || `normal`, ectopy: s.ectopy || `none`, nibpFail: !!s.nibpFail, rosc: !!s.rosc, trans: +s.trans || 0,
-        actions: (s.actions || []).filter((a) => String(a.label || ``).trim()).map((a) => ({ label: String(a.label).trim(), times: Math.max(1, +a.times || 1), to: a.to || ``, delay: +a.delay || 0 })),
+        actions: (s.actions || []).filter((a) => String(a.label || ``).trim()).map((a) => Object.assign({ label: String(a.label).trim(), times: Math.max(1, +a.times || 1), to: a.to || ``, delay: +a.delay || 0 }, a.kind === `call` ? { kind: `call`, who: a.who } : {})),
         next: (s.next || []).filter((n) => n.to).map((n) => ({ label: String(n.label || ``).trim() || `Phase suivante`, to: n.to })),
-        call: s.call && s.call.on ? s.call : null
+        calls: (s.calls || []).filter((c) => c && c.who)
       }));
       const tech = [], crm = [];
       (e.steps || []).forEach((s, i) => {
@@ -1657,7 +1809,7 @@
         sensorsStart: Object.assign({ ecg: false, spo2: false, cuff: false, temp: false }, e.sensorsStart),
         startTime: e.startTime || ``, steps, tech, crm,
         questions: L((e.debrief || {}).questions), messages: L((e.debrief || {}).messages),
-        trainer: e.trainer || {}, briefing: e.briefing || {}, documents: e.documents || [], contacts: e.contacts || [],
+        trainer: e.trainer || {}, briefing: e.briefing || {}, documents: e.documents || [], contacts,
         trigger: e.trigger || ``, saed: e.call || {},
         objTech: L(e.objTech), objCrm: L(e.objCrm), mailTo: e.mailTo || ``, editor: true
       };
@@ -3544,10 +3696,10 @@
     function flowListHtml(sc) {
       const P = (id) => { const j = stepIdxById(sc, id); return j >= 0 ? `P${j + 1}` : `?`; };
       return `<div class="flow-l">${sc.steps.map((s, i) => {
-        const g = (s.actions || []).filter((a) => a.to).map((a) => `<span class="fl-go auto">⚡ ${esc(a.label)}${a.times > 1 ? ` ×${a.times}` : ``} → ${P(a.to)}${a.delay ? ` (${a.delay} s)` : ``}</span>`)
+        const g = (s.actions || []).filter((a) => a.to).map((a) => `<span class="fl-go auto">${a.kind === `call` ? `☎` : `⚡`} ${esc(a.label)}${a.times > 1 && a.kind !== `call` ? ` ×${a.times}` : ``} → ${P(a.to)}${a.delay ? ` (${a.delay} s)` : ``}</span>`)
           .concat((s.next || []).map((n) => `<span class="fl-go">✋ ${esc(n.label)} → ${P(n.to)}</span>`));
         const att = sc.tech.filter((x) => x.ph === i).map((x) => x.t);
-        return `<div class="fl-row"><b>P${i + 1}</b><div><div><b>${esc(s.label)}</b> <small>FC ${s.hr} · TA ${s.nibpFail ? `imprenable` : s.sys ? `${s.sys}/${s.dia}` : `—`} · SpO2 ${s.spo2}</small>${s.call ? ` <small class="fl-call">☎ appel</small>` : ``}</div>
+        return `<div class="fl-row"><b>P${i + 1}</b><div><div><b>${esc(s.label)}</b> <small>FC ${s.hr} · TA ${s.nibpFail ? `imprenable` : s.sys ? `${s.sys}/${s.dia}` : `—`} · SpO2 ${s.spo2}</small>${(s.calls || []).map((c) => ` <small class="fl-call">☎ ${esc(((sc.contacts || []).find((x) => x.id === c.who) || {}).name || `appel`)}${c.cb && c.cb.on ? ` · 📞 rappel` : ``}</small>`).join(``)}</div>
           ${att.length ? `<div class="fl-att">${esc(att.slice(0, 4).join(` · `))}${att.length > 4 ? ` +${att.length - 4}` : ``}</div>` : ``}
           <div class="fl-gos">${g.join(``) || `<span class="fl-go end">Fin</span>`}</div></div></div>`;
       }).join(``)}</div>`;
@@ -3589,9 +3741,9 @@
     /* ---------- Destination des appels du téléphone d'appel ---------- */
     const CALL_MODES = {
       remote: [`Sur la télécommande`, `La télécommande sonne : touchez « Décrocher » et parlez dans le micro du téléphone. Pendant l'appel, la fiche de la phase (ce que le médecin doit entendre, sa réponse, les prescriptions) s'affiche.`],
-      doctor: [`Sur un autre téléphone (poste médecin)`, `Le formateur qui joue le médecin ouvre le « poste médecin » sur son téléphone en scannant son QR code (tablette › logo iM60 › Maintenance). Il décroche et voit la fiche de l'appel. La télécommande note l'appel au journal.`],
+      doctor: [`Sur un autre téléphone (poste médecin)`, `Le formateur qui joue le médecin ouvre le « poste médecin » (QR code). Quand ça sonne : il décroche lui-même, ou touche « Laisser l'IA », puis peut reprendre la main à tout moment. Pour le 15, il joue d'abord l'ARM, met en attente, puis le médecin régulateur. Il peut aussi rappeler les apprenants pour prendre des nouvelles.`],
       tel: [`Vrai numéro de téléphone`, `Le téléphone d'appel compose ce numéro comme un appel normal : il lui faut une carte SIM. L'heure de l'appel est notée, sa durée est approximative.`],
-      ia: [`IA (le médecin est joué par l'IA)`, `Le téléphone d'appel discute à la voix avec l'IA (Gemini), qui suit les consignes de la phase en cours. Clé d'accès à saisir une seule fois sur le téléphone d'appel (appui long 3 s sur l'heure). La transcription arrive au journal. La voix des apprenants est envoyée à Google : prévenez-les.`]
+      ia: [`IA (le médecin est joué par l'IA)`, `Le téléphone d'appel discute à la voix avec l'IA (Gemini), qui suit les consignes de l'interlocuteur pour la phase en cours (au 15 : l'ARM, puis le médecin régulateur). Le poste médecin et la télécommande affichent la conversation et peuvent « Reprendre la main ». Clé d'accès à saisir une seule fois sur le téléphone d'appel (appui long 3 s sur l'heure). La transcription arrive au journal. La voix des apprenants est envoyée à Google : prévenez-les.`]
     };
     const callCfg = () => { sim.call = Object.assign({ mode: `remote`, tel: `` }, sim.call || {}); return sim.call; };
     function renderCallMode() {
@@ -3608,7 +3760,7 @@
       const el = $(`call-dev`); if (!el) return;
       const on = (k) => Date.now() - (devSeen[k] || 0) < 12000;
       el.innerHTML = `Téléphone d'appel : <b class="${on(`phone`) ? `ok-t` : ``}">${on(`phone`) ? `connecté ✓` : `pas connecté`}</b>` +
-        (callCfg().mode === `doctor` ? ` · Poste médecin : <b class="${on(`doctor`) ? `ok-t` : ``}">${on(`doctor`) ? `connecté ✓` : `pas connecté`}</b>` : ``);
+        (callCfg().mode === `doctor` || callCfg().mode === `ia` ? ` · Poste médecin : <b class="${on(`doctor`) ? `ok-t` : ``}">${on(`doctor`) ? `connecté ✓` : `pas connecté`}</b>` : ``);
     }
     function setCallMode(k) {
       if (!CALL_MODES[k]) return;
@@ -3663,24 +3815,28 @@
       const P = (id) => { const j = stepIdxById(sc, id); return j >= 0 ? `P${j + 1}` : `?`; };
       const acts = (st.actions || []).map((a, j) => {
         const n = (sim.actCnt || {})[actKey(sim.stepIdx, a.label)] || 0;
+        if (a.kind === `call`) return `<button type="button" class="act tel ${n ? `done` : ``}" onclick="pressAction(${j})"><b>☎ ${esc(a.label)}</b><small>${n ? `fait ✓` : `coché à la fin de l'appel`}${a.to ? ` → ${P(a.to)}${a.delay ? ` · ${a.delay} s` : ``}` : ``}</small></button>`;
         return `<button type="button" class="act ${a.to ? `trig` : ``}" onclick="pressAction(${j})"><b>${esc(a.label)}</b><small>${a.to ? `${a.times > 1 ? `${Math.min(n, a.times)}/${a.times} → ` : `→ `}${P(a.to)}${a.delay ? ` · ${a.delay} s` : ``}` : n ? `noté ×${n}` : `noter`}</small></button>`;
       }).join(``);
       const man = (st.next || []).map((x) => `<button type="button" class="act man" onclick="goStep(${stepIdxById(sc, x.to)}, 'bouton')">✋ ${esc(x.label)} <small>→ ${P(x.to)}</small></button>`).join(``);
+      const cbs = (st.calls || []).map((c) => { const ct = (sc.contacts || []).find((x) => x.id === c.who); return ct ? `<button type="button" class="act tel cbk" onclick="requestCallback('${esc(ct.id)}', ${sim.stepIdx})"><b>📞 Faire rappeler</b><small>${esc(ct.name)}</small></button>` : ``; }).join(``);
+      const cbp = cbPend.map((p) => `<div class="pend"><span>📞 Rappel de ${esc(p.name)} dans <b data-cbcd="${p.id}">${fmtDur(p.at - Date.now())}</b></span><button type="button" class="btn sm" onclick="cbNow('${p.id}')">Maintenant</button><button type="button" class="btn sm" onclick="cbCancel('${p.id}')">Annuler</button></div>`).join(``);
       const docs = (sc.documents || []).length ? `<button type="button" class="act doc ${sim.doc >= 0 ? `on` : ``}" onclick="openDocSheet()">📄 Documents${sim.doc >= 0 ? ` <small>affiché</small>` : ``}</button>` : ``;
       const pend = pendGo ? `<div class="pend"><span>⏳ ${esc(pendGo.label)} → ${esc(sc.steps[pendGo.idx] ? sc.steps[pendGo.idx].label : ``)} dans <b id="pend-cd">${Math.max(0, Math.ceil((pendGo.at - Date.now()) / 1000))}</b> s</span><button type="button" class="btn sm" onclick="goStep(${pendGo.idx}, 'immédiat')">Maintenant</button><button type="button" class="btn sm" onclick="cancelPend()">Annuler</button></div>` : ``;
-      const html = pend + (acts || man || docs ? `<div class="acts">${acts}${man}${docs}</div>` : ``);
+      const html = pend + cbp + (acts || man || docs || cbs ? `<div class="acts">${acts}${cbs}${man}${docs}</div>` : ``);
       if (box.dataset.h !== html) { box.dataset.h = html; box.innerHTML = html; }
     }
     const norm = (s) => String(s || ``).normalize(`NFD`).replace(/[̀-ͯ]/g, ``).toLowerCase().replace(/[^a-z0-9]+/g, ` `).trim();
-    function pressAction(j) {
+    function pressAction(j, auto) {
       const sc = scenarioById(sim.scenarioId), st = sc.steps[sim.stepIdx], a = st && st.actions[j];
       if (!a) return;
-      if (sim.stage !== `run`) { toast(`Simulation en pause`); return; }
+      if (sim.stage !== `run` && !auto) { toast(`Simulation en pause`); return; }
       const k = actKey(sim.stepIdx, a.label);
       sim.actCnt = sim.actCnt || {};
       const n = (sim.actCnt[k] || 0) + 1;
       sim.actCnt[k] = n;
-      if (/choc/i.test(a.label)) { sendCmd(`SHOCK`, null, true); remEvent(`action`, `⚡ Choc électrique délivré (${a.label})`, { act: a.label }); }
+      if (a.kind === `call`) remEvent(`action`, `☎ ${a.label}${auto ? ` — appel passé` : ` — noté par le formateur`}`, { act: a.label });
+      else if (/choc/i.test(a.label)) { sendCmd(`SHOCK`, null, true); remEvent(`action`, `⚡ Choc électrique délivré (${a.label})`, { act: a.label }); }
       else remEvent(`action`, `💉 ${a.label}${a.times > 1 ? ` (${n}/${a.times})` : n > 1 ? ` (${n}e)` : ``}`, { act: a.label });
       const na = norm(a.label).split(` `).filter((w) => w.length > 3);
       sc.tech.filter((it) => it.ph === sim.stepIdx && !debrief.done[it.id] && na.length && na.every((w) => norm(it.t).includes(w))).forEach((it) => toggleDone(it.id));
@@ -3703,6 +3859,7 @@
     function cancelPend() { if (pendGo) remEvent(`system`, `Passage automatique annulé (${pendGo.label})`); pendGo = null; renderActs(); }
     let pendPausedAt = 0;
     function pendTick() {
+      cbTick();
       if (!pendGo) { pendPausedAt = 0; return; }
       if (sim.stage === `pause`) { if (!pendPausedAt) pendPausedAt = Date.now(); return; }
       if (pendPausedAt) { pendGo.at += Date.now() - pendPausedAt; pendPausedAt = 0; }
@@ -4452,7 +4609,7 @@
       const sc = scenarioById(sim.scenarioId), st = sc.steps[sim.stepIdx];
       $(`pb-num`).textContent = st ? `Étape ${sim.stepIdx + 1}/${sc.steps.length}` : `Aucune étape`;
       $(`pb-name`).textContent = st ? st.label : `Lancez depuis Préparation`;
-      $(`pb-cue`).innerHTML = st ? esc(st.cue) + (st.call ? `<div class="cue-call">☎ Appel attendu : <b>${esc(((sc.contacts || []).find((c) => c.id === st.call.who) || {}).name || `médecin`)}</b>${(st.call.hear || []).length ? ` — à entendre : ${esc(st.call.hear.join(` · `))}` : ``}</div>` : ``) : ``;
+      $(`pb-cue`).innerHTML = st ? esc(st.cue) + (st.calls || []).map((c) => `<div class="cue-call">☎ Appel possible : <b>${esc(((sc.contacts || []).find((x) => x.id === c.who) || {}).name || `médecin`)}</b>${(c.hear || []).length ? ` — à entendre : ${esc(c.hear.join(` · `))}` : ``}${c.answer ? `<br>Réponse : ${esc(c.answer)}` : ``}${c.cb && c.cb.on ? `<br>📞 Rappel ${c.cb.delay ? `${fmtDur(c.cb.delay * 1000)} après l'appel` : `à la main`}` : ``}</div>`).join(``) : ``;
       $(`pb-cue`).classList.toggle(`hidden`, !cueOpen || !st);
       $(`pb-more`).textContent = cueOpen ? `▴ consigne` : `▾ consigne`;
       $(`pb-next`).disabled = sim.stepIdx >= sc.steps.length - 1 && !(st && st.next && st.next.length);
@@ -4639,12 +4796,13 @@
     function renderChecklists() {
       const sc = scenarioById(sim.scenarioId);
       const cnt = (arr) => arr.filter((i) => debrief.done[i.id]).length;
-      $(`chk-seg`).innerHTML = [[`tech`, `Gestes techniques`, sc.tech], [`crm`, `Attendus CRM`, crmOf(sc)]].map(([k, l, arr]) => `<button type="button" class="${chkTab === k ? `sel` : ``}" onclick="setChkTab('${k}')">${l}<small>${cnt(arr)}/${arr.length}</small></button>`).join(``);
-      const arr = chkTab === `crm` ? crmOf(sc) : sc.tech;
+      const here = (arr) => arr.filter((i) => i.ph == null || i.ph === sim.stepIdx);   // seulement la phase en cours
+      $(`chk-seg`).innerHTML = [[`tech`, `Gestes techniques`, here(sc.tech)], [`crm`, `Attendus CRM`, here(crmOf(sc))]].map(([k, l, arr]) => `<button type="button" class="${chkTab === k ? `sel` : ``}" onclick="setChkTab('${k}')">${l}<small>${cnt(arr)}/${arr.length}</small></button>`).join(``);
+      const arr = here(chkTab === `crm` ? crmOf(sc) : sc.tech);
       $(`chk-list`).innerHTML = arr.length ? arr.map((it) => {
         const d = debrief.done[it.id];
         return `<button type="button" class="ck ${d ? `done` : ``} ${it.ph != null && it.ph === sim.stepIdx ? `now` : ``}" onclick="toggleDone('${it.id}')"><span class="bx">${d ? `✓` : ``}</span><span>${it.ph != null ? `<em class="ph-tag">P${it.ph + 1}</em> ` : ``}${esc(it.t)}${d ? `<time>${tPlus(d.ts)}</time>` : ``}</span></button>`;
-      }).join(``) : `<div class="muted" style="grid-column:1/-1">Aucun geste attendu en mode libre.</div>`;
+      }).join(``) : `<div class="muted" style="grid-column:1/-1">${sc.steps.length ? `Aucun attendu ${chkTab === `crm` ? `CRM ` : ``}programmé pour cette phase.` : `Aucun geste attendu en mode libre.`}</div>`;
     }
     function renderLive() { renderPhaseBar(); renderRows(); renderChecklists(); }
 
@@ -5032,35 +5190,59 @@
     function renderRemoteAll() { renderHeader(); renderScopeStatus(); showTab(curTab); renderMic(); }
 
     /* =====================================================================
-       V7 — TÉLÉPHONE D'APPEL (apprenants), POSTE MÉDECIN, APPELS
+       V8 — TÉLÉPHONE D'APPEL (apprenants), POSTE MÉDECIN, APPELS
        Le téléphone d'appel (?role=phone) appelle selon le réglage de la télécommande :
        télécommande ou poste médecin (voix par WebRTC, signalisation par le relais),
        vrai numéro (tel:) ou IA (Gemini, clé gardée sur le téléphone d'appel seulement).
+       Nouveautés v8 :
+       - une fiche d'appel par interlocuteur et par phase (st.calls), reliée à une action « ☎ » ;
+       - SAMU réaliste : l'ARM décroche, puis mise en attente et passage au médecin régulateur ;
+       - le formateur (poste médecin ou télécommande) suit l'IA en direct et peut reprendre la main ;
+       - rappel des apprenants par le médecin pour prendre des nouvelles (auto ou à la main).
        ===================================================================== */
     const devSeen = {};
     let call = null;                 // appel en cours sur cet appareil
-    const callsSeen = {};            // télécommande : suivi des appels pour le journal
+    const callsSeen = {};            // télécommande et poste médecin : suivi de tous les appels
+    let cbDue = null;                // poste médecin : rappel demandé par la télécommande
+    let cbPend = [];                 // télécommande : rappels programmés
     const RTC_CFG = { iceServers: [{ urls: [`stun:stun.l.google.com:19302`, `stun:stun1.l.google.com:19302`] }] };
     const isCallee = () => (role === `remote` && callCfg().mode === `remote`) || role === `doctor`;
-    const DEFAULT_CONTACTS = [{ id: `nephro`, name: `Néphrologue d'astreinte`, persona: `` }, { id: `samu`, name: `SAMU — Centre 15`, persona: `` }];
+    const DEFAULT_CONTACTS = [{ id: `nephro`, kind: `medecin`, name: `Néphrologue d'astreinte`, persona: `` }, { id: `samu`, kind: `samu`, name: `SAMU — Centre 15`, persona: `` }];
     const phoneContacts = () => { const c = (scenarioById(sim.scenarioId).contacts || []).filter((x) => x && x.name); return c.length ? c : DEFAULT_CONTACTS; };
+    const fullCt = (ct) => (ct && phoneContacts().find((x) => x.id === ct.id)) || ct || { name: `médecin` };
+    const ctBrief = (ct) => ({ id: ct.id, name: ct.name, persona: ct.persona || ``, kind: ct.kind || (isSamuCt(ct) ? `samu` : `medecin`), arm: ct.arm || `` });
+    const STAGE_LBL = { arm: `ARM`, hold: `en attente`, reg: `médecin régulateur` };
 
-    /* ---------- Sons (sonnerie, retour d'appel) ---------- */
+    /* Diffusion + prise en compte locale (un appareil ne reçoit pas ses propres messages) */
+    function pub(msg) {
+      publishSyncMessage(msg);
+      if (role === `remote` || role === `doctor`) callSeen(Object.assign({ sender: senderId, ts: Date.now() }, msg));
+    }
+
+    /* ---------- Sons (sonnerie, retour d'appel, attente) ---------- */
     let toneCtx = null, toneTimer = null;
     function toneAudio() { try { toneCtx = toneCtx || new (window.AudioContext || window.webkitAudioContext)(); if (toneCtx.state === `suspended`) toneCtx.resume(); } catch (_) {} return toneCtx; }
-    function ctBeep(freqs, dur, vol) {
+    function ctBeep(freqs, dur, vol, at) {
       const c = toneAudio(); if (!c) return;
+      const t0 = c.currentTime + (at || 0);
       const g = c.createGain(); g.gain.value = vol || 0.12; g.connect(c.destination);
-      freqs.forEach((f) => { const o = c.createOscillator(); o.frequency.value = f; o.connect(g); o.start(); o.stop(c.currentTime + dur); });
+      freqs.forEach((f) => { const o = c.createOscillator(); o.frequency.value = f; o.connect(g); o.start(t0); o.stop(t0 + dur); });
     }
     function stopTone() { clearInterval(toneTimer); toneTimer = null; }
     function ringback() { stopTone(); const f = () => ctBeep([440], 1.5, 0.1); f(); toneTimer = setInterval(f, 5000); }   // tonalité française : 1,5 s / 3,5 s
     function ringIncoming() {
       stopTone();
-      const f = () => { buzz(); if (role === `doctor`) { ctBeep([1046, 1318], 0.35, 0.14); setTimeout(() => ctBeep([1046, 1318], 0.35, 0.14), 500); } };
+      const f = () => { buzz(); if (role === `doctor` || role === `phone`) { ctBeep([1046, 1318], 0.35, 0.14); setTimeout(() => ctBeep([1046, 1318], 0.35, 0.14), 500); } };
       f(); toneTimer = setInterval(f, 2500);
     }
     function busyTone() { stopTone(); let n = 0; toneTimer = setInterval(() => { ctBeep([440], 0.25, 0.1); if (++n > 5) stopTone(); }, 500); }
+    /* Musique d'attente du 15 (petite mélodie en boucle) */
+    function holdMusic() {
+      stopTone();
+      const notes = [523, 659, 784, 659, 587, 698, 880, 698];
+      const f = () => notes.forEach((n, i) => ctBeep([n, n * 1.5], 0.32, 0.05, i * 0.36));
+      f(); toneTimer = setInterval(f, notes.length * 360 + 500);
+    }
 
     /* ---------- Voix (WebRTC) ---------- */
     async function rtcOpen() {
@@ -5086,14 +5268,25 @@
       if (!call) return;
       try { if (call.st) call.st.getTracks().forEach((t) => t.stop()); } catch (_) {}
       try { if (call.pc) call.pc.close(); } catch (_) {}
-      call.pc = null; call.st = null;
+      call.pc = null; call.st = null; call.voice = false;
       const a = $(`call-audio`); if (a) a.srcObject = null;
     }
+    function applyMic() { if (call && call.st) call.st.getAudioTracks().forEach((t) => { t.enabled = !call.muted && !call.holdMute; }); }
     function toggleMute() {
       if (!call || !call.st) return;
-      call.muted = !call.muted;
-      call.st.getAudioTracks().forEach((t) => { t.enabled = !call.muted; });
-      renderCallUi();
+      call.muted = !call.muted; applyMic();
+      if (role === `phone`) renderPhone(); else renderCallUi();
+    }
+    /* Téléphone d'appel : ouvre la voix vers l'appareil du formateur (to = son identifiant) */
+    async function startRtcTo(to) {
+      if (!call) return;
+      const cid = call.cid;
+      const r = await rtcOpen();
+      if (!call || call.cid !== cid) { try { r.pc.close(); if (r.st) r.st.getTracks().forEach((t) => t.stop()); } catch (_) {} return; }
+      call.pc = r.pc; call.st = r.st; applyMic();
+      await r.pc.setLocalDescription(await r.pc.createOffer());
+      await iceDone(r.pc);
+      publishSyncMessage({ type: `CALL_SDP`, cid, to, kind: `offer`, sdp: r.pc.localDescription.sdp });
     }
 
     /* ---------- Journal (la télécommande garde le journal) ---------- */
@@ -5102,21 +5295,50 @@
       else publishSyncMessage({ type: `CALL_LOG`, text, extra: extra || null, sid: sim.sessionId });
     }
 
-    /* ---------- Fiche d'appel de la phase en cours ---------- */
-    function phaseCall(contactId) {
-      const sc = scenarioById(sim.scenarioId), st = sc.steps[sim.stepIdx];
-      const c = st && st.call;
-      return c && (!contactId || !c.who || c.who === contactId) ? c : null;
+    /* ---------- Fiche d'appel : consignes de l'interlocuteur pour la phase ---------- */
+    function phaseCall(contactId, stepIdx) {
+      const sc = scenarioById(sim.scenarioId), st = sc.steps[stepIdx == null ? sim.stepIdx : stepIdx];
+      const list = (st && st.calls) || [];
+      return list.find((c) => c.who === contactId) || null;
     }
-    function callSheetHtml(cid) {
-      const sc = scenarioById(sim.scenarioId), st = sc.steps[sim.stepIdx];
-      const c = phaseCall(call && call.contact ? call.contact.id : ``);
-      const heard = (call && call.heard) || {};
-      if (!c) return `<div class="cs-empty">Pas de fiche d'appel pour ${st ? `la phase « ${esc(st.label)} »` : `ce moment`}. Jouez le médecin librement : faites préciser la situation (SAED) et exigez la reformulation des prescriptions.</div>`;
+    function ctxNow() {
+      const sc = scenarioById(sim.scenarioId), st = sc.steps[sim.stepIdx] || {}, g = sc.saed || {};
+      return { patient: sc.patient, trigger: sc.trigger || sc.context || ``, stepLabel: st.label || ``, cue: st.cue || ``, common: g.doctor || ``, address: g.address || ``,
+        vit: `FC ${st.hr ?? `?`}, TA ${st.nibpFail ? `non mesurable` : `${st.sys ?? `?`}/${st.dia ?? `?`}`}, SpO2 ${st.spo2 ?? `?`} %, FR ${st.rr ?? `?`}` };
+    }
+    function callSheetHtml(info, live) {
+      /* info : { contact, stage, cb, cfgStep } ; live : fiche interactive (appel en cours sur cet appareil) */
+      const sc = scenarioById(sim.scenarioId);
+      const ct = fullCt(info.contact), samu = isSamuCt(ct);
+      const stepIdx = info.cfgStep == null ? sim.stepIdx : info.cfgStep, st = sc.steps[stepIdx];
+      const c = phaseCall(ct.id, stepIdx);
       const L = (arr) => (arr || []).filter(Boolean);
+      const heard = (live ? call && call.heard : info.heard) || {}, armOk = (live ? call && call.arm : info.arm) || {};
+      const cur = sc.steps[sim.stepIdx] || {};
+      const vit = `FC ${cur.hr} · TA ${cur.nibpFail ? `imprenable` : `${cur.sys}/${cur.dia}`} · SpO2 ${cur.spo2} · FR ${cur.rr}`;
+      if (info.cb) {
+        const cb = (c && c.cb) || {};
+        return `<div class="cs"><div class="cs-h">📞 Vous rappelez ${samu ? `en tant que médecin régulateur` : `en tant que ${esc(ct.name)}`}</div>
+          <div class="muted">Présentez-vous, demandez des nouvelles. Constantes réelles : ${esc(vit)}</div>
+          <div class="cs-h">Ce que vous voulez savoir</div><ul>${L(cb.ask && cb.ask.length ? cb.ask : [`Comment va le patient ?`, `Les constantes actuelles ?`, `Ce qui a été fait depuis l'appel ?`]).map((x) => `<li>${esc(x)}</li>`).join(``)}</ul>
+          ${cb.note ? `<div class="cs-h">Selon les nouvelles</div><p>${esc(cb.note)}</p>` : ``}
+          ${c && c.answer ? `<div class="cs-h">Rappel : ce que vous aviez dit</div><p>${esc(c.answer)}</p>` : ``}</div>`;
+      }
+      if (samu && info.stage === `arm`) {
+        return `<div class="cs"><div class="cs-h">1. Vous êtes l'ARM <small>décrochez : « SAMU, centre 15, j'écoute »</small></div>
+          <div class="cs-hear">${ARM_ITEMS.map((h, i) => `<button type="button" class="${armOk[i] ? `on` : ``}" ${live ? `onclick="markArm(${i})"` : `disabled`}>${armOk[i] ? `✓` : `○`} ${esc(h)}</button>`).join(``)}</div>
+          <div class="muted">Pas d'avis médical à ce stade : recentrez (« Vous êtes où exactement ? »). Arrêt cardiaque : « J'engage le SMUR, commencez le massage », puis passez le médecin tout de suite.${(sc.saed || {}).address ? `<br>Adresse attendue : <b>${esc(sc.saed.address)}</b>` : ``}</div>
+          ${live ? `<button type="button" class="btn pri" onclick="samuHold()">⏸ « Je vous passe le médecin régulateur, ne quittez pas »</button>` : ``}</div>`;
+      }
+      if (samu && info.stage === `hold`) {
+        return `<div class="cs"><div class="cs-h">⏸ En attente</div><div class="muted">L'apprenant entend la musique d'attente du 15. Prenez le rôle du médecin régulateur (ou passez le téléphone à un collègue).</div>
+          ${live ? `<button type="button" class="btn pri" onclick="samuResume()">▶ Reprendre en médecin régulateur</button>` : ``}</div>`;
+      }
+      if (!c) return `<div class="cs-empty">${samu ? `<b>Vous êtes le médecin régulateur.</b> ` : ``}Pas de fiche d'appel pour ${esc(ct.name)} ${st ? `dans la phase « ${esc(st.label)} »` : `à ce moment`}. Jouez librement : faites préciser la situation (SAED) et exigez la reformulation des prescriptions.</div>`;
       return `<div class="cs">
+        ${samu ? `<div class="cs-h">2. Vous êtes le médecin régulateur <small>« Médecin régulateur, je vous écoute »</small></div>` : ``}
         <div class="cs-h">Doit entendre <small>touchez quand c'est dit</small></div>
-        <div class="cs-hear">${L(c.hear).map((h, i) => `<button type="button" class="${heard[i] ? `on` : ``}" onclick="markHeard(${i})">${heard[i] ? `✓` : `○`} ${esc(h)}</button>`).join(``)}</div>
+        <div class="cs-hear">${L(c.hear).map((h, i) => `<button type="button" class="${heard[i] ? `on` : ``}" ${live ? `onclick="markHeard(${i})"` : `disabled`}>${heard[i] ? `✓` : `○`} ${esc(h)}</button>`).join(``)}</div>
         ${L(c.ask).length ? `<div class="cs-h">S'il manque des éléments, demander</div><ul>${L(c.ask).map((x) => `<li>${esc(x)}</li>`).join(``)}</ul>` : ``}
         ${c.answer ? `<div class="cs-h">Réponse quand l'essentiel est transmis</div><p>${esc(c.answer)}</p>` : ``}
         ${L(c.presc).length ? `<div class="cs-h">Prescriptions orales (à faire reformuler)</div><ul>${L(c.presc).map((x) => `<li>${esc(x)}</li>`).join(``)}</ul>` : ``}
@@ -5125,10 +5347,32 @@
     }
     function markHeard(i) {
       if (!call) return;
-      const c = phaseCall(call.contact ? call.contact.id : ``); if (!c || !c.hear || !c.hear[i]) return;
+      const c = phaseCall(call.contact.id, call.cfgStep); if (!c || !c.hear || !c.hear[i]) return;
       call.heard = call.heard || {};
       call.heard[i] = !call.heard[i];
       if (call.heard[i]) callLog(`SAED — entendu : ${c.hear[i]}`);
+      renderCallUi();
+    }
+    function markArm(i) {
+      if (!call) return;
+      call.arm = call.arm || {};
+      call.arm[i] = !call.arm[i];
+      if (call.arm[i]) callLog(`ARM — obtenu : ${ARM_ITEMS[i]}`);
+      renderCallUi();
+    }
+    /* SAMU joué par un formateur : mise en attente puis médecin régulateur */
+    function samuHold() {
+      if (!call) return;
+      call.stage = `hold`; call.holdMute = true; applyMic();
+      pub({ type: `CALL_HOLD`, cid: call.cid, on: true });
+      pub({ type: `CALL_STAGE`, cid: call.cid, stage: `hold` });
+      renderCallUi();
+    }
+    function samuResume() {
+      if (!call) return;
+      call.stage = `reg`; call.holdMute = false; applyMic();
+      pub({ type: `CALL_HOLD`, cid: call.cid, on: false });
+      pub({ type: `CALL_STAGE`, cid: call.cid, stage: `reg` });
       renderCallUi();
     }
 
@@ -5139,7 +5383,7 @@
       requestWakeLock();
       const ct = phoneContacts()[i]; if (!ct) return;
       const C = callCfg();
-      call = { cid: uid(), contact: { id: ct.id, name: ct.name, persona: ct.persona || `` }, mode: C.mode, state: `calling`, t0: Date.now(), liveAt: 0, txt: [] };
+      call = { cid: uid(), contact: ctBrief(ct), mode: C.mode, state: `calling`, t0: Date.now(), liveAt: 0, txt: [], cfgStep: sim.stepIdx, stage: isSamuCt(ct) ? `arm` : `` };
       publishSyncMessage({ type: `CALL_RING`, cid: call.cid, contact: call.contact, mode: C.mode, sid: sim.sessionId, step: sim.stepIdx });
       if (C.mode === `tel`) {
         if (!C.tel) { publishSyncMessage({ type: `CALL_END`, cid: call.cid, why: `no-number` }); phoneEnded(`Numéro non attribué`); return; }
@@ -5148,10 +5392,11 @@
         return;
       }
       if (C.mode === `ia`) {
-        const k = iaCfg();
-        if (!k.key) { callLog(`Appel IA impossible : pas de clé sur le téléphone d'appel`); publishSyncMessage({ type: `CALL_END`, cid: call.cid, why: `no-key` }); phoneEnded(`Service indisponible`); return; }
+        if (!iaCfg().key) { callLog(`Appel IA impossible : pas de clé sur le téléphone d'appel`); publishSyncMessage({ type: `CALL_END`, cid: call.cid, why: `no-key` }); phoneEnded(`Service indisponible`); return; }
         ringback(); renderPhone();
-        setTimeout(() => { if (call && call.state === `calling`) iaAnswer(); }, 4200 + Math.random() * 3000);
+        const cid = call.cid;
+        if (useLive()) liveForStage(`ring`);         // v9 : la liaison Live s'ouvre pendant la sonnerie
+        setTimeout(() => { if (call && call.cid === cid && call.state === `calling`) iaAnswer(); }, (call.stage ? 2500 : 4200) + Math.random() * 3000);
         return;
       }
       ringback(); renderPhone();
@@ -5161,34 +5406,102 @@
     function phoneEnded(why) {
       if (!call) return;
       const was = call;
-      clearTimeout(was.noAns); iaStop(); rtcClose();
+      clearTimeout(was.noAns); clearTimeout(was.holdT); iaStop(); rtcClose();
       was.state = `ended`; was.why = why;
       busyTone(); renderPhone();
       setTimeout(() => { if (call === was) { call = null; renderPhone(); } }, 3000);
     }
     async function phoneOnAnswer(m) {
-      if (!call || m.cid !== call.cid || call.state !== `calling`) return;
+      if (!call || m.cid !== call.cid || call.state !== `calling` || m.by === `ia`) return;
       clearTimeout(call.noAns);
       stopTone();
       call.state = `live`; call.liveAt = Date.now(); call.by = m.by;
       renderPhone();
-      const r = await rtcOpen();
-      if (!call || call.cid !== m.cid) { try { r.pc.close(); if (r.st) r.st.getTracks().forEach((t) => t.stop()); } catch (_) {} return; }
-      call.pc = r.pc; call.st = r.st;
-      await r.pc.setLocalDescription(await r.pc.createOffer());
-      await iceDone(r.pc);
-      publishSyncMessage({ type: `CALL_SDP`, cid: call.cid, to: m.by, kind: `offer`, sdp: r.pc.localDescription.sdp });
+      startRtcTo(m.by);
+    }
+    /* Le formateur laisse l'IA répondre à un appel qui sonne chez lui */
+    function phoneLetIa(m) {
+      if (!call || m.cid !== call.cid || call.state !== `calling`) return;
+      if (!iaCfg().key) { callLog(`« Laisser l'IA répondre » impossible : pas de clé sur le téléphone d'appel`); return; }
+      clearTimeout(call.noAns);
+      call.mode = `ia`;
+      const cid = call.cid;
+      setTimeout(() => { if (call && call.cid === cid && call.state === `calling`) iaAnswer(); }, 700);
+    }
+    /* Le formateur reprend la main sur l'IA : l'IA se tait, la voix passe par son appareil */
+    function phoneTake(m) {
+      if (!call || m.cid !== call.cid || call.state !== `live`) return;
+      clearTimeout(call.holdT);
+      iaStop(); stopTone();
+      call.listening = call.speaking = call.thinking = false;
+      if (call.stage === `hold`) call.stage = `reg`;
+      call.holdMute = false;
+      call.mode = `human`; call.by = m.by;
+      renderPhone();
+      startRtcTo(m.by);
+    }
+    /* … et la rend à l'IA */
+    function phoneGive(m) {
+      if (!call || m.cid !== call.cid || call.state !== `live` || call.mode !== `human`) return;
+      rtcClose();
+      if (m.stage) call.stage = m.stage === `hold` ? `reg` : m.stage;
+      call.mode = `ia`;
+      if (useLive()) { renderPhone(); liveForStage(`resume`); return; }
+      const P = iaPrompts(call, `json`);
+      call.sys = (call.stage === `arm` ? P.arm : P.main) + (call.txt.length ? `\n\nCONVERSATION JUSQU'ICI :\n${iaTranscript()}` : ``);
+      call.note = `(Un collègue a tenu la communication quelques instants, sans transcription. Reprends naturellement là où vous en étiez, sans te présenter à nouveau.)`;
+      if (!call.hist || !call.hist.length) call.hist = [{ role: `user`, parts: [{ text: `(Le téléphone sonne, tu décroches.)` }] }, { role: `model`, parts: [{ text: `Oui ?` }] }];
+      if (call.hist[call.hist.length - 1].role === `user`) call.hist.push({ role: `model`, parts: [{ text: JSON.stringify({ dire: `D'accord.`, elements: [] }) }] });
+      renderPhone();
+      iaListen();
+    }
+    /* Mise en attente / reprise par le formateur qui joue le 15 */
+    function phoneHold(m) {
+      if (!call || m.cid !== call.cid || call.state !== `live`) return;
+      if (m.on) { call.stage = `hold`; call.holdMute = true; holdMusic(); }
+      else { call.stage = `reg`; call.holdMute = false; stopTone(); }
+      applyMic(); renderPhone();
+    }
+    /* Rappel : le médecin rappelle les apprenants */
+    function phoneIncoming(m) {
+      if (m.sid && sim.sessionId && m.sid !== sim.sessionId) return;
+      if (call && call.state !== `ended`) { publishSyncMessage({ type: `CALL_END`, cid: m.cid, why: `busy` }); return; }
+      toneAudio();
+      call = { cid: m.cid, contact: m.contact, mode: m.mode, state: `incoming`, cb: true, from: m.from || ``, cfgStep: m.step, t0: Date.now(), liveAt: 0, txt: [], stage: `` };
+      ringIncoming(); renderPhone();
+      const cid = m.cid;
+      call.noAns = setTimeout(() => { if (call && call.cid === cid && call.state === `incoming`) { publishSyncMessage({ type: `CALL_END`, cid, why: `noanswer` }); stopTone(); call = null; renderPhone(); } }, 40000);
+    }
+    function answerIncoming() {
+      if (!call || call.state !== `incoming`) return;
+      clearTimeout(call.noAns); stopTone(); requestWakeLock();
+      call.state = `live`; call.liveAt = Date.now();
+      if (call.mode === `ia`) {
+        if (!iaCfg().key) { callLog(`Rappel IA impossible : pas de clé sur le téléphone d'appel`); endCall(`no-key`); return; }
+        publishSyncMessage({ type: `CALL_ANSWER`, cid: call.cid, by: `ia`, cb: true });
+        renderPhone(); iaCallbackStart();
+      } else {
+        publishSyncMessage({ type: `CALL_ANSWER`, cid: call.cid, by: senderId, who: `phone`, cb: true });
+        renderPhone(); startRtcTo(call.from);
+      }
+    }
+    function declineIncoming() {
+      if (!call) return;
+      clearTimeout(call.noAns); stopTone();
+      publishSyncMessage({ type: `CALL_END`, cid: call.cid, why: `declined-learner` });
+      call = null; renderPhone();
     }
     function endCall(why) {
       if (!call) return;
       const was = call;
-      clearTimeout(was.noAns);
+      clearTimeout(was.noAns); clearTimeout(was.holdT);
       stopTone();
       iaStop();
       rtcClose();
       if (was.state !== `ended`) {
         was.state = `ended`; was.why = why || ``;
-        publishSyncMessage({ type: `CALL_END`, cid: was.cid, why: why || `hangup`, dur: was.liveAt ? Date.now() - was.liveAt : 0, txt: was.txt && was.txt.length ? was.txt : undefined });
+        const msg = { type: `CALL_END`, cid: was.cid, why: why || `hangup`, dur: was.liveAt ? Date.now() - was.liveAt : 0, txt: was.txt && was.txt.length ? was.txt : undefined };
+        if (role === `phone`) publishSyncMessage(msg); else pub(msg);
       }
       if (role === `phone`) { renderPhone(); setTimeout(() => { if (call === was) { call = null; renderPhone(); } }, 2500); }
       else { call = null; renderCallUi(); }
@@ -5211,21 +5524,23 @@
         return;
       }
       const dur = call.liveAt ? fmtDur(Date.now() - call.liveAt) : ``;
-      const stat = call.state === `calling` ? `Appel en cours…` : call.state === `tel` ? `Appel téléphonique…` : call.state === `live` ? (call.thinking ? `…` : dur) : (call.why || `Appel terminé`);
+      const stat = call.state === `incoming` ? `Appel entrant…` : call.state === `calling` ? `Appel en cours…` : call.state === `tel` ? `Appel téléphonique…` : call.state === `live` ? (call.stage === `hold` ? `♪ Musique d'attente…` : call.thinking ? `…` : dur) : (call.why || `Appel terminé`);
+      const btns = call.state === `incoming`
+        ? `<button type="button" class="ph-b red" onclick="declineIncoming()">✆<small>Refuser</small></button><button type="button" class="ph-b grn" onclick="answerIncoming()">✆<small>Décrocher</small></button>`
+        : (call.state === `live` && call.mode !== `ia` ? `<button type="button" class="ph-b ${call.muted ? `on` : ``}" onclick="toggleMute()">🎙<small>${call.muted ? `Micro coupé` : `Muet`}</small></button>` : ``) +
+          (call.state !== `ended` ? `<button type="button" class="ph-b red" onclick="endCall('hangup')">✆<small>Raccrocher</small></button>` : ``);
       el.innerHTML = `<div class="ph-call ${call.state}">
-        <div class="ph-av big">${esc((call.contact.name || `?`).slice(0, 1))}</div>
+        <div class="ph-av big ${call.state === `incoming` ? `ring` : ``}">${esc((call.contact.name || `?`).slice(0, 1))}</div>
         <div class="ph-cn">${esc(call.contact.name)}</div>
         <div class="ph-st" id="ph-st">${esc(stat)}</div>
-        ${call.state === `live` && call.mode === `ia` ? `<div class="ph-mic ${call.listening ? `on` : ``}">${call.listening ? `● Parlez` : call.speaking ? `◀ ◀` : ``}</div>` : ``}
-        <div class="ph-btns">
-          ${call.state === `live` && call.mode !== `ia` ? `<button type="button" class="ph-b ${call.muted ? `on` : ``}" onclick="toggleMute()">🎙<small>${call.muted ? `Micro coupé` : `Muet`}</small></button>` : ``}
-          ${call.state !== `ended` ? `<button type="button" class="ph-b red" onclick="endCall('hangup')">✆<small>Raccrocher</small></button>` : ``}
-        </div></div>`;
+        ${call.state === `live` && call.mode === `ia` && call.stage !== `hold` ? `<div class="ph-mic ${call.listening && !call.speaking ? `on` : ``}">${call.speaking ? `◀ ◀` : call.listening ? `● Parlez` : call.thinking ? `…` : ``}</div>` : ``}
+        <div class="ph-btns">${btns}</div></div>`;
     }
 
     /* ---------- Réglages cachés du téléphone d'appel (appui long 3 s sur l'heure) ---------- */
-    function iaCfg() { try { return Object.assign({ key: ``, model: `gemini-flash-lite-latest` }, JSON.parse(localStorage.getItem(`im60_ia`) || `{}`)); } catch (_) { return { key: ``, model: `gemini-flash-lite-latest` }; } }
-    function iaSave(k) { try { localStorage.setItem(`im60_ia`, JSON.stringify(k)); } catch (_) {} }
+    const IA_DEF = { key: ``, model: `gemini-flash-latest`, voice: `live`, live: `gemini-3.8-live`, barge: true, liveUrl: `` };
+    function iaCfg() { try { return Object.assign({}, IA_DEF, JSON.parse(localStorage.getItem(`im60_ia`) || `{}`)); } catch (_) { return Object.assign({}, IA_DEF); } }
+    function iaSave(k) { try { localStorage.setItem(`im60_ia`, JSON.stringify(Object.assign(iaCfg(), k))); } catch (_) {} }
     function openPhoneSettings() {
       const k = iaCfg();
       $(`ph-set`).classList.remove(`hidden`);
@@ -5234,103 +5549,166 @@
         <div class="muted">Code de salon : <b>${appState.pin}</b> · Appels : <b>${esc(callModeLbl())}</b></div>
         <label class="lbl" for="ia-key">Clé d'accès Gemini (gardée sur ce téléphone seulement)</label>
         <input type="password" id="ia-key" value="${esc(k.key)}" placeholder="AIza…" autocomplete="off">
-        <label class="lbl" for="ia-model">Modèle</label>
+        <label class="lbl" for="ia-voice">Conversation</label>
+        <select id="ia-voice"><option value="live"${k.voice !== `classic` ? ` selected` : ``}>Live : conversation continue, voix naturelle (conseillé)</option><option value="classic"${k.voice === `classic` ? ` selected` : ``}>Classique : chacun son tour, voix du téléphone</option></select>
+        <label class="lbl" for="ia-live">Modèle Live</label>
+        <input type="text" id="ia-live" value="${esc(k.live)}">
+        <label class="lbl" style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="ia-barge" ${k.barge ? `checked` : ``}> Les apprenants peuvent couper la parole à l'IA</label>
+        <div class="muted">Si l'IA s'interrompt toute seule (elle s'entend dans le haut-parleur), décochez, ou baissez le volume.</div>
+        <label class="lbl" for="ia-model">Modèle classique (et secours si Live ne répond pas)</label>
         <input type="text" id="ia-model" value="${esc(k.model)}">
-        <div class="muted">Clé gratuite sur aistudio.google.com (compte Google). Ne la mettez jamais dans un fichier publié sur GitHub.</div>
+        <div class="muted">Clé gratuite sur aistudio.google.com (compte Google). Ne la mettez jamais dans un fichier publié sur GitHub. La clé sert aussi quand le poste médecin « laisse l'IA répondre » et pour les rappels par l'IA.</div>
         <div class="row"><button type="button" class="btn pri" onclick="savePhoneSettings()">Enregistrer</button><button type="button" class="btn" onclick="testIa()">Tester la voix</button></div>
         <div id="ia-test" class="muted"></div>
-        <div class="row"><button type="button" class="btn" onclick="iaSave({key:'',model:iaCfg().model});openPhoneSettings()">Effacer la clé</button><button type="button" class="btn" onclick="$('ph-set').classList.add('hidden')">Fermer</button></div>
+        <div class="row"><button type="button" class="btn" onclick="iaSave({key:''});openPhoneSettings()">Effacer la clé</button><button type="button" class="btn" onclick="$('ph-set').classList.add('hidden')">Fermer</button></div>
       </div>`;
     }
-    function savePhoneSettings() { iaSave({ key: $(`ia-key`).value.trim(), model: $(`ia-model`).value.trim() || `gemini-flash-lite-latest` }); toast(`Réglages enregistrés`); $(`ph-set`).classList.add(`hidden`); }
+    function savePhoneSettings() {
+      iaSave({ key: $(`ia-key`).value.trim(), model: $(`ia-model`).value.trim() || IA_DEF.model, voice: $(`ia-voice`).value, live: $(`ia-live`).value.trim() || IA_DEF.live, barge: $(`ia-barge`).checked });
+      toast(`Réglages enregistrés`); $(`ph-set`).classList.add(`hidden`);
+    }
     async function testIa() {
       savePhoneSettings(); openPhoneSettings();
       const out = $(`ia-test`); out.textContent = `Test en cours…`;
+      if (iaCfg().voice !== `classic`) { liveTest(out); return; }
       try { const r = await iaAsk(`Tu réponds au téléphone. Dis seulement : « Allô, j'écoute. »`, [{ role: `user`, parts: [{ text: `(Le téléphone sonne.)` }] }]); out.textContent = `Réponse : ${r}`; iaSpeak(r); }
       catch (e) { out.textContent = `Échec : ${e.message}`; }
     }
 
-    /* ---------- IA : écoute (reconnaissance vocale), réponse (Gemini), voix (synthèse) ---------- */
-    function iaPrompt(ct) {
-      const sc = scenarioById(sim.scenarioId), st = sc.steps[sim.stepIdx] || {}, c = phaseCall(ct.id);
-      const L = (arr) => (arr || []).filter(Boolean).map((x) => `- ${x}`).join(`\n`) || `- (rien de précisé)`;
-      const vit = `FC ${st.hr ?? `?`}, TA ${st.nibpFail ? `non mesurable` : `${st.sys ?? `?`}/${st.dia ?? `?`}`}, SpO2 ${st.spo2 ?? `?`} %, FR ${st.rr ?? `?`}`;
-      const head = [
-        `Tu joues le rôle de : ${ct.name}.${ct.persona ? ` ${ct.persona}` : ``}`,
-        `Tu réponds au téléphone à une infirmière ou un infirmier d'un centre d'hémodialyse. C'est une simulation de formation : ne sors jamais du rôle, ne dis jamais que tu es une IA, ne fais pas de cours.`,
-        `Parle comme au téléphone : phrases courtes, deux ou trois au maximum par réponse, en français, sans liste ni mise en forme (ta réponse est lue à voix haute).`,
-        ``, `CE QUE TU SAIS DÉJÀ (ne le révèle pas, sers-t'en pour réagir) :`,
-        `- Patient : ${sc.patient || `patient hémodialysé`}.`,
-        `- Situation : ${sc.trigger || sc.context || ``}`,
-        `- Moment de la simulation : ${st.label || ``}. ${st.cue || ``}`,
-        `- Constantes actuelles : ${vit}.`
-      ];
-      if (c && c.prompt) return c.prompt + `\n\nRAPPEL : ta réponse est lue à voix haute, pas de liste ni de mise en forme.`;
-      if (c) return head.concat([
-        ``, `CE QUE TU DOIS ENTENDRE DE L'APPELANT AVANT DE DÉCIDER :`, L(c.hear),
-        ``, `S'IL MANQUE DES ÉLÉMENTS, pose ces questions, une à la fois :`, L(c.ask),
-        `Tant que l'essentiel n'est pas transmis, ne propose pas de diagnostic ni de traitement.`,
-        ``, `QUAND L'ESSENTIEL EST TRANSMIS, réponds dans cet esprit :`, String(c.answer || `(rien de précisé)`).trim(),
-        ``, `PRESCRIPTIONS À DONNER ORALEMENT, puis demande à l'appelant de les reformuler. Corrige-le s'il se trompe :`, L(c.presc),
-        ``, `À NE PAS DIRE OU FAIRE :`, String(c.avoid || `(rien de précisé)`).trim(),
-        (sc.saed || {}).doctor ? `\nCONSIGNES COMMUNES :\n${sc.saed.doctor}` : ``,
-        ``, `Si l'appelant ne se présente pas ou ne dit pas d'où il appelle, demande-le en premier.`
-      ]).join(`\n`);
-      return head.concat([
-        ``, `Aucune consigne particulière n'est prévue pour cet appel à ce moment. Réagis de façon réaliste et prudente : fais préciser la situation (qui appelle, le patient, ce qui se passe, les constantes, ce qu'on attend de toi), ne donne pas de diagnostic tant que tu n'as pas les éléments, et fais reformuler toute prescription.`,
-        (sc.saed || {}).doctor ? `\nCONSIGNES COMMUNES :\n${sc.saed.doctor}` : ``
-      ]).join(`\n`);
+    /* ---------- Fiche de l'appel en cours : éléments obtenus, autorisation de décider ---------- */
+    const callCfgNow = () => (call ? phaseCall(call.contact.id, call.cfgStep) : null);
+    const cleanList = (a) => (a || []).map((x) => String(x).trim()).filter(Boolean);
+    function iaItems() { return !call || call.cb ? [] : call.stage === `arm` ? ARM_ITEMS : cleanList((callCfgNow() || {}).hear); }
+    function iaMark(i) {
+      if (!call) return;
+      const items = iaItems(), arm = call.stage === `arm`;
+      if (!(i >= 0) || !items[i]) return;
+      const k = arm ? `arm` : `heard`;
+      call[k] = call[k] || {};
+      if (call[k][i]) return;
+      call[k][i] = true;
+      publishSyncMessage({ type: `CALL_MARK`, cid: call.cid, kind: arm ? `arm` : `hear`, i });
+      callLog(`${arm ? `ARM — obtenu` : `SAED — entendu`} (IA) : ${items[i]}`);
     }
-    async function iaAsk(system, contents) {
+    function iaMissing() { const got = (call && (call.stage === `arm` ? call.arm : call.heard)) || {}; return iaItems().map((x, i) => [i, x]).filter(([i]) => !got[i]); }
+    const missTxt = (miss) => miss.map(([i, x]) => `${i + 1}. ${x}`).join(` ; `);
+    function iaCanDecide() { return !callCfgNow() || call.urg || !iaMissing().length || (call.turns || 0) >= 7; }
+    function iaUnlock() {
+      const miss = iaMissing();
+      if (!call.unlocked) { call.unlocked = true; callLog(`IA : décision autorisée${miss.length ? ` (manquait encore : ${miss.map((x) => x[1]).join(`, `)})` : ` (tout a été transmis)`}`); }
+      return callDecision(callCfgNow());
+    }
+    function iaCheck(urg) {
+      if (urg && !call.urg) { call.urg = true; callLog(`IA : urgence vitale reconnue, décision sans attendre`); }
+      const miss = iaMissing();
+      if (!iaCanDecide()) return { autorise: false, manquants: missTxt(miss), consigne: `Pas encore. Pose une question courte sur : ${miss[0][1]}.` };
+      const d = iaUnlock();
+      return { autorise: true, ta_decision: d.decision, prescriptions: d.prescriptions.join(` ; `) || `aucune`, a_ne_pas_dire: d.a_ne_pas_dire || `rien de particulier`, consigne: `Annonce ta décision avec tes mots : d'abord le moyen et le délai, puis les consignes une par une, puis fais reformuler.` };
+    }
+
+    /* ---------- IA : consignes, voix du téléphone (mode classique) ---------- */
+    function iaPrompts(c, mode) {
+      const ct = fullCt(c.contact), cfg = phaseCall(ct.id, c.cfgStep), ctx = ctxNow();
+      if (c.cb) return { main: buildCallbackPrompt(ctx, cfg, ct, mode) };
+      return buildCallPrompts(ctx, cfg, ct, mode);
+    }
+    function iaWho(c) {
+      const samu = isSamuCt(fullCt(c.contact));
+      if (c.stage === `arm`) return `ARM (IA)`;
+      return samu ? `Régulateur (IA)` : `Médecin (IA)`;
+    }
+    const IA_SCHEMA = { type: `OBJECT`, properties: { dire: { type: `STRING` }, elements: { type: `ARRAY`, items: { type: `INTEGER` } }, urgence: { type: `BOOLEAN` }, transfert: { type: `BOOLEAN` }, raccrocher: { type: `BOOLEAN` } }, required: [`dire`] };
+    const JSON_RULE = `\n\nFORMAT DE TA RÉPONSE : un objet JSON. « dire » = ce que tu dis à voix haute (une ou deux phrases courtes). « elements » = les numéros des éléments que l'appelant vient de transmettre dans son dernier message (liste vide sinon). « urgence », « transfert », « raccrocher » = true seulement dans les cas prévus par la trame.`;
+    async function iaAsk(system, contents, json) {
       const k = iaCfg();
       const ctl = new AbortController(), t = setTimeout(() => ctl.abort(), 20000);
       try {
         const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(k.model)}:generateContent`, {
           method: `POST`, signal: ctl.signal,
           headers: { 'Content-Type': `application/json`, 'x-goog-api-key': k.key },
-          body: JSON.stringify({ systemInstruction: { parts: [{ text: system }] }, contents, generationConfig: { temperature: 0.7, maxOutputTokens: 600 } })
+          body: JSON.stringify({ systemInstruction: { parts: [{ text: system + (json ? JSON_RULE : ``) }] }, contents,
+            generationConfig: json ? { temperature: 0.5, maxOutputTokens: 800, responseMimeType: `application/json`, responseSchema: IA_SCHEMA } : { temperature: 0.6, maxOutputTokens: 600 } })
         });
         const j = await r.json().catch(() => ({}));
         if (!r.ok) throw new Error((j.error && j.error.message) || `erreur ${r.status}`);
         const parts = (((j.candidates || [])[0] || {}).content || {}).parts || [];
-        const txt = parts.map((p) => p.text || ``).join(` `).replace(/[*_#`]/g, ``).trim();
-        if (!txt) throw new Error(`réponse vide`);
-        return txt;
+        const raw = parts.filter((p) => !p.thought).map((p) => p.text || ``).join(` `).trim();
+        if (!raw) throw new Error(`réponse vide`);
+        if (!json) return raw.replace(/[*_#`]/g, ``).trim();
+        try { const o = JSON.parse(raw.replace(/^```(json)?|```$/g, ``)); if (o && typeof o.dire === `string`) return o; } catch (_) {}
+        return { dire: raw.replace(/[{}"*_#`]/g, ``).replace(/^\s*dire\s*:\s*/i, ``).trim() };
       } finally { clearTimeout(t); }
     }
-    function iaVoice() {
-      const vs = (window.speechSynthesis && speechSynthesis.getVoices()) || [];
-      return vs.find((v) => /^fr(-|_)FR/i.test(v.lang) && /google/i.test(v.name)) || vs.find((v) => /^fr(-|_)FR/i.test(v.lang)) || vs.find((v) => /^fr/i.test(v.lang)) || null;
+    function iaVoice(alt) {
+      const vs = ((window.speechSynthesis && speechSynthesis.getVoices()) || []).filter((v) => /^fr/i.test(v.lang));
+      const fr = vs.filter((v) => /^fr(-|_)FR/i.test(v.lang));
+      const pool = fr.length ? fr : vs;
+      if (alt && pool.length > 1) return pool.find((v) => !/google/i.test(v.name)) || pool[1];
+      return pool.find((v) => /google/i.test(v.name)) || pool[0] || null;
     }
-    function iaSpeak(text, done) {
+    function iaSpeak(text, done, alt) {
       if (!window.speechSynthesis) { if (done) done(); return; }
       const u = new SpeechSynthesisUtterance(text);
-      u.lang = `fr-FR`; u.rate = 1.05;
-      const v = iaVoice(); if (v) u.voice = v;
+      u.lang = `fr-FR`; u.rate = 1.05; u.pitch = alt ? 0.85 : 1.08;
+      const v = iaVoice(alt); if (v) u.voice = v;
       let fin = false; const end = () => { if (fin) return; fin = true; if (done) done(); };
       u.onend = end; u.onerror = end;
       setTimeout(end, 1500 + text.length * 110);        // filet de sécurité si onend ne vient pas
       speechSynthesis.cancel(); speechSynthesis.speak(u);
     }
+    const iaAlt = (c) => c.stage === `reg` || (c.cb && isSamuCt(fullCt(c.contact)));
+    function iaSay(text, then) {
+      if (!call) return;
+      const cid = call.cid;
+      iaLine(iaWho(call), text);
+      call.speaking = true; renderPhone();
+      iaSpeak(text, () => { if (call && call.cid === cid && call.mode === `ia`) { call.speaking = false; (then || iaListen)(); } }, iaAlt(call));
+    }
+
+    /* ---------- Entrée commune : décrocher, rappeler, reprendre ---------- */
     function iaAnswer() {
       if (!call) return;
       stopTone();
-      call.state = `live`; call.liveAt = Date.now(); call.hist = []; call.sys = iaPrompt(call.contact);
+      call.state = `live`; call.liveAt = Date.now(); call.hist = []; call.armTurns = 0; call.turns = 0;
       publishSyncMessage({ type: `CALL_ANSWER`, cid: call.cid, by: `ia` });
-      const nm = call.contact.name.replace(/\s*\(.*\)\s*/, ``), hello = /samu|\b15\b/i.test(call.contact.name) ? `SAMU, centre 15, je vous écoute.` : `Allô, ${nm.charAt(0).toLowerCase() + nm.slice(1)}, je vous écoute.`;
-      call.hist.push({ role: `user`, parts: [{ text: `(Le téléphone sonne, tu décroches.)` }] }, { role: `model`, parts: [{ text: hello }] });
-      iaLine(`Médecin (IA)`, hello);
       renderPhone();
-      call.speaking = true; iaSpeak(hello, () => { if (call) { call.speaking = false; iaListen(); } });
+      if (useLive()) { if (lv && lv.cid === call.cid) liveKick(lv); else liveForStage(`answer`); return; }
+      iaAnswerClassic();
+    }
+    function iaAnswerClassic() {
+      const P = iaPrompts(call, `json`);
+      call.sys = call.stage === `arm` ? P.arm : P.main;
+      const nm = call.contact.name.replace(/\s*\(.*\)\s*/, ``);
+      const hello = call.stage === `arm` ? `SAMU, centre 15, j'écoute.` : `Allô, ${nm.charAt(0).toLowerCase() + nm.slice(1)}, je vous écoute.`;
+      call.hist = [{ role: `user`, parts: [{ text: `(Le téléphone sonne, tu décroches.)` }] }, { role: `model`, parts: [{ text: JSON.stringify({ dire: hello, elements: [] }) }] }];
+      iaSay(hello);
+    }
+    async function iaCallbackStart() {
+      if (!call) return;
+      call.turns = 0;
+      if (useLive()) { liveForStage(`cb`); return; }
+      const cid = call.cid;
+      call.sys = iaPrompts(call, `json`).main;
+      call.hist = [{ role: `user`, parts: [{ text: `(Tu rappelles le centre de dialyse. On décroche : « Allô ? »)` }] }];
+      call.thinking = true; renderPhone();
+      let r = null;
+      try { r = await iaAsk(call.sys, call.hist, true); }
+      catch (e) { r = { dire: `Bonjour, c'est ${call.contact.name}, je vous rappelle pour avoir des nouvelles du patient.` }; callLog(`IA : erreur (${e.message})`); }
+      if (!call || call.cid !== cid) return;
+      call.thinking = false;
+      call.hist.push({ role: `model`, parts: [{ text: JSON.stringify(r) }] });
+      iaSay(String(r.dire || ``).trim() || `Allô, je vous rappelle pour avoir des nouvelles.`);
     }
     function iaLine(who, text) {
       if (!call) return;
-      call.txt.push({ t: Date.now(), who, text });
+      call.txt.push({ t: Date.now(), who, text, stage: call.stage || `` });
       publishSyncMessage({ type: `CALL_TXT`, cid: call.cid, who, text });
     }
+
+    /* ---------- Mode classique : reconnaissance vocale du téléphone, chacun son tour ---------- */
     let iaRec = null;
     function iaListen() {
-      if (!call || call.state !== `live` || call.mode !== `ia`) return;
+      if (!call || call.state !== `live` || call.mode !== `ia` || call.stage === `hold` || useLive()) return;
       const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
       if (!SR) { toast(`Reconnaissance vocale indisponible : utilisez Chrome`); callLog(`IA : reconnaissance vocale indisponible sur le téléphone d'appel`); return; }
       const rec = new SR(); iaRec = rec;
@@ -5341,7 +5719,7 @@
       rec.onend = () => {
         if (iaRec !== rec) return;
         iaRec = null;
-        if (!call || call.state !== `live`) return;
+        if (!call || call.state !== `live` || call.mode !== `ia`) return;
         call.listening = false;
         said = said.trim();
         if (!said) { setTimeout(iaListen, 150); renderPhone(); return; }
@@ -5350,32 +5728,321 @@
       call.listening = true; renderPhone();
       try { rec.start(); } catch (_) { setTimeout(iaListen, 400); }
     }
+    /* Note interne jointe au message de l'apprenant : ce qui manque, ou la décision quand elle est autorisée */
+    function iaInternalNote() {
+      if (!call || call.cb || call.stage === `arm` || call.unlocked) return ``;
+      if (iaCanDecide()) {
+        const d = iaUnlock();
+        return `\n[Note interne, ne la lis pas : l'essentiel est transmis, tu peux décider maintenant. Ta décision : ${d.decision} Prescriptions : ${d.prescriptions.join(` ; `) || `aucune`}. À ne pas dire : ${d.a_ne_pas_dire || `rien de particulier`}.]`;
+      }
+      return `\n[Note interne, ne la lis pas : encore manquants : ${missTxt(iaMissing())}. Pas de diagnostic ni de traitement pour l'instant : pose une question courte.]`;
+    }
     async function iaTurn(said) {
       if (!call) return;
       const cid = call.cid;
       iaLine(`Apprenant`, said);
-      call.hist.push({ role: `user`, parts: [{ text: said }] });
+      call.turns = (call.turns || 0) + 1;
+      const sent = (call.note ? `${call.note} ` : ``) + said + iaInternalNote(); call.note = ``;
+      call.hist.push({ role: `user`, parts: [{ text: sent }] });
       call.thinking = true; renderPhone();
-      let reply = ``;
-      try { reply = await iaAsk(call.sys, call.hist); }
-      catch (e) { if (!call || call.cid !== cid) return; reply = `Pardon, je vous entends mal. Vous pouvez répéter ?`; call.hist.pop(); callLog(`IA : erreur (${e.message})`); }
-      if (!call || call.cid !== cid) return;
+      let r = null;
+      try { r = await iaAsk(call.sys, call.hist, true); }
+      catch (e) { if (!call || call.cid !== cid) return; r = { dire: `Pardon, je vous entends mal. Vous pouvez répéter ?` }; call.hist.pop(); callLog(`IA : erreur (${e.message})`); }
+      if (!call || call.cid !== cid || call.mode !== `ia`) return;
       call.thinking = false;
-      if (call.hist[call.hist.length - 1].role === `user`) call.hist.push({ role: `model`, parts: [{ text: reply }] });
-      iaLine(`Médecin (IA)`, reply);
-      call.speaking = true; renderPhone();
-      iaSpeak(reply, () => { if (call && call.cid === cid) { call.speaking = false; iaListen(); } });
+      if (typeof r === `string`) r = { dire: r };
+      (r.elements || []).forEach((n) => iaMark(Math.round(Number(n)) - 1));
+      if (r.urgence && !call.urg) { call.urg = true; callLog(`IA : urgence vitale reconnue, décision sans attendre`); }
+      let reply = String(r.dire || ``).replace(/[*_#`]/g, ``).trim();
+      let transfer = false;
+      if (call.stage === `arm`) {
+        call.armTurns = (call.armTurns || 0) + 1;
+        if (r.transfert) transfer = true;
+        else if (call.armTurns >= 8) { transfer = true; reply += ` Je vous passe le médecin régulateur, ne quittez pas.`; }
+        reply = reply || `Je vous passe le médecin régulateur, ne quittez pas.`;
+      }
+      reply = reply || `Oui ?`;
+      if (call.hist[call.hist.length - 1].role === `user`) call.hist.push({ role: `model`, parts: [{ text: JSON.stringify(Object.assign({}, r, { dire: reply })) }] });
+      const hang = !!r.raccrocher && call.stage !== `arm`;
+      iaSay(reply, transfer ? iaTransfer : hang ? () => { setTimeout(() => { if (call && call.cid === cid) endCall(`hangup-ia`); }, 500); } : iaListen);
+    }
+    /* IA du 15 (classique) : l'ARM met en attente puis passe le médecin régulateur (autre voix) */
+    function iaTransfer() {
+      if (!call) return;
+      const cid = call.cid;
+      call.stage = `hold`; call.turns = 0;
+      publishSyncMessage({ type: `CALL_STAGE`, cid, stage: `hold` });
+      holdMusic(); renderPhone();
+      call.holdT = setTimeout(() => {
+        if (!call || call.cid !== cid || call.mode !== `ia` || call.state !== `live`) return;
+        stopTone();
+        call.stage = `reg`;
+        publishSyncMessage({ type: `CALL_STAGE`, cid, stage: `reg` });
+        if (useLive()) { liveForStage(`reg`); return; }
+        call.sys = iaPrompts(call, `json`).main + `\n\nCE QUE L'ARM A DÉJÀ NOTÉ (sa conversation avec l'appelant) :\n${iaTranscript()}`;
+        const hello = `Médecin régulateur du SAMU, bonjour. Je vous écoute, faites-moi votre bilan.`;
+        call.hist = [{ role: `user`, parts: [{ text: `(L'ARM te passe l'appel, tu décroches.)` }] }, { role: `model`, parts: [{ text: JSON.stringify({ dire: hello, elements: [] }) }] }];
+        iaSay(hello);
+      }, 4500 + Math.random() * 3500);
+    }
+    const iaTranscript = () => (call ? call.txt.map((l) => `${l.who.replace(` (IA)`, ``)} : ${l.text}`).join(`\n`) : ``);
+    /* Bascule vers le mode classique en cours d'appel (Live injoignable) */
+    function iaClassicResume() {
+      if (!call || call.state !== `live` || call.mode !== `ia`) return;
+      if (call.cb && !call.txt.length) { iaCallbackStart(); return; }
+      if (!call.txt.length) { iaAnswerClassic(); return; }
+      const P = iaPrompts(call, `json`);
+      call.sys = (call.stage === `arm` ? P.arm : P.main) + `\n\nCONVERSATION JUSQU'ICI :\n${iaTranscript()}`;
+      call.hist = [{ role: `user`, parts: [{ text: `(La ligne a coupé une seconde. Reprends.)` }] }, { role: `model`, parts: [{ text: JSON.stringify({ dire: `Pardon, ça a coupé. Vous pouvez répéter ?`, elements: [] }) }] }];
+      iaSay(`Pardon, ça a coupé. Vous pouvez répéter ?`);
+    }
+
+    /* =====================================================================
+       V9 — GEMINI LIVE : conversation vocale continue
+       Le téléphone d'appel ouvre une liaison WebSocket avec Gemini Live : le micro part en continu
+       (16 kHz), la voix de l'IA revient en continu (24 kHz), les apprenants peuvent lui couper la parole.
+       L'IA note elle-même les éléments transmis (noter_element), demande l'autorisation de décider
+       (verifier_decision), passe le régulateur (transferer_au_regulateur) et raccroche (raccrocher).
+       En cas d'échec, l'appel continue en mode classique.
+       ===================================================================== */
+    const LIVE_URL = `wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1beta.GenerativeService.BidiGenerateContent`;
+    const LIVE_VOICES = { arm: `Aoede`, reg: `Charon`, med: `Orus` };
+    const LIVE_FN = {
+      noter_element: { name: `noter_element`, description: `Note qu'un élément numéroté de ta liste vient d'être transmis par l'appelant. À appeler sans rien dire.`, parameters: { type: `OBJECT`, properties: { numero: { type: `INTEGER`, description: `Numéro de l'élément dans la liste` } }, required: [`numero`] } },
+      verifier_decision: { name: `verifier_decision`, description: `À appeler avant d'annoncer une décision, un diagnostic ou un traitement. Dit si l'essentiel a été transmis et donne la décision prévue et les prescriptions.`, parameters: { type: `OBJECT`, properties: { urgence_vitale: { type: `BOOLEAN`, description: `true si arrêt cardiaque ou détresse vitale immédiate` } } } },
+      transferer_au_regulateur: { name: `transferer_au_regulateur`, description: `Met l'appel en attente et le passe au médecin régulateur. À appeler juste après avoir dit « ne quittez pas ».` },
+      raccrocher: { name: `raccrocher`, description: `Termine l'appel, juste après avoir dit au revoir.` }
+    };
+    let lv = null, mic = null;
+    const useLive = () => iaCfg().voice !== `classic` && !(call && call.noLive) && typeof WebSocket !== `undefined`;
+    const b64enc = (u8) => { let s = ``; for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(s); };
+    const b64dec = (b) => { const s = atob(b), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; };
+
+    /* Micro : capture, passage à 16 kHz, paquets de 100 ms */
+    const MIC_WORKLET = `class P extends AudioWorkletProcessor{process(i){const c=i[0]&&i[0][0];if(c)this.port.postMessage(c.slice(0));return true}}registerProcessor('im60-mic',P);`;
+    async function micStart() {
+      if (mic) return mic;
+      const st = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true, channelCount: 1 } });
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      try { await ctx.resume(); } catch (_) {}
+      const m = { st, ctx, src: ctx.createMediaStreamSource(st), mute: ctx.createGain(), node: null, carry: new Float32Array(0), frac: 0, out: new Int16Array(1600), n: 0 };
+      m.mute.gain.value = 0; m.mute.connect(ctx.destination);
+      const ratio = ctx.sampleRate / 16000;
+      const feed = (f) => {
+        const buf = new Float32Array(m.carry.length + f.length); buf.set(m.carry); buf.set(f, m.carry.length);
+        let i = m.frac;
+        while (i + ratio <= buf.length) {
+          const a = Math.floor(i), b = Math.max(a + 1, Math.floor(i + ratio));
+          let s = 0; for (let k = a; k < b; k++) s += buf[k];
+          const v = Math.max(-1, Math.min(1, s / (b - a)));
+          m.out[m.n++] = v < 0 ? v * 32768 : v * 32767;
+          if (m.n === m.out.length) { liveSendAudio(m.out.slice()); m.n = 0; }
+          i += ratio;
+        }
+        const keep = Math.floor(i); m.carry = buf.slice(keep); m.frac = i - keep;
+      };
+      try {
+        const url = URL.createObjectURL(new Blob([MIC_WORKLET], { type: `application/javascript` }));
+        await ctx.audioWorklet.addModule(url);
+        m.node = new AudioWorkletNode(ctx, `im60-mic`);
+        m.node.port.onmessage = (e) => feed(e.data);
+      } catch (_) {
+        m.node = ctx.createScriptProcessor(4096, 1, 1);
+        m.node.onaudioprocess = (e) => feed(e.inputBuffer.getChannelData(0).slice(0));
+      }
+      m.src.connect(m.node); m.node.connect(m.mute);
+      if (mic) { try { st.getTracks().forEach((t) => t.stop()); ctx.close(); } catch (_) {} return mic; }
+      mic = m; return m;
+    }
+    function micStop() {
+      const m = mic; mic = null; if (!m) return;
+      try { m.st.getTracks().forEach((t) => t.stop()); m.src.disconnect(); m.node.disconnect(); m.ctx.close(); } catch (_) {}
+    }
+    function liveSendAudio(pcm) {
+      const L = lv;
+      if (!L || !L.ready || !L.kicked || L.ws.readyState !== 1) return;
+      if (!call || call.cid !== L.cid || call.state !== `live` || call.mode !== `ia` || call.stage === `hold`) return;
+      if (!iaCfg().barge && L.srcs.length) return;          // pas de coupure de parole : on n'écoute pas pendant que l'IA parle
+      L.ws.send(JSON.stringify({ realtimeInput: { audio: { data: b64enc(new Uint8Array(pcm.buffer)), mimeType: `audio/pcm;rate=16000` } } }));
+    }
+
+    /* Haut-parleur : lecture en continu des morceaux de voix reçus */
+    function livePlay(L, b64, mime) {
+      const ctx = toneAudio(); if (!ctx) return;
+      const rate = Number((/rate=(\d+)/.exec(mime || ``) || [])[1]) || 24000;
+      const u8 = b64dec(b64), i16 = new Int16Array(u8.buffer, 0, u8.length >> 1);
+      if (!i16.length) return;
+      const buf = ctx.createBuffer(1, i16.length, rate), ch = buf.getChannelData(0);
+      for (let i = 0; i < i16.length; i++) ch[i] = i16[i] / 32768;
+      const s = ctx.createBufferSource(); s.buffer = buf; s.connect(ctx.destination);
+      const t = Math.max(ctx.currentTime + 0.04, L.playT); s.start(t); L.playT = t + buf.duration;
+      L.srcs.push(s); L.lastAudio = Date.now();
+      s.onended = () => { L.srcs = L.srcs.filter((x) => x !== s); if (!L.srcs.length) liveIdle(L); };
+      if (L.test) return;
+      if (call && !call.speaking) { call.speaking = true; renderPhone(); }
+    }
+    function liveHush(L) { L.srcs.forEach((s) => { try { s.onended = null; s.stop(); } catch (_) {} }); L.srcs = []; L.playT = 0; }
+    function liveIdle(L) {
+      if (L.test || lv !== L) return;
+      if (call && call.speaking) { call.speaking = false; renderPhone(); }
+      if (L.after && L.turnDone) liveAfter(L);
+    }
+    function liveFlushIn(L) {
+      const t = L.inTxt.replace(/\s+/g, ` `).trim(); L.inTxt = ``;
+      if (!t || !call) return;
+      iaLine(`Apprenant`, t);
+      call.turns = (call.turns || 0) + 1;
+    }
+    function liveFlushOut(L, suffix) {
+      const t = L.outTxt.replace(/\s+/g, ` `).trim(); L.outTxt = ``;
+      if (t && call) iaLine(iaWho(call), t + (suffix || ``));
+    }
+    function liveKick(L) {
+      L.kickOk = true;
+      if (!L.ready || L.kicked) return;
+      L.kicked = true;
+      if (L.kick) L.ws.send(JSON.stringify({ realtimeInput: { text: L.kick } }));
+      if (call) { call.listening = true; renderPhone(); }
+    }
+
+    /* Ouverture d'une session Live (une par interlocuteur : ARM, puis régulateur) */
+    function liveOpen(o) {
+      liveClose();
+      const k = iaCfg();
+      let ws;
+      try { ws = new WebSocket(`${k.liveUrl || LIVE_URL}?key=${encodeURIComponent(k.key)}`); }
+      catch (e) { if (!o.test) liveFail({ cid: call && call.cid, ready: false }, e.message); return null; }
+      const L = { cid: o.test ? `` : call.cid, ws, ready: false, kickOk: !o.holdKick, kicked: false, kick: o.kick, inTxt: ``, outTxt: ``, srcs: [], playT: 0, after: null, turnDone: true, lastAudio: 0, retried: !!o.retried, test: !!o.test, onTest: o.onTest };
+      if (!o.test) lv = L;
+      L.setupT = setTimeout(() => { if (!L.ready && !L.closing) liveFail(L, `pas de réponse du serveur`); }, 10000);
+      ws.onopen = () => ws.send(JSON.stringify({ setup: {
+        model: `models/${k.live}`,
+        generationConfig: { responseModalities: [`AUDIO`], temperature: 0.6, speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: o.voice } } } },
+        systemInstruction: { parts: [{ text: o.sys }] },
+        tools: o.tools && o.tools.length ? [{ functionDeclarations: o.tools.map((n) => LIVE_FN[n]) }] : undefined,
+        realtimeInputConfig: { automaticActivityDetection: { endOfSpeechSensitivity: `END_SENSITIVITY_LOW`, silenceDurationMs: 700, prefixPaddingMs: 200 } },
+        inputAudioTranscription: {}, outputAudioTranscription: {}
+      } }));
+      ws.onmessage = (ev) => liveMsg(L, ev);
+      ws.onerror = () => {};
+      ws.onclose = (ev) => { if (L.closing) return; liveFail(L, ev.reason || `liaison fermée (code ${ev.code})`); };
+      if (!o.test) {
+        L.tick = setInterval(() => { if (lv !== L) { clearInterval(L.tick); return; } if (L.after && !L.srcs.length && (L.turnDone || Date.now() - L.lastAudio > 2500)) liveAfter(L); }, 400);
+        micStart().catch(() => { toast(`Micro refusé : autorisez le micro pour ce site`); callLog(`IA Live : micro refusé sur le téléphone d'appel`); });
+      }
+      return L;
+    }
+    function liveClose(L0) {
+      const L = L0 || lv; if (!L) return;
+      if (lv === L) lv = null;
+      L.closing = true; clearTimeout(L.setupT); clearInterval(L.tick); liveHush(L);
+      try { L.ws.close(); } catch (_) {}
+    }
+    function liveStop() { liveClose(); micStop(); }
+    async function liveMsg(L, ev) {
+      let raw = ev.data;
+      try { if (raw instanceof Blob) raw = await raw.text(); else if (raw instanceof ArrayBuffer) raw = new TextDecoder().decode(raw); } catch (_) { return; }
+      let m; try { m = JSON.parse(raw); } catch (_) { return; }
+      if (L.closing) return;
+      if (m.setupComplete) {
+        L.ready = true; clearTimeout(L.setupT);
+        if (L.test) { L.ws.send(JSON.stringify({ realtimeInput: { text: L.kick } })); return; }
+        if (L.kickOk) liveKick(L);
+        return;
+      }
+      if (!L.test && (lv !== L || !call || call.cid !== L.cid)) return;
+      if (m.toolCall) {
+        const rs = (m.toolCall.functionCalls || []).map((fc) => ({ id: fc.id, name: fc.name, response: { result: liveTool(L, fc.name, fc.args || {}) } }));
+        try { L.ws.send(JSON.stringify({ toolResponse: { functionResponses: rs } })); } catch (_) {}
+        return;
+      }
+      const sc = m.serverContent; if (!sc) return;
+      if (sc.inputTranscription && sc.inputTranscription.text) L.inTxt += sc.inputTranscription.text;
+      if (sc.outputTranscription && sc.outputTranscription.text) { if (!L.test) liveFlushIn(L); L.outTxt += sc.outputTranscription.text; }
+      if (sc.modelTurn && sc.modelTurn.parts) {
+        for (const p of sc.modelTurn.parts) if (p.inlineData && p.inlineData.data) { L.turnDone = false; if (!L.test) liveFlushIn(L); livePlay(L, p.inlineData.data, p.inlineData.mimeType); }
+      }
+      if (sc.interrupted) { liveHush(L); if (!L.test) { liveFlushOut(L, ` …`); if (call) { call.speaking = false; renderPhone(); } } }
+      if (sc.turnComplete) {
+        L.turnDone = true;
+        if (L.test) { if (L.onTest) L.onTest(L.outTxt.trim()); return; }
+        liveFlushOut(L);
+        if (!L.srcs.length) liveIdle(L);
+      }
+    }
+    function liveTool(L, name, a) {
+      if (!call) return { ok: false };
+      if (name === `noter_element`) {
+        iaMark(Math.round(Number(a.numero)) - 1);
+        const miss = iaMissing();
+        return { ok: true, encore_manquants: miss.length ? missTxt(miss) : `rien : tout est transmis` };
+      }
+      if (name === `verifier_decision`) return iaCheck(!!a.urgence_vitale);
+      if (name === `transferer_au_regulateur`) {
+        if (call.stage !== `arm`) return { ok: false };
+        L.after = `transfer`;
+        return { ok: true, consigne: `Ne dis plus rien : l'appel passe en attente.` };
+      }
+      if (name === `raccrocher`) { L.after = `hangup`; return { ok: true }; }
+      return { ok: false, erreur: `fonction inconnue` };
+    }
+    function liveAfter(L) {
+      const a = L.after; L.after = null;
+      if (!call || call.cid !== L.cid) return;
+      if (a === `transfer`) { liveClose(L); iaTransfer(); }
+      else if (a === `hangup`) { const cid = call.cid; setTimeout(() => { if (call && call.cid === cid && call.state === `live`) endCall(`hangup-ia`); }, 700); }
+    }
+    function liveFail(L, why) {
+      const wasReady = L.ready;
+      if (L.ws) liveClose(L);
+      if (L.test) { if (L.onTest) L.onTest(null, why); return; }
+      if (!call || call.cid !== L.cid || call.mode !== `ia`) return;
+      if (call.state === `calling`) { call.noLive = true; callLog(`IA Live indisponible (${why}) : mode classique`); return; }
+      if (call.state !== `live`) return;
+      callLog(`IA Live : ${wasReady ? `coupure` : `connexion impossible`} (${why})`);
+      if (!wasReady || L.retried) {
+        call.noLive = true; micStop(); toast(`Voix Live indisponible : mode classique`);
+        if (call.stage === `hold`) return;               // le régulateur prendra en mode classique
+        iaClassicResume(); return;
+      }
+      liveForStage(`retry`);
+    }
+    /* Prépare la session Live qui correspond au moment de l'appel */
+    function liveForStage(kind) {
+      if (!call) return;
+      const ct = fullCt(call.contact), samu = isSamuCt(ct);
+      const P = iaPrompts(call, `live`);
+      const nm = call.contact.name.replace(/\s*\(.*\)\s*/, ``);
+      let sys, voice, tools, kick;
+      if (call.cb) { sys = P.main; voice = samu ? LIVE_VOICES.reg : LIVE_VOICES.med; tools = [`raccrocher`]; kick = `(Tu rappelles le centre de dialyse. On décroche : « Allô ? »)`; }
+      else if (call.stage === `arm`) { sys = P.arm; voice = LIVE_VOICES.arm; tools = [`noter_element`, `transferer_au_regulateur`]; kick = `(Le téléphone sonne, tu décroches. Dis seulement : « SAMU, centre 15, j'écoute. »)`; }
+      else { sys = P.main; voice = samu ? LIVE_VOICES.reg : LIVE_VOICES.med; tools = [`noter_element`, `verifier_decision`, `raccrocher`]; kick = samu ? `(L'ARM te passe l'appel. Décroche et présente-toi en une phrase.)` : `(Le téléphone sonne, tu décroches. Présente-toi en une phrase : « Allô, ${nm.charAt(0).toLowerCase() + nm.slice(1)}, je vous écoute. »)`; }
+      if (call.txt.length) sys += `\n\nCONVERSATION JUSQU'ICI${samu && call.stage === `reg` ? ` (d'abord avec l'ARM, qui t'a passé l'appel)` : ``} :\n${iaTranscript()}`;
+      const got = Object.keys((call.stage === `arm` ? call.arm : call.heard) || {}).map((i) => Number(i) + 1);
+      if (got.length && !call.cb) sys += `\n\nÉLÉMENTS DÉJÀ NOTÉS : ${got.join(`, `)}.`;
+      if (call.unlocked && !call.cb && call.stage !== `arm`) { const d = callDecision(callCfgNow()); sys += `\n\nTU ES DÉJÀ AUTORISÉ À DÉCIDER. Ta décision : ${d.decision} Prescriptions : ${d.prescriptions.join(` ; `) || `aucune`}.`; }
+      if (kind === `resume`) kick = `(Un collègue a tenu la ligne quelques instants, sans transcription. Reprends naturellement, sans te présenter : dis simplement « Oui, je vous écoute. »)`;
+      if (kind === `retry`) kick = `(La ligne a coupé une seconde. Dis : « Pardon, ça a coupé. Je vous écoute. »)`;
+      liveOpen({ sys, voice, tools, kick, retried: kind === `retry`, holdKick: kind === `ring` });
+    }
+    /* Réglages : test de la voix Live */
+    function liveTest(out) {
+      toneAudio();
+      const L = liveOpen({ test: true, sys: `Tu réponds au téléphone, en français.`, voice: LIVE_VOICES.reg, kick: `Dis seulement : « Allô, j'écoute. »`,
+        onTest: (txt, err) => { if (err) out.textContent = `Échec : ${err}. Vérifiez la clé et le nom du modèle Live, ou choisissez « Classique ».`; else out.textContent = `Live fonctionne ✓${txt ? ` — « ${txt} »` : ``}`; setTimeout(() => liveClose(L), 4000); } });
+      if (!L) out.textContent = `Échec : impossible d'ouvrir la liaison`;
     }
     function iaStop() {
       if (iaRec) { const r = iaRec; iaRec = null; try { r.abort(); } catch (_) {} }
       try { if (window.speechSynthesis) speechSynthesis.cancel(); } catch (_) {}
+      liveStop();
     }
 
-    /* =========== CÔTÉ QUI DÉCROCHE (télécommande ou poste médecin) =========== */
+    /* =========== CÔTÉ FORMATEUR (télécommande ou poste médecin) =========== */
     function calleeOnRing(m) {
       if (!isCallee() || (call && call.state !== `ended`)) return;
       if (m.mode !== (role === `doctor` ? `doctor` : `remote`)) return;
-      call = { cid: m.cid, contact: m.contact || { name: `médecin` }, mode: m.mode, state: `ringing`, t0: Date.now(), liveAt: 0, heard: {} };
+      call = { cid: m.cid, contact: m.contact || { name: `médecin` }, mode: m.mode, state: `ringing`, t0: Date.now(), liveAt: 0, heard: {}, arm: {}, cfgStep: m.step, stage: isSamuCt(fullCt(m.contact)) ? `arm` : `` };
       ringIncoming();
       renderCallUi();
       setTimeout(() => { if (call && call.cid === m.cid && call.state === `ringing`) { stopTone(); call = null; renderCallUi(); } }, 46000);
@@ -5384,22 +6051,28 @@
       if (!call || call.state !== `ringing`) return;
       stopTone();
       call.state = `live`; call.liveAt = Date.now();
-      publishSyncMessage({ type: `CALL_ANSWER`, cid: call.cid, by: senderId, who: role });
-      if (role === `remote`) remoteCallSeen({ type: `CALL_ANSWER`, cid: call.cid, by: senderId, who: role });
+      pub({ type: `CALL_ANSWER`, cid: call.cid, by: senderId, who: role });
       renderCallUi();
     }
     function declineCall() {
       if (!call) return;
       stopTone();
-      publishSyncMessage({ type: `CALL_END`, cid: call.cid, why: `declined` });
-      if (role === `remote`) remoteCallSeen({ type: `CALL_END`, cid: call.cid, why: `declined` });
+      pub({ type: `CALL_END`, cid: call.cid, why: `declined` });
       call = null; renderCallUi();
+    }
+    function letIaAnswer() {
+      if (!call || call.state !== `ringing`) return;
+      stopTone();
+      pub({ type: `CALL_IA`, cid: call.cid, who: role });
+      call = null; renderCallUi();
+      toast(`L'IA va répondre : vous pourrez reprendre la main`);
     }
     async function calleeOnOffer(m) {
       if (!call || m.cid !== call.cid || m.to !== senderId || m.kind !== `offer`) return;
+      if (call.pc) { try { call.pc.close(); } catch (_) {} call.pc = null; }
       const r = await rtcOpen();
       if (!call || call.cid !== m.cid) { try { r.pc.close(); if (r.st) r.st.getTracks().forEach((t) => t.stop()); } catch (_) {} return; }
-      call.pc = r.pc; call.st = r.st;
+      call.pc = r.pc; call.st = r.st; applyMic();
       await r.pc.setRemoteDescription({ type: `offer`, sdp: m.sdp });
       await r.pc.setLocalDescription(await r.pc.createAnswer());
       await iceDone(r.pc);
@@ -5407,71 +6080,178 @@
     }
     function hangUpCallee() {
       if (!call) return;
-      if (role === `remote`) remoteCallSeen({ type: `CALL_END`, cid: call.cid, why: `hangup-trainer`, dur: call.liveAt ? Date.now() - call.liveAt : 0 });
-      endCall(`hangup-trainer`);
+      endCall(call.state === `dialing` ? `cancel-cb` : `hangup-trainer`);
     }
+    /* Reprendre la main sur l'IA */
+    function takeOver(cid) {
+      const c = callsSeen[cid];
+      if (!c || c.end || (call && call.state !== `ended`)) return;
+      toneAudio();
+      call = { cid, contact: c.contact || { name: `médecin` }, mode: role === `doctor` ? `doctor` : `remote`, state: `live`, liveAt: Date.now(), heard: Object.assign({}, c.heard), arm: Object.assign({}, c.arm), took: true, cb: !!c.cb, cfgStep: c.cfgStep, stage: c.stage === `hold` ? `reg` : c.stage || `` };
+      pub({ type: `CALL_TAKE`, cid, by: senderId, who: role });
+      renderCallUi();
+    }
+    function giveBack() {
+      if (!call || !call.took) return;
+      const cid = call.cid, stage = call.stage;
+      rtcClose();
+      call = null;
+      pub({ type: `CALL_GIVE`, cid, stage });
+      renderCallUi();
+    }
+    /* Rappel des apprenants par le formateur (télécommande ou poste médecin) */
+    function dialCallback(ctId, step) {
+      if (call && call.state !== `ended`) { toast(`Un appel est déjà en cours`); return; }
+      const ct = phoneContacts().find((x) => x.id === ctId); if (!ct) return;
+      toneAudio(); requestWakeLock();
+      cbDue = null;
+      const cid = uid();
+      call = { cid, contact: ctBrief(ct), mode: role === `doctor` ? `doctor` : `remote`, state: `dialing`, cb: true, t0: Date.now(), liveAt: 0, heard: {}, arm: {}, cfgStep: step == null ? sim.stepIdx : step, stage: `` };
+      pub({ type: `CALL_CB`, cid, contact: call.contact, mode: call.mode, from: senderId, step: call.cfgStep, sid: sim.sessionId });
+      ringback(); renderCallUi();
+      call.noAns = setTimeout(() => { if (call && call.cid === cid && call.state === `dialing`) { pub({ type: `CALL_END`, cid, why: `noanswer-learner` }); stopTone(); call = null; renderCallUi(); toast(`Les apprenants n'ont pas décroché`); } }, 42000);
+    }
+    /* Télécommande : déclenche un rappel selon le réglage des appels */
+    function requestCallback(ctId, step, auto) {
+      const ct = phoneContacts().find((x) => x.id === ctId); if (!ct) return;
+      const C = callCfg(), st = step == null ? sim.stepIdx : step;
+      if (C.mode === `ia`) { const cid = uid(); pub({ type: `CALL_CB`, cid, contact: ctBrief(ct), mode: `ia`, step: st, sid: sim.sessionId }); toast(`📞 ${ct.name} rappelle les apprenants (IA)`); }
+      else if (C.mode === `remote`) dialCallback(ctId, st);
+      else if (C.mode === `doctor`) { publishSyncMessage({ type: `CALL_CB_DUE`, contact: ctBrief(ct), step: st }); remEvent(`call`, `📞 Rappel de ${ct.name} demandé au poste médecin${auto ? ` (programmé)` : ``}`); toast(`Le poste médecin est prévenu : il rappelle les apprenants`); }
+      else { remEvent(`call`, `📞 Rappel de ${ct.name} à faire avec votre téléphone (mode vrai numéro)`); toast(`Mode « vrai numéro » : rappelez le téléphone des apprenants avec le vôtre`); }
+    }
+    function cbTick() {
+      if (role !== `remote` || !cbPend.length) return;
+      if (sim.stage === `pause`) { cbPend.forEach((p) => { p.at += 1000; }); return; }
+      if (!sim.running) { cbPend = []; renderActs(); return; }
+      const due = cbPend.filter((p) => Date.now() >= p.at);
+      if (due.length) { cbPend = cbPend.filter((p) => !due.includes(p)); due.forEach((p) => requestCallback(p.who, p.step, true)); renderActs(); }
+      else document.querySelectorAll(`[data-cbcd]`).forEach((el) => { const p = cbPend.find((x) => x.id === el.dataset.cbcd); if (p) el.textContent = fmtDur(p.at - Date.now()); });
+    }
+    function cbNow(id) { const p = cbPend.find((x) => x.id === id); if (!p) return; cbPend = cbPend.filter((x) => x !== p); requestCallback(p.who, p.step); renderActs(); }
+    function cbCancel(id) { const p = cbPend.find((x) => x.id === id); if (!p) return; cbPend = cbPend.filter((x) => x !== p); remEvent(`system`, `Rappel programmé annulé (${p.name})`); renderActs(); }
+
     let csOpen = true;
+    function supervisedCall() {
+      const list = Object.entries(callsSeen).map(([cid, c]) => Object.assign({ cid }, c))
+        .filter((c) => c.live && !c.end && Date.now() - c.live < 1800000 && (!call || call.cid !== c.cid))
+        .filter((c) => (role === `doctor` ? c.ia || c.took : c.mode !== `remote` || c.ia));
+      return list[list.length - 1] || null;
+    }
+    const stageTxt = (c) => (c.stage && isSamuCt(fullCt(c.contact)) ? ` · ${STAGE_LBL[c.stage]}` : ``);
     function renderCallUi() {
       if (role !== `remote` && role !== `doctor`) return;
       const el = $(role === `doctor` ? `dr-main` : `callov`); if (!el) return;
-      const iaLive = role === `remote` && Object.values(callsSeen).find((c) => c.live && !c.end && c.mode !== `remote` && Date.now() - c.live < 1800000);
-      if (!call && !iaLive) {
+      const sup = supervisedCall();
+      if (!call && !sup) {
         if (role === `doctor`) {
-          const on = !!sim.rev;
+          const on = !!sim.rev, m = callCfg().mode;
           el.innerHTML = `<div class="dr-idle"><div class="ph-title">Poste médecin</div>
             <div class="muted">${on ? `Connecté · ${esc(scenarioById(sim.scenarioId).short || ``)}` : `Recherche de la télécommande… (PIN ${appState.pin})`}</div>
-            <div class="muted">${callCfg().mode === `doctor` ? `Les appels des apprenants arriveront ici.` : `Attention : la télécommande envoie les appels « ${esc(callModeLbl().toLowerCase())} ». Choisissez « Sur un autre téléphone » dans Préparation › Téléphone d'appel.`}</div>
+            <div class="muted">${m === `doctor` ? `Les appels des apprenants sonneront ici : vous décrochez, ou vous laissez l'IA répondre.` : m === `ia` ? `L'IA répond aux appels : la conversation s'affichera ici et vous pourrez reprendre la main.` : `Attention : la télécommande envoie les appels « ${esc(callModeLbl().toLowerCase())} ». Choisissez « Sur un autre téléphone » ou « IA » dans Préparation › Téléphone d'appel.`}</div>
+            ${cbDue ? `<div class="co-ring cb-due"><div class="co-ic">⏰</div><div class="grow"><b>Rappel prévu</b><small>Rappelez les apprenants en tant que ${esc(cbDue.contact.name)}</small></div><button type="button" class="btn grn" onclick="dialCallback('${esc(cbDue.contact.id)}', ${Number(cbDue.step) || 0})">📞 Rappeler</button><button type="button" class="btn" onclick="cbDue=null;renderCallUi()">Plus tard</button></div>` : ``}
+            <div class="cs-h">Rappeler les apprenants pour prendre des nouvelles</div>
+            <div class="ph-list">${phoneContacts().map((c) => `<button type="button" class="ph-ct" onclick="dialCallback('${esc(c.id)}')"><span class="ph-av">${esc((c.name || `?`).slice(0, 1))}</span><span class="grow"><b>${esc(c.name)}</b><small>Rappeler en tant que…</small></span><span class="ph-go">📞</span></button>`).join(``)}</div>
             <button type="button" class="btn" onclick="toneAudio();ctBeep([1046,1318],0.3,0.14);requestWakeLock();toast('Sonnerie activée')">🔔 Tester / activer la sonnerie</button></div>`;
         } else { el.classList.add(`hidden`); el.innerHTML = ``; }
         return;
       }
       el.classList.remove(`hidden`);
-      if (!call && iaLive) {
-        const lines = (iaLive.txt || []).slice(-4);
-        el.innerHTML = `<div class="co-bar"><span>☎ ${esc(iaLive.contact ? iaLive.contact.name : ``)} · ${iaLive.mode === `ia` ? `IA` : iaLive.mode === `tel` ? `vrai numéro` : `poste médecin`}</span><b id="co-time" data-t0="${iaLive.live}">${fmtDur(Date.now() - (iaLive.live || Date.now()))}</b></div>
-          ${lines.length ? `<div class="co-txt">${lines.map((l) => `<div><b>${esc(l.who)} :</b> ${esc(l.text)}</div>`).join(``)}</div>` : ``}`;
+      if (!call && sup) {
+        const lines = (sup.txt || []).slice(role === `doctor` ? -8 : -4);
+        const by = sup.took ? `✋ repris par un formateur` : sup.ia ? `🤖 IA` : sup.mode === `tel` ? `vrai numéro` : `poste médecin`;
+        const canTake = sup.ia && !sup.took;
+        el.innerHTML = `<div class="co-bar"><span>☎ ${sup.cb ? `Rappel · ` : ``}${esc(sup.contact ? sup.contact.name : ``)}${esc(stageTxt(sup))} · ${by}</span><b id="co-time" data-t0="${sup.live}">${fmtDur(Date.now() - (sup.live || Date.now()))}</b>
+            ${canTake ? `<button type="button" class="btn sm grn" onclick="takeOver('${sup.cid}')">✋ Reprendre la main</button>` : ``}
+            ${role === `remote` && sup.ia ? `<button type="button" class="btn sm" onclick="csOpen=!csOpen;renderCallUi()">${csOpen ? `▴ Fiche` : `▾ Fiche`}</button>` : ``}</div>
+          ${lines.length ? `<div class="co-txt">${lines.map((l) => `<div><b>${esc(l.who)} :</b> ${esc(l.text)}</div>`).join(``)}</div>` : sup.ia ? `<div class="co-txt"><i>La conversation va s'afficher ici…</i></div>` : ``}
+          ${sup.ia && (role === `doctor` || csOpen) ? callSheetHtml(sup, false) : ``}`;
         return;
       }
       if (call.state === `ringing`) {
         el.innerHTML = `<div class="co-ring"><div class="co-ic">☎</div><div class="grow"><b>Appel de l'apprenant</b><small>vers ${esc(call.contact.name)}</small></div>
-          <button type="button" class="btn red" onclick="declineCall()">Refuser</button><button type="button" class="btn grn" onclick="answerCall()">Décrocher</button></div>`;
+          <button type="button" class="btn red" onclick="declineCall()">Refuser</button><button type="button" class="btn" onclick="letIaAnswer()">🤖 Laisser l'IA</button><button type="button" class="btn grn" onclick="answerCall()">Décrocher</button></div>`;
         return;
       }
-      el.innerHTML = `<div class="co-bar"><span>☎ En ligne · ${esc(call.contact.name)}${call.voice ? `` : ` · <i>liaison…</i>`}</span><b id="co-time" data-t0="${call.liveAt}">${fmtDur(Date.now() - call.liveAt)}</b>
+      if (call.state === `dialing`) {
+        el.innerHTML = `<div class="co-ring"><div class="co-ic">📞</div><div class="grow"><b>Rappel en cours…</b><small>vous appelez les apprenants en tant que ${esc(call.contact.name)}</small></div>
+          <button type="button" class="btn red" onclick="hangUpCallee()">Annuler</button></div>${callSheetHtml(call, true)}`;
+        return;
+      }
+      el.innerHTML = `<div class="co-bar"><span>☎ En ligne · ${call.cb ? `rappel · ` : ``}${esc(call.contact.name)}${esc(stageTxt(call))}${call.voice ? `` : ` · <i>liaison…</i>`}</span><b id="co-time" data-t0="${call.liveAt}">${fmtDur(Date.now() - call.liveAt)}</b>
           <button type="button" class="btn sm ${call.muted ? `amb` : ``}" onclick="toggleMute()">${call.muted ? `Micro coupé` : `Muet`}</button>
+          ${call.took ? `<button type="button" class="btn sm" onclick="giveBack()">🤖 Rendre à l'IA</button>` : ``}
           ${role === `remote` ? `<button type="button" class="btn sm" onclick="csOpen=!csOpen;renderCallUi()">${csOpen ? `▴ Fiche` : `▾ Fiche`}</button>` : ``}
           <button type="button" class="btn sm red" onclick="hangUpCallee()">Raccrocher</button></div>
-        ${csOpen || role === `doctor` ? callSheetHtml() : ``}`;
+        ${csOpen || role === `doctor` ? callSheetHtml(call, true) : ``}`;
     }
 
-    /* =========== TÉLÉCOMMANDE : journal de tous les appels =========== */
+    /* =========== Suivi de tous les appels (télécommande : journal ; poste médecin : supervision) =========== */
     const CALL_MODE_SHORT = { remote: `télécommande`, doctor: `poste médecin`, tel: `vrai numéro`, ia: `IA` };
-    function remoteCallSeen(m) {
-      if (role !== `remote`) return;
+    function callSeen(m) {
+      if (role !== `remote` && role !== `doctor`) return;
+      const LOG = role === `remote`;
       const c = callsSeen[m.cid] || (callsSeen[m.cid] = { txt: [] });
       if (m.type === `CALL_RING`) {
         if (c.ring) return;
-        c.ring = Date.now(); c.contact = m.contact; c.mode = m.mode;
-        remEvent(`call`, `☎ Appel de l'apprenant vers ${m.contact ? m.contact.name : `?`} (${CALL_MODE_SHORT[m.mode] || m.mode})`);
+        c.ring = Date.now(); c.contact = m.contact; c.mode = m.mode; c.cfgStep = m.step; c.stage = isSamuCt(fullCt(m.contact)) ? `arm` : ``;
+        if (LOG) remEvent(`call`, `☎ Appel de l'apprenant vers ${m.contact ? m.contact.name : `?`} (${CALL_MODE_SHORT[m.mode] || m.mode})`);
         if (m.mode === `tel`) c.live = Date.now();
+      } else if (m.type === `CALL_CB`) {
+        if (c.ring) return;
+        c.ring = Date.now(); c.contact = m.contact; c.mode = m.mode; c.cfgStep = m.step; c.cb = true; c.stage = ``;
+        if (LOG) remEvent(`call`, `📞 ${m.contact ? m.contact.name : `?`} rappelle les apprenants (${m.mode === `ia` ? `IA` : CALL_MODE_SHORT[m.mode] || m.mode})`);
+      } else if (m.type === `CALL_IA`) {
+        if (LOG) remEvent(`call`, `Le formateur laisse l'IA répondre`);
       } else if (m.type === `CALL_ANSWER`) {
         if (c.live && m.by !== `ia`) return;
-        c.live = Date.now(); c.mode = c.mode || ``;
-        remEvent(`call`, `Appel décroché ${m.by === `ia` ? `par l'IA` : m.who === `doctor` ? `sur le poste médecin` : `sur la télécommande`}${c.ring ? ` après ${fmtDur(c.live - c.ring)}` : ``}`);
+        c.live = Date.now();
+        if (m.by === `ia`) { c.ia = true; c.mode = `ia`; }
+        if (LOG) remEvent(`call`, m.cb ? `Rappel décroché par les apprenants${c.ring ? ` après ${fmtDur(c.live - c.ring)}` : ``}` : `Appel décroché ${m.by === `ia` ? `par l'IA` : m.who === `doctor` ? `sur le poste médecin` : `sur la télécommande`}${c.ring ? ` après ${fmtDur(c.live - c.ring)}` : ``}`);
         if (call && call.cid === m.cid && call.state === `ringing` && m.by !== senderId) { stopTone(); call = null; }
+      } else if (m.type === `CALL_STAGE`) {
+        const prev = c.stage; c.stage = m.stage;
+        if (LOG && m.stage === `hold`) remEvent(`call`, `⏸ L'ARM met en attente pour passer le médecin régulateur${c.live ? ` (après ${fmtDur(Date.now() - c.live)} avec l'ARM)` : ``}`);
+        if (LOG && m.stage === `reg` && prev === `hold`) remEvent(`call`, `Médecin régulateur en ligne`);
+      } else if (m.type === `CALL_TAKE`) {
+        c.took = true;
+        if (c.stage === `hold`) c.stage = `reg`;
+        if (LOG) remEvent(`call`, `✋ Le formateur reprend la main (${m.who === `doctor` ? `poste médecin` : `télécommande`})`);
+      } else if (m.type === `CALL_GIVE`) {
+        c.took = false; if (m.stage) c.stage = m.stage;
+        if (LOG) remEvent(`call`, `🤖 Le formateur rend la main à l'IA`);
       } else if (m.type === `CALL_TXT`) {
         c.txt.push({ who: m.who, text: m.text });
+      } else if (m.type === `CALL_MARK`) {
+        const k = m.kind === `arm` ? `arm` : `heard`; c[k] = c[k] || {}; c[k][m.i] = true;
       } else if (m.type === `CALL_END`) {
         if (c.end) return;
         c.end = Date.now();
         if (m.txt && m.txt.length && !c.txt.length) c.txt = m.txt;
-        const why = { declined: `refusé`, noanswer: `sans réponse`, 'no-number': `aucun numéro programmé`, 'no-key': `IA sans clé`, 'hangup-trainer': `raccroché par le formateur` }[m.why] || `terminé`;
-        const dur = m.dur || (c.live ? c.end - c.live : 0);
-        const tr = c.txt.map((l) => `${l.who} : ${l.text}`).join(`\n`);
-        remEvent(`call`, `Fin d'appel — ${why}${dur ? ` · durée ${m.why === `tel` ? `≈ ` : ``}${fmtDur(dur)}` : ``}`, tr ? { detail: tr } : null);
-        if (tr) saedAuto(c);
+        if (LOG) {
+          const why = { declined: `refusé`, 'declined-learner': `refusé par les apprenants`, noanswer: `sans réponse`, 'noanswer-learner': `les apprenants n'ont pas décroché`, busy: `ligne occupée`, 'cancel-cb': `rappel annulé`, 'no-number': `aucun numéro programmé`, 'no-key': `IA sans clé`, 'hangup-trainer': `raccroché par le formateur`, 'hangup-ia': `raccroché par l'interlocuteur (IA)` }[m.why] || `terminé`;
+          const dur = m.dur || (c.live ? c.end - c.live : 0);
+          const tr = c.txt.map((l) => `${l.who} : ${l.text}`).join(`\n`);
+          remEvent(`call`, `Fin ${c.cb ? `du rappel` : `d'appel`} — ${why}${dur ? ` · durée ${m.why === `tel` ? `≈ ` : ``}${fmtDur(dur)}` : ``}`, tr ? { detail: tr } : null);
+          if (tr && !c.cb) saedAuto(c);
+          if (c.live && !c.cb && c.contact) callDone(c);
+        }
       }
       renderCallUi();
+    }
+    /* Fin d'un appel des apprenants : coche l'action « ☎ » de la phase et programme le rappel éventuel */
+    function callDone(c) {
+      if (!sim.running) return;
+      const sc = scenarioById(sim.scenarioId), st = sc.steps[sim.stepIdx];
+      const j = st ? (st.actions || []).findIndex((a) => a.kind === `call` && a.who === c.contact.id) : -1;
+      if (j >= 0) pressAction(j, true);
+      const cfg = phaseCall(c.contact.id, c.cfgStep);
+      if (cfg && cfg.cb && cfg.cb.on && Number(cfg.cb.delay) > 0) {
+        const p = { id: uid(), who: c.contact.id, name: c.contact.name, step: c.cfgStep, at: Date.now() + Number(cfg.cb.delay) * 1000 };
+        cbPend.push(p);
+        remEvent(`system`, `📞 Rappel de ${c.contact.name} programmé dans ${fmtDur(Number(cfg.cb.delay) * 1000)}`);
+        renderActs();
+      }
     }
     /* Grille SAED cochée d'après la transcription (mots-clés de l'éditeur) */
     function saedAuto(c) {
@@ -5490,18 +6270,29 @@
     function handleCallMsg(m) {
       if (m.type === `DEV`) { devSeen[m.kind] = Date.now(); if (role === `remote` && curTab === `prep`) renderCallDevs(); return true; }
       if (m.type === `CALL_LOG`) { if (role === `remote` && (!m.sid || m.sid === sim.sessionId)) remEvent(`call`, m.text, m.extra || null); return true; }
+      if (m.type === `CALL_CB_DUE`) { if (role === `doctor`) { cbDue = m; buzz(); ctBeep([880, 1175], 0.25, 0.12); renderCallUi(); } return true; }
       if (!/^CALL_/.test(m.type)) return false;
-      if (role === `remote`) remoteCallSeen(m);
+      if (role === `remote` || role === `doctor`) callSeen(m);
       if (role === `phone`) {
         if (m.type === `CALL_ANSWER`) phoneOnAnswer(m);
         else if (m.type === `CALL_SDP` && call && m.cid === call.cid && m.kind === `answer` && m.to === senderId && call.pc) call.pc.setRemoteDescription({ type: `answer`, sdp: m.sdp }).catch(() => {});
-        else if (m.type === `CALL_END` && call && m.cid === call.cid && call.state !== `ended`) phoneEnded(m.why === `declined` ? `Correspondant indisponible` : `Appel terminé`);
+        else if (m.type === `CALL_END` && call && m.cid === call.cid && call.state !== `ended`) {
+          if (call.state === `incoming`) { clearTimeout(call.noAns); stopTone(); call = null; renderPhone(); }
+          else phoneEnded(m.why === `declined` ? `Correspondant indisponible` : `Appel terminé`);
+        }
+        else if (m.type === `CALL_HOLD`) phoneHold(m);
+        else if (m.type === `CALL_TAKE`) phoneTake(m);
+        else if (m.type === `CALL_GIVE`) phoneGive(m);
+        else if (m.type === `CALL_IA`) phoneLetIa(m);
+        else if (m.type === `CALL_CB`) phoneIncoming(m);
       }
       if (role === `remote` || role === `doctor`) {
         if (m.type === `CALL_RING`) calleeOnRing(m);
+        else if (m.type === `CALL_ANSWER` && m.cb && call && m.cid === call.cid && call.state === `dialing`) { clearTimeout(call.noAns); stopTone(); call.state = `live`; call.liveAt = Date.now(); renderCallUi(); }
         else if (m.type === `CALL_ANSWER` && call && m.cid === call.cid && call.state === `ringing` && m.by !== senderId) { stopTone(); call = null; renderCallUi(); }
         else if (m.type === `CALL_SDP`) calleeOnOffer(m);
-        else if (m.type === `CALL_END` && call && m.cid === call.cid) { stopTone(); rtcClose(); call = null; renderCallUi(); if (role === `doctor`) toast(`Appel terminé`); }
+        else if (m.type === `CALL_TAKE` && m.by !== senderId && call && call.cid === m.cid && call.took) { rtcClose(); call = null; renderCallUi(); }
+        else if (m.type === `CALL_END` && call && m.cid === call.cid) { clearTimeout(call.noAns); stopTone(); rtcClose(); call = null; renderCallUi(); if (role === `doctor`) toast(`Appel terminé`); }
       }
       return true;
     }
@@ -5527,7 +6318,6 @@
       publishSyncMessage({ type: `DEV`, kind: role });
       if (!sim.rev) publishSyncMessage({ type: `PH_REQ` });
       if (sim.scenarioId && sim.scenarioId !== `free` && !SCENARIOS.some((x) => x.id === sim.scenarioId) && Date.now() - devScnAt > 8000) { devScnAt = Date.now(); publishSyncMessage({ type: `SCN_REQ`, id: sim.scenarioId }); }
-      const st = $(`ph-st`); if (st && call && call.state === `live` && !call.thinking && call.mode !== `ia`) st.textContent = fmtDur(Date.now() - call.liveAt);
       const ck = $(`ph-clock`); if (ck) ck.textContent = hhmm(Date.now());
     }
     function initDevice(r) {
@@ -5551,7 +6341,7 @@
       document.addEventListener(`visibilitychange`, () => { if (document.visibilityState === `visible`) requestWakeLock(); });
       deviceTick();
       setInterval(deviceTick, 1000 * 3);
-      setInterval(() => { const st = $(`ph-st`); if (st && call && call.state === `live` && !call.thinking && call.mode !== `ia`) st.textContent = fmtDur(Date.now() - call.liveAt); callTick(); }, 1000);
+      setInterval(() => { const st = $(`ph-st`); if (st && call && call.state === `live` && !call.thinking && call.mode !== `ia` && call.stage !== `hold`) st.textContent = fmtDur(Date.now() - call.liveAt); callTick(); }, 1000);
     }
 
     /* =====================================================================
