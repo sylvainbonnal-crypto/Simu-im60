@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <meta name="theme-color" content="#0c1214">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <title>Simulateur EDAN iM60 — Urgences en hémodialyse (v5)</title>
+  <title>Simulateur EDAN iM60 — Urgences en hémodialyse (v7)</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@400;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
@@ -95,7 +95,8 @@
     .lcd-frame { flex: 1 1 auto; display: flex; padding: 6px; border-radius: 10px; background: #1c2228; box-shadow: inset 0 2px 6px rgba(0,0,0,.55); min-height: 0; }
     .lcd { position: relative; flex: 1; display: flex; flex-direction: column; min-height: 560px; overflow: hidden; border-radius: 4px; background: var(--lcd-bg); color: var(--lcd-white); font-family: var(--font-lcd); }
     .monitor-stage.is-full .lcd { min-height: 0; }
-    .lcd.off > *:not(.boot):not(.stage):not(.docview):not(.lp-hint) { visibility: hidden; }
+    .lcd.off > *:not(.boot):not(.stage):not(.docview):not(.lp-hint):not(.mw-top) { visibility: hidden; }
+    .menu-win.mw-top { z-index: 60; }
 
     /* Barre supérieure */
     .lcd-top { display: grid; grid-template-columns: minmax(170px, auto) 1fr auto; align-items: stretch; gap: 6px; height: 34px; padding: 3px 6px; border-bottom: 1px solid var(--lcd-line); font-size: 15px; }
@@ -560,6 +561,9 @@
     /* ===== v5 : étapes de séance (QR, synthèse, pause), liste PNI, mode test ===== */
     .stage { position: absolute; inset: 0; z-index: 35; display: flex; align-items: center; justify-content: center; padding: 16px; background: #000; color: #dfe8ef; font-family: Arial, sans-serif; cursor: pointer; }
     .stage.over { background: rgba(0,0,0,.3); cursor: default; }
+    .stg-qr-wrap { display: flex; flex-direction: column; align-items: center; gap: 18px; }
+    .stg-qsel { display: flex; }
+    .stg-qsel button { min-height: 44px; padding: 6px 14px; font-size: 15px; }
     .stg-qr { display: flex; align-items: center; justify-content: center; gap: 28px; flex-wrap: wrap; }
     .stg-qr .bp-qr svg { border-radius: 6px; }
     .stg-txt { display: flex; flex-direction: column; gap: 10px; max-width: 380px; font-size: 16px; color: #9fb0bf; }
@@ -664,6 +668,80 @@
     @property --p { syntax: '<percentage>'; inherits: false; initial-value: 0%; }
     @keyframes lpFill { to { --p: 100%; } }
     .lcd { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+    .edov { position: fixed; inset: 0; z-index: 500; display: flex; flex-direction: column; background: #12202b; }
+    .edov.hidden { display: none; }
+    .edov-bar { display: flex; align-items: center; gap: 12px; padding: 8px 12px; padding-top: calc(8px + env(safe-area-inset-top)); color: #fff; font-family: var(--font-ui); font-size: 15px; }
+    .edov-bar span { flex: 1; opacity: .75; font-size: 13px; }
+    .edov-bar button { min-height: 44px; padding: 6px 16px; border-radius: 10px; border: 0; background: #f27474; color: #1b0a0a; font-weight: 700; font-size: 15px; cursor: pointer; }
+    .edov iframe { flex: 1; width: 100%; border: 0; background: #fff; }
+    /* ===== V7 : équipe, appels, téléphone d'appel, poste médecin ===== */
+    input[type=tel], input[type=password] { width: 100%; min-height: 44px; padding: 8px 10px; border-radius: 10px; border: 1px solid var(--line-strong); background: var(--surf-2); font-size: 15px; color: var(--ink); }
+    .team-l { display: flex; flex-direction: column; gap: 6px; }
+    .team-r { display: flex; gap: 6px; align-items: center; }
+    .team-r > .grow { flex: 1 1 auto; min-width: 0; }
+    .team-r > div.grow b { display: block; font-size: 14px; }
+    .team-r > div.grow small { display: block; color: var(--ink-2); font-size: 12px; line-height: 1.25; }
+    .team-r > input:not(.grow) { flex: 0 0 38%; }
+    .seg-r.col { grid-auto-flow: row; grid-auto-columns: auto; }
+    .seg-r.col button { border-right: 0; border-bottom: 1px solid var(--line-strong); text-align: left; padding: 8px 12px; }
+    .seg-r.col button:last-child { border-bottom: 0; }
+    .ok-t { color: var(--ok); }
+    .stg-who { color: #fff; }
+    .dim { opacity: .55; font-weight: 400; }
+    .mt-seg button { min-height: 40px; }
+    .callov { position: fixed; z-index: 90; left: 8px; right: 8px; bottom: calc(70px + env(safe-area-inset-bottom)); max-height: 58vh; overflow: auto; border-radius: 14px; border: 2px solid var(--ok); background: #0f2a22; box-shadow: 0 12px 30px rgba(0,0,0,.6); padding: 10px; display: flex; flex-direction: column; gap: 8px; }
+    .co-ring { display: flex; align-items: center; gap: 10px; }
+    .co-ring b { display: block; font-size: 16px; } .co-ring small { color: var(--ink-2); }
+    .co-ic { font-size: 30px; animation: coShake .5s infinite; }
+    @keyframes coShake { 0%,100% { transform: rotate(-12deg); } 50% { transform: rotate(12deg); } }
+    .co-bar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-weight: 600; }
+    .co-bar > span { flex: 1 1 140px; }
+    .co-bar > b { font-variant-numeric: tabular-nums; }
+    .co-txt { font-size: 13px; display: flex; flex-direction: column; gap: 3px; color: var(--ink-2); }
+    .co-txt b { color: var(--ink); }
+    .cs { display: flex; flex-direction: column; gap: 6px; font-size: 14px; }
+    .cs p { margin: 0; } .cs ul { margin: 0; padding-left: 18px; }
+    .cs-h { font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--ok); margin-top: 4px; }
+    .cs-h small { text-transform: none; letter-spacing: 0; font-weight: 400; color: var(--ink-2); margin-left: 4px; }
+    .cs-h.warn { color: var(--warn); }
+    .cs-hear { display: flex; flex-direction: column; gap: 4px; }
+    .cs-hear button { text-align: left; min-height: 38px; padding: 6px 10px; border-radius: 9px; border: 1px solid var(--line-strong); background: var(--surf-2); color: var(--ink); font-size: 14px; cursor: pointer; }
+    .cs-hear button.on { background: var(--ok-soft); border-color: var(--ok); color: var(--ok); }
+    .cs-empty { font-size: 14px; color: var(--ink-2); }
+    #view-phone { position: fixed; inset: 0; display: flex; flex-direction: column; background: radial-gradient(120% 80% at 50% 0%, #1d2b36, #070b0e); color: #eef3f6; font-family: var(--font-ui); user-select: none; -webkit-user-select: none; }
+    #view-phone.hidden { display: none; }
+    .ph-top { display: flex; justify-content: space-between; padding: calc(8px + env(safe-area-inset-top)) 18px 6px; font-size: 14px; font-weight: 600; }
+    .ph-clock { padding: 4px 8px; margin: -4px -8px; }
+    .ph-net-i { opacity: .8; font-size: 12px; }
+    .ph-main, .dr-main { flex: 1; overflow: auto; padding: 10px 16px calc(20px + env(safe-area-inset-bottom)); display: flex; flex-direction: column; gap: 12px; }
+    .ph-main.hidden, .dr-main.hidden { display: none; }
+    .ph-title { font-size: 26px; font-weight: 700; margin: 8px 2px 4px; }
+    .ph-list { display: flex; flex-direction: column; gap: 10px; }
+    .ph-ct { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 16px; border: 1px solid #2b3a44; background: #121c23; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+    .ph-ct b { display: block; font-size: 17px; } .ph-ct small { color: #8ea2ae; }
+    .ph-ct:active { background: #1a2a33; }
+    .ph-av { width: 46px; height: 46px; flex: none; border-radius: 50%; display: grid; place-items: center; background: #2c6e7a; font-size: 20px; font-weight: 700; }
+    .ph-av.big { width: 110px; height: 110px; font-size: 46px; margin: 30px auto 6px; }
+    .ph-go { font-size: 22px; width: 46px; height: 46px; display: grid; place-items: center; border-radius: 50%; background: #1f8f4e; }
+    .ph-net { text-align: center; color: #8ea2ae; font-size: 13px; }
+    .ph-call { display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center; flex: 1; }
+    .ph-cn { font-size: 24px; font-weight: 700; }
+    .ph-st { font-size: 17px; color: #b8c7d0; font-variant-numeric: tabular-nums; min-height: 24px; }
+    .ph-call.ended .ph-st { color: #f27474; }
+    .ph-mic { min-height: 22px; font-size: 14px; color: #8ea2ae; }
+    .ph-mic.on { color: #87d69b; }
+    .ph-btns { margin-top: auto; display: flex; gap: 28px; justify-content: center; padding-bottom: 30px; }
+    .ph-b { width: 76px; height: 76px; border-radius: 50%; border: 0; background: #2a3842; color: #fff; font-size: 28px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; position: relative; }
+    .ph-b small { position: absolute; top: 82px; font-size: 12px; white-space: nowrap; color: #b8c7d0; }
+    .ph-b.red { background: #d93a3a; } .ph-b.on { background: #e8eef2; color: #111; }
+    .ph-set { position: fixed; inset: 0; z-index: 50; background: rgba(0,0,0,.7); display: flex; align-items: center; justify-content: center; padding: 14px; }
+    .ph-set.hidden { display: none; }
+    .ph-set-box { width: 100%; max-width: 460px; background: var(--surf-1); border: 1px solid var(--line-strong); border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 8px; color: var(--ink); }
+    .ph-set-box h3 { margin: 0; }
+    .ph-top.dr { background: #0f2a22; }
+    .dr-idle { display: flex; flex-direction: column; gap: 12px; }
+    .dr-main .co-ring, .dr-main .co-bar { padding: 12px; border-radius: 14px; border: 2px solid var(--ok); background: #0f2a22; }
+    .dr-main .co-ring .btn { min-height: 60px; font-size: 17px; }
   </style>
 </head>
 <body>
@@ -886,6 +964,7 @@
       <div class="seg-r" id="mod-seg"></div>
       <div id="sc-pick" class="sc-pick"></div>
       <details class="fold"><summary>Voir le déroulé <span id="sc-sum"></span></summary><div id="sc-preview"></div></details>
+      <button type="button" class="btn" onclick="openEditor()">✎ Éditeur de scénarios</button>
     </div>
 
     <div class="card">
@@ -904,6 +983,28 @@
       <div class="seg-r" id="prep-nibp"></div>
       <button type="button" class="btn" onclick="sendCmd('RESET_SETTINGS')">Réglages usine du scope</button>
       <div class="muted">La tablette affiche la synthèse de cette programmation pour la relire à deux. Après validation, elle s'éteint et attend que l'apprenant allume le moniteur.</div>
+    </div>
+
+    <div class="card">
+      <h2>Équipe de la séance</h2>
+      <div class="muted">Affiché dans le briefing formateur de la tablette et repris dans le compte-rendu.</div>
+      <div class="lbl">Formateurs : qui fait quoi</div>
+      <div id="team-staff" class="team-l"></div>
+      <div class="lbl">Apprenants</div>
+      <div id="team-learners" class="team-l"></div>
+      <div class="row"><button type="button" class="btn" onclick="addLearner()">+ Ajouter un apprenant</button><button type="button" class="btn" onclick="clearLearners(this)">Vider la liste</button></div>
+      <datalist id="learner-roles"><option value="Leader"><option value="IDE 1"><option value="IDE 2"><option value="Aide-soignant(e)"><option value="Au téléphone"><option value="Renfort (arrive plus tard)"><option value="Observateur"></datalist>
+    </div>
+
+    <div class="card">
+      <h2>Téléphone d'appel</h2>
+      <div class="muted">Le téléphone posé sur la table pour « appeler le médecin ». Ouvrez-le en scannant son QR code (tablette : appui long sur le logo iM60 › Maintenance).</div>
+      <div class="lbl">Quand un apprenant appelle, l'appel arrive :</div>
+      <div class="seg-r col" id="call-mode"></div>
+      <div id="call-tel-box" class="hidden"><label class="lbl" for="call-tel">Numéro à appeler (téléphone du formateur qui joue le médecin)</label><input type="tel" id="call-tel" placeholder="Ex. : 77 12 34" onchange="setCallTel(this.value)"></div>
+      <div id="call-mode-help" class="muted"></div>
+      <div id="call-dev" class="muted"></div>
+      <div class="row"><button type="button" class="btn grow" onclick="showQrSheet('phone')">QR téléphone d'appel</button><button type="button" class="btn grow" onclick="showQrSheet('doctor')">QR poste médecin</button></div>
     </div>
 
     <div class="card">
@@ -1016,8 +1117,20 @@
   </nav>
 
   <div id="sheet" class="sheet hidden" onclick="if(event.target===this)closeSheet()"><div id="sheet-box" class="sheet-box" role="dialog" aria-modal="true"></div></div>
-  <div id="toast" class="toast hidden"></div>
+  <div id="callov" class="callov hidden"></div>
 </section>
+
+<!-- =====================================================================
+     VUE 3 : TÉLÉPHONE D'APPEL (apprenants) ou POSTE MÉDECIN (formateur)
+     ===================================================================== -->
+<section id="view-phone" class="hidden" aria-label="Téléphone">
+  <div class="ph-top" id="ph-top"><span id="ph-clock" class="ph-clock">--:--</span><span class="ph-net-i">▂▄▆ 4G</span></div>
+  <div id="ph-main" class="ph-main"></div>
+  <div id="dr-main" class="dr-main"></div>
+  <div id="ph-set" class="ph-set hidden"></div>
+</section>
+<audio id="call-audio" autoplay playsinline></audio>
+<div id="toast" class="toast hidden"></div>
   <script>
     /* =====================================================================
        0. GLOBAUX, UTILITAIRES, STOCKAGE
@@ -1545,6 +1658,7 @@
         startTime: e.startTime || ``, steps, tech, crm,
         questions: L((e.debrief || {}).questions), messages: L((e.debrief || {}).messages),
         trainer: e.trainer || {}, briefing: e.briefing || {}, documents: e.documents || [], contacts: e.contacts || [],
+        trigger: e.trigger || ``, saed: e.call || {},
         objTech: L(e.objTech), objCrm: L(e.objCrm), mailTo: e.mailTo || ``, editor: true
       };
     }
@@ -1587,7 +1701,9 @@
       sameArm: false,
       nibpStart: { mode: `manual`, interval: 300 },
       patient: { bed: `LIT 04`, name: `PATIENT` },
-      brief: ``, briefIdx: 0, doc: -1, actCnt: {}
+      brief: ``, briefIdx: 0, doc: -1, actCnt: {},
+      team: { staff: {}, learners: [] },
+      call: { mode: `remote`, tel: `` }
     };
     let sim = deep(SIM_DEFAULT);
     const simFrozen = () => sim.stage === `pause` || sim.stage === `end`;
@@ -1814,8 +1930,10 @@
           }, 20000);
           if (role === `remote`) {
             publishSyncMessage({ type: `SYNC_REQ` });
-          } else {
+          } else if (role === `monitor`) {
             broadcastFullState();
+          } else {
+            publishSyncMessage({ type: `PH_REQ` });
           }
         } else if (type === 0x30) {
           /* PUBLISH */
@@ -2124,12 +2242,25 @@
     }
 
     const SITE_URL = `https://sylvainbonnal-crypto.github.io/Simu-im60/`;
-    function getPairingUrl() {
+    function siteBase() {
       const L = window.location;
       const local = L.protocol !== `https:` || /^(localhost|127\.|192\.168\.|10\.)/.test(L.hostname);
-      const base = local ? SITE_URL : L.href.split(`?`)[0].split(`#`)[0];
-      return `${base}?role=remote&pin=${appState.pin}`;
+      return local ? SITE_URL : L.href.split(`?`)[0].split(`#`)[0];
     }
+    function getPairingUrl(r) { return `${siteBase()}?role=${r || `remote`}&pin=${appState.pin}`; }
+    function editorUrl() { return siteBase().replace(/[^/]*$/, ``) + `editeur.html?pin=${appState.pin}`; }
+    /* Éditeur ouvert par-dessus le simulateur, avec un bouton pour en sortir.
+       Le code de salon est donné à l'éditeur (même site, même mémoire du navigateur). */
+    function openEditor() {
+      try { localStorage.setItem(`im60_editeur_v3_pin`, appState.pin); } catch (_) {}
+      if (role === `monitor` && menuSec) closeMenu();
+      let ov = $(`edov`);
+      if (!ov) { ov = document.createElement(`div`); ov.id = `edov`; ov.className = `edov`; document.body.appendChild(ov); }
+      ov.innerHTML = `<div class="edov-bar"><b>✎ Éditeur de scénarios</b><span>Code de salon ${appState.pin}</span><button type="button" onclick="closeEditor()">✕ Fermer l'éditeur</button></div>
+        <iframe title="Éditeur de scénarios" src="editeur.html?pin=${appState.pin}"></iframe>`;
+      ov.classList.remove(`hidden`);
+    }
+    function closeEditor() { const ov = $(`edov`); if (ov) { ov.innerHTML = ``; ov.classList.add(`hidden`); } if (role === `monitor`) { stageKey = ``; renderStage(); } }
 
     /* =====================================================================
        4. MOTEUR PHYSIOLOGIQUE (côté tablette)
@@ -2969,7 +3100,14 @@
       [`trend-graph`, `Tendances graph.`], [`trend-table`, `Tendances tableau`], [`nibp-review`, `Liste PNI`],
       [`alarm-review`, `Revue alarmes`], [`sound`, `Volume`], [`patient`, `Patient`], [`maint`, `Maintenance`]
     ];
-    let menuSec = null, maintUnlocked = false, maintCode = ``, trendWin = 30, lastTrendLog = 0;
+    let menuSec = null, maintUnlocked = false, maintCode = ``, trendWin = 30, lastTrendLog = 0, maintQr = `remote`;
+    const MAINT_QR = {
+      remote: [`Télécommande formateur`, `Scannez ce QR code avec l'appareil photo du smartphone du formateur : la télécommande s'ouvre déjà connectée à cette tablette.`],
+      phone: [`Téléphone d'appel`, `Le téléphone posé sur la table pour les apprenants (« Appel médecin »). Selon le réglage de la télécommande (Préparation › Téléphone d'appel), l'appel arrive sur la télécommande, sur le poste médecin, sur un vrai numéro ou sur l'IA.`],
+      doctor: [`Poste médecin`, `Pour le formateur qui joue le médecin sur un autre téléphone : il reçoit les appels des apprenants, décroche et voit la fiche de l'appel de la phase en cours.`]
+    };
+    function setMaintQr(k) { maintQr = k; renderMenu(); }
+    function setStageQr(k) { maintQr = k; stageKey = ``; renderStage(); }
     const ADJ = {
       'alarms.hr.hi': { step: 5, min: 25, max: 250, lbl: `Limite FC haute` }, 'alarms.hr.lo': { step: 5, min: 15, max: 200, lbl: `Limite FC basse` },
       'alarms.spo2.hi': { step: 1, min: 50, max: 100, lbl: `Limite SpO2 haute` }, 'alarms.spo2.lo': { step: 1, min: 50, max: 99, lbl: `Limite SpO2 basse` },
@@ -3019,9 +3157,10 @@
     let menuFocus = null;
     function openParam(p) { if (!mon.power || !mon.booted) return; openMenu(p === `nibp` ? `nibp` : `alarms`, p); }
     function openMenu(sec, focus) {
-      if (!mon.power || !mon.booted || simFrozen()) return;
+      if (sec !== `maint` && (!mon.power || !mon.booted || simFrozen())) return;
       ensureAudio();
       menuSec = sec;
+      $(`menu-win`).classList.toggle(`mw-top`, !mon.booted || simFrozen());
       menuFocus = focus || null;
       $(`menu-win`).classList.remove(`hidden`);
       if ((sec.startsWith(`trend`) || sec === `nibp-review` || sec === `alarm-review`) && Date.now() - lastTrendLog > 60000) {
@@ -3030,7 +3169,7 @@
       }
       renderMenu();
     }
-    function closeMenu() { menuSec = null; maintCode = ``; maintUnlocked = false; $(`menu-win`).classList.add(`hidden`); }
+    function closeMenu() { menuSec = null; maintCode = ``; maintUnlocked = false; $(`menu-win`).classList.add(`hidden`); $(`menu-win`).classList.remove(`mw-top`); }
     function knobPress() {
       if (simFrozen()) return;
       const k = $(`knob`);
@@ -3041,7 +3180,7 @@
     function renderMenu() {
       if (!menuSec) return;
       const sec = menuSec;
-      $(`mw-nav`).innerHTML = MENU_SECS.map(([id, l]) => `<button type="button" class="${id === sec ? `sel` : ``}" onclick="openMenu('${id}')">${l}</button>`).join(``);
+      $(`mw-nav`).innerHTML = MENU_SECS.filter(([id]) => mon.booted && !simFrozen() || id === `maint`).map(([id, l]) => `<button type="button" class="${id === sec ? `sel` : ``}" onclick="openMenu('${id}')">${l}</button>`).join(``);
       const title = sec === `main` ? `Menu principal` : (MENU_SECS.find((m) => m[0] === sec) || [, `Menu`])[1];
       $(`mw-title-txt`).textContent = title;
       const C = $(`mw-content`);
@@ -3118,20 +3257,24 @@
             <div style="font-size:26px;letter-spacing:.3em;min-height:34px">${`•`.repeat(maintCode.length)}</div>
             <div class="keypad">${[1, 2, 3, 4, 5, 6, 7, 8, 9, `C`, 0, `OK`].map((k) => `<button type="button" onclick="maintKey('${k}')">${k}</button>`).join(``)}</div>`;
         } else {
-          const url = getPairingUrl();
-          h = `<div style="display:flex;gap:16px;flex-wrap:wrap;align-items:flex-start">
+          const Q = MAINT_QR[maintQr] || MAINT_QR.remote, url = getPairingUrl(maintQr);
+          h = `<div class="seg mt-seg">${Object.entries(MAINT_QR).map(([k, v]) => `<button type="button" class="${k === maintQr ? `sel` : ``}" onclick="setMaintQr('${k}')">${v[0]}</button>`).join(``)}</div>
+            <div style="display:flex;gap:16px;flex-wrap:wrap;align-items:flex-start;margin-top:10px">
               <div class="qr-box">${createQrSvg(url, 220)}<span>PIN ${appState.pin}</span></div>
               <div style="flex:1;min-width:220px;display:flex;flex-direction:column;gap:8px">
-                <div class="mw-h">Télécommande formateur</div>
-                <p class="m-note">Scannez ce QR code avec l'appareil photo du smartphone du formateur : la télécommande s'ouvre déjà connectée à cette tablette.</p>
+                <div class="mw-h">${Q[0]}</div>
+                <p class="m-note">${Q[1]}</p>
                 <div style="word-break:break-all;font-size:13px;color:#9fb0bf">${esc(url)}</div>
                 <div>Synchronisation : <b id="lcd-menu-sync-status">${esc(($(`remote-sync-label`) || {}).textContent || `—`)}</b></div>
                 <div style="display:flex;gap:8px;flex-wrap:wrap">
                   <button type="button" class="m-btn" onclick="regeneratePin()">Nouveau PIN</button>
                   <button type="button" class="m-btn ghost" onclick="goFullscreen()">Plein écran</button>
-                  <button type="button" class="m-btn ghost" onclick="switchRole('remote')">Télécommande sur cet appareil</button>
+                  ${maintQr === `remote` ? `<button type="button" class="m-btn ghost" onclick="switchRole('remote')">Télécommande sur cet appareil</button>` : ``}
                 </div>
-              </div></div>`;
+              </div></div>
+            <div class="mw-h" style="margin-top:16px">Éditeur de scénarios</div>
+            <div class="m-row"><span>Écrire ou modifier un scénario, puis « Envoyer au simulateur » (code ${appState.pin} déjà rempli). Le bouton « Fermer l'éditeur » en haut ramène ici.</span>
+              <button type="button" class="m-btn" onclick="openEditor()">✎ Ouvrir l'éditeur</button></div>`;
         }
       }
       C.innerHTML = h;
@@ -3315,7 +3458,7 @@
       else if (st === `run` && !mon.power && /^(syn|learn|sleep)\|/.test(stageKey)) mode = `sleep`;
       else if (st === `pause`) mode = `pause`;
       else if (st === `end`) mode = `end`;
-      const key = `${mode}|${mode === `syn` ? sim.rev : mode === `learn` ? `${sim.scenarioId}.${sim.briefIdx}.${sim.patient.bed}` : ``}|${appState.pin}`;
+      const key = `${mode}|${mode === `syn` ? sim.rev : mode === `learn` ? `${sim.scenarioId}.${sim.briefIdx}.${sim.patient.bed}` : mode === `qr` ? maintQr : ``}|${appState.pin}`;
       if (key === stageKey) return;
       stageKey = key;
       const el = $(`stage`);
@@ -3324,13 +3467,15 @@
       el.classList.remove(`sleep`);
       if (!mode) { el.innerHTML = ``; return; }
       if (mode === `qr`) {
-        el.innerHTML = `<div class="stg-qr"><div class="bp-qr">${createQrSvg(getPairingUrl(), 240)}</div>
-          <div class="stg-txt"><div class="stg-logo">EDAN iM60</div><b>Télécommande formateur</b>
-            <span>Scannez ce QR code avec l'appareil photo du smartphone du formateur.</span>
+        const Q = MAINT_QR[maintQr] || MAINT_QR.remote;
+        el.innerHTML = `<div class="stg-qr-wrap"><div class="seg stg-qsel">${Object.entries(MAINT_QR).map(([k, v], i) => `<button type="button" class="${k === maintQr ? `sel` : ``}" onclick="event.stopPropagation();setStageQr('${k}')">${i + 1}. ${v[0]}</button>`).join(``)}</div>
+          <div class="stg-qr"><div class="bp-qr">${createQrSvg(getPairingUrl(maintQr), 240)}</div>
+          <div class="stg-txt"><div class="stg-logo">EDAN iM60</div><b>${Q[0]}</b>
+            <span>${maintQr === `remote` ? `Scannez ce QR code avec l'appareil photo du smartphone du formateur.` : Q[1]}</span>
             <span class="pin">PIN <b>${appState.pin}</b></span>
             ${EMBED ? `` : `<button type="button" class="m-btn ghost" onclick="event.stopPropagation();openSplit()">Mode test double écran</button>`}
-            ${EMBED ? `` : `<a class="m-btn ghost" href="editeur.html" target="_blank" onclick="event.stopPropagation()" style="text-decoration:none;text-align:center">Éditeur de scénarios</a>`}
-            <small>Touchez l'écran pour passer en plein écran.</small></div></div>`;
+            <button type="button" class="m-btn ghost" onclick="event.stopPropagation();openEditor()">✎ Éditeur de scénarios</button>
+            <small>Touchez l'écran pour passer en plein écran.</small></div></div></div>`;
       } else if (mode === `syn`) el.innerHTML = trainerHtml();
       else if (mode === `learn`) el.innerHTML = learnHtml();
       else if (mode === `sleep`) {
@@ -3372,6 +3517,7 @@
         renderHeader();
       } else {
         stageKey = ``; renderStage(); renderDoc();
+        if (role === `phone` && !call) renderPhone(); else if (role === `doctor`) renderCallUi();
       }
     }
     /* La télécommande envoie au scope le scénario reçu de l'éditeur (le scope en a besoin pour les briefings et les documents) */
@@ -3406,6 +3552,81 @@
           <div class="fl-gos">${g.join(``) || `<span class="fl-go end">Fin</span>`}</div></div></div>`;
       }).join(``)}</div>`;
     }
+
+    /* ---------- Équipe de la séance (formateurs et apprenants) ---------- */
+    function rolesOf(sc) {
+      const r = ((sc.trainer || {}).roles || []).map((x) => String(x).trim()).filter(Boolean);
+      return (r.length ? r : ROLES_DEFAUT).map((line) => {
+        const i = line.indexOf(`:`);
+        return i > 0 ? { key: line.slice(0, i).trim(), task: line.slice(i + 1).trim() } : { key: line, task: `` };
+      });
+    }
+    const teamOf = () => { sim.team = sim.team || { staff: {}, learners: [] }; sim.team.staff = sim.team.staff || {}; sim.team.learners = sim.team.learners || []; return sim.team; };
+    function renderTeam() {
+      const box = $(`team-staff`), lb = $(`team-learners`);
+      if (!box) return;
+      const T = teamOf(), sc = scenarioById(sim.scenarioId);
+      box.innerHTML = rolesOf(sc).map((r) => `<div class="team-r"><div class="grow"><b>${esc(r.key)}</b>${r.task ? `<small>${esc(r.task)}</small>` : ``}</div>
+        <input type="text" placeholder="Prénom" value="${esc(T.staff[r.key] || ``)}" onchange="setStaff('${esc(r.key).replace(/'/g, `\\'`)}', this.value)"></div>`).join(``) +
+        `<div class="muted">Les rôles viennent du scénario (éditeur, onglet 1). Les prénoms sont gardés d'une séance à l'autre.</div>`;
+      lb.innerHTML = T.learners.length ? T.learners.map((l, i) => `<div class="team-r">
+        <input type="text" class="grow" placeholder="Prénom de l'apprenant" value="${esc(l.name)}" onchange="setLearner(${i}, 'name', this.value)">
+        <input type="text" list="learner-roles" placeholder="Rôle" value="${esc(l.role)}" onchange="setLearner(${i}, 'role', this.value)">
+        <button type="button" class="btn sm" onclick="delLearner(${i})" aria-label="Retirer">✕</button></div>`).join(``) : `<div class="muted">Aucun apprenant inscrit.</div>`;
+    }
+    function teamChanged() { pushSim(); renderPrepChecks(); }
+    function setStaff(k, v) { teamOf().staff[k] = String(v || ``).trim(); teamChanged(); }
+    function addLearner() { teamOf().learners.push({ name: ``, role: `` }); renderTeam(); const ins = $(`team-learners`).querySelectorAll(`input.grow`); if (ins.length) ins[ins.length - 1].focus(); teamChanged(); }
+    function setLearner(i, k, v) { const l = teamOf().learners[i]; if (!l) return; l[k] = String(v || ``).trim(); teamChanged(); }
+    function delLearner(i) { teamOf().learners.splice(i, 1); renderTeam(); teamChanged(); }
+    let clrArm = 0;
+    function clearLearners(btn) {
+      if (Date.now() - clrArm > 3000) { clrArm = Date.now(); btn.textContent = `Toucher encore pour vider`; setTimeout(() => { btn.textContent = `Vider la liste`; }, 3000); return; }
+      clrArm = 0; teamOf().learners = []; renderTeam(); teamChanged(); btn.textContent = `Vider la liste`;
+    }
+    const learnersTxt = () => teamOf().learners.filter((l) => l.name || l.role).map((l) => `${l.name || `?`}${l.role ? ` (${l.role})` : ``}`);
+
+    /* ---------- Destination des appels du téléphone d'appel ---------- */
+    const CALL_MODES = {
+      remote: [`Sur la télécommande`, `La télécommande sonne : touchez « Décrocher » et parlez dans le micro du téléphone. Pendant l'appel, la fiche de la phase (ce que le médecin doit entendre, sa réponse, les prescriptions) s'affiche.`],
+      doctor: [`Sur un autre téléphone (poste médecin)`, `Le formateur qui joue le médecin ouvre le « poste médecin » sur son téléphone en scannant son QR code (tablette › logo iM60 › Maintenance). Il décroche et voit la fiche de l'appel. La télécommande note l'appel au journal.`],
+      tel: [`Vrai numéro de téléphone`, `Le téléphone d'appel compose ce numéro comme un appel normal : il lui faut une carte SIM. L'heure de l'appel est notée, sa durée est approximative.`],
+      ia: [`IA (le médecin est joué par l'IA)`, `Le téléphone d'appel discute à la voix avec l'IA (Gemini), qui suit les consignes de la phase en cours. Clé d'accès à saisir une seule fois sur le téléphone d'appel (appui long 3 s sur l'heure). La transcription arrive au journal. La voix des apprenants est envoyée à Google : prévenez-les.`]
+    };
+    const callCfg = () => { sim.call = Object.assign({ mode: `remote`, tel: `` }, sim.call || {}); return sim.call; };
+    function renderCallMode() {
+      const box = $(`call-mode`);
+      if (!box) return;
+      const C = callCfg();
+      box.innerHTML = Object.entries(CALL_MODES).map(([k, v]) => `<button type="button" class="${C.mode === k ? `sel` : ``}" onclick="setCallMode('${k}')">${v[0]}</button>`).join(``);
+      $(`call-tel-box`).classList.toggle(`hidden`, C.mode !== `tel`);
+      if (document.activeElement !== $(`call-tel`)) $(`call-tel`).value = C.tel || ``;
+      $(`call-mode-help`).textContent = CALL_MODES[C.mode][1];
+      renderCallDevs();
+    }
+    function renderCallDevs() {
+      const el = $(`call-dev`); if (!el) return;
+      const on = (k) => Date.now() - (devSeen[k] || 0) < 12000;
+      el.innerHTML = `Téléphone d'appel : <b class="${on(`phone`) ? `ok-t` : ``}">${on(`phone`) ? `connecté ✓` : `pas connecté`}</b>` +
+        (callCfg().mode === `doctor` ? ` · Poste médecin : <b class="${on(`doctor`) ? `ok-t` : ``}">${on(`doctor`) ? `connecté ✓` : `pas connecté`}</b>` : ``);
+    }
+    function setCallMode(k) {
+      if (!CALL_MODES[k]) return;
+      const C = callCfg();
+      if (C.mode === k) return;
+      C.mode = k;
+      if (sim.running) remEvent(`system`, `Appels redirigés : ${CALL_MODES[k][0].toLowerCase()}`);
+      pushSim(); renderCallMode();
+    }
+    function setCallTel(v) { callCfg().tel = String(v || ``).replace(/[^\d+]/g, ``); pushSim(); renderCallMode(); }
+    const callModeLbl = () => CALL_MODES[callCfg().mode][0];
+    function showQrSheet(k) {
+      const Q = MAINT_QR[k], url = getPairingUrl(k);
+      openSheet(`qr`, shHead(Q[0], `Scannez avec l'appareil photo du téléphone concerné`) +
+        `<div style="display:flex;justify-content:center"><div class="qr-box">${createQrSvg(url, 240)}<span>PIN ${appState.pin}</span></div></div>
+         <div class="muted">${Q[1]}</div><div class="muted" style="word-break:break-all">${esc(url)}</div>`);
+    }
+
 
     /* ---------- Briefings (télécommande) ---------- */
     function learnSlides(sc) {
@@ -3516,9 +3737,16 @@
     }
 
     /* ---------- Briefings (tablette, dans le scope éteint) ---------- */
+    const staffPlain = (sc) => rolesOf(sc).map((r) => `${r.key}${teamOf().staff[r.key] ? ` — ${teamOf().staff[r.key]}` : ``}${r.task ? ` : ${r.task}` : ``}`);
+    function staffLines(sc) {
+      const T = teamOf();
+      return rolesOf(sc).map((r) => {
+        const n = T.staff[r.key];
+        return `<b class="stg-who">${esc(r.key)}${n ? ` — ${esc(n)}` : ``}</b>${r.task ? ` : ${esc(r.task)}` : ``}`;
+      });
+    }
     function trainerHtml() {
       const sc = scenarioById(sim.scenarioId), tr = sc.trainer || {};
-      const roles = (tr.roles || []).filter(Boolean);
       return `<div class="stg-syn">
         <div class="stg-h"><span>Briefing formateurs · ${esc(sc.short)}</span><small>Ne pas montrer aux apprenants</small></div>
         <div class="stg-kv">
@@ -3526,7 +3754,9 @@
           <div><span>Heure de départ</span><b>${esc(sim.clockStart ? sim.clockStart.replace(`:`, ` h `) : `—`)}</b></div>
           ${sc.trap ? `<div><span>Piège</span><b>${esc(sc.trap)}</b></div>` : ``}
           ${sc.hidden ? `<div><span>Caché / à obtenir</span><b>${esc(sc.hidden)}</b></div>` : ``}
-          ${roles.length ? `<div><span>Qui fait quoi</span><b>${roles.map(esc).join(`<br>`)}</b></div>` : ``}
+          <div><span>Qui fait quoi</span><b>${staffLines(sc).join(`<br>`)}</b></div>
+          <div><span>Apprenants</span><b>${learnersTxt().length ? learnersTxt().map(esc).join(`<br>`) : `<i class="dim">Non renseignés (télécommande › Préparation › Équipe)</i>`}</b></div>
+          <div><span>Téléphone d'appel</span><b>${esc(callModeLbl())}${callCfg().mode === `tel` && callCfg().tel ? ` : ${esc(callCfg().tel)}` : ``}</b></div>
           ${tr.dsa ? `<div><span>Programmation du DSA</span><b>${esc(tr.dsa)}</b></div>` : ``}
           ${tr.notes ? `<div><span>Entre nous</span><b>${esc(tr.notes)}</b></div>` : ``}
         </div>
@@ -3606,7 +3836,7 @@
         // Appui simple : allume le moniteur (séance validée). Appui long : éteint.
         $(`hw-power`).addEventListener(`click`, () => { if (sim.stage === `run` && !mon.power) { unlockTablet(); setPower(true); } });
         lp($(`hw-power`), 1200, () => { if (sim.stage === `run` && mon.power) setPower(false); });
-        lp($(`brand-logo`), 2000, () => { if (!mon.booted) return; maintUnlocked = true; openMenu(`maint`); });
+        lp($(`brand-logo`), 2000, () => { if (role !== `monitor`) return; maintUnlocked = true; openMenu(`maint`); });
       });
     })();
     function renderAll() { renderPatient(); renderParams(); renderNibp(); renderAlarms(); renderLabels(); }
@@ -3864,7 +4094,7 @@
       if (added) { events.sort((a, b) => a.ts - b.ts); saveRemote(); renderLogs(); if (curTab === `debrief` && dbTab === `bilan`) renderDebrief(); }
     }
     const tPlus = (ts) => (sim.startedAt ? fmtDur(ts - sim.startedAt) : hhmm(ts));
-    const CAT_ICON = { step: `▶`, action: `✓`, sensor: `⚡`, nibp: `◉`, alarm: `⚠`, learner: `☝`, note: `✎`, system: `•` };
+    const CAT_ICON = { step: `▶`, action: `✓`, sensor: `⚡`, nibp: `◉`, alarm: `⚠`, learner: `☝`, note: `✎`, system: `•`, call: `☎` };
     function evRow(ev, withDel) {
       let cls = ev.cat;
       if (ev.cat === `alarm`) cls = `alarm-${ev.prio || `med`}`;
@@ -3950,6 +4180,8 @@
       $(`prep-nibp`).innerHTML = Object.entries(NIBP_START).map(([k, v]) => `<button type="button" class="${prep.nibp === k ? `sel` : ``}" onclick="setPrepNibp('${k}')">${v[2]}</button>`).join(``);
       renderPrepChecks();
       renderBriefCtl();
+      renderTeam();
+      renderCallMode();
     }
     function renderPrepChecks() {
       const box = $(`prep-check`);
@@ -4517,7 +4749,7 @@
        ===================================================================== */
     const DB_TABS = [[`bilan`, `Bilan`], [`chrono`, `Chronologie`], [`guide`, `Guide`], [`crm`, `Grille CRM`], [`export`, `Exporter`]];
     function setDbTab(t) { dbTab = t; renderDebrief(); window.scrollTo(0, 0); }
-    const TL_FILTERS = [[`all`, `Tout`], [`step`, `Étapes`], [`action`, `Actions`], [`nibp`, `PNI`], [`alarm`, `Alarmes`], [`learner`, `Scope`], [`note`, `Notes`]];
+    const TL_FILTERS = [[`all`, `Tout`], [`step`, `Étapes`], [`action`, `Actions`], [`nibp`, `PNI`], [`alarm`, `Alarmes`], [`learner`, `Scope`], [`call`, `Appels`], [`note`, `Notes`]];
     function setTlFilter(f) { tlFilter = f; renderTimeline(); }
     function renderTimeline() {
       const box = $(`db-timeline`);
@@ -4572,7 +4804,7 @@
       add(`1re pause d'alarme`, first((e) => e.cat === `learner` && /Pause alarme \d/.test(e.text)));
       const scA = scenarioById(sim.scenarioId), seenA = new Set();
       (scA.steps || []).forEach((s) => (s.actions || []).forEach((a) => { if (seenA.has(a.label)) return; seenA.add(a.label); add(`1er « ${a.label} »`, first((e) => e.cat === `action` && e.act === a.label)); }));
-      add(`1er appel (médecin / SAMU)`, first((e) => e.cat === `action` && /^☎/.test(e.text)));
+      add(`1er appel (médecin / SAMU)`, first((e) => (e.cat === `action` || e.cat === `call`) && /^☎/.test(e.text)));
       const st = computeStats();
       for (const it of st.items) { const d = debrief.done[it.id]; add(it.t, d ? events.find((e) => e.id === d.ev) || { ts: d.ts } : null); }
       return rows;
@@ -4637,6 +4869,7 @@
     function summaryText() {
       const s = computeStats();
       const L = [`${s.sc.title}`, `${s.sc.patient}`, `Date : ${new Date(sim.startedAt || Date.now()).toLocaleString(`fr-FR`)} — heure simulée de départ ${sim.clockStart || `—`} — durée active ${fmtDur(s.dur)}`, ``,
+        `Formateurs : ${staffPlain(s.sc).join(` ; `) || `—`}`, `Apprenants : ${learnersTxt().join(` ; `) || `—`}`, ``,
         `Attendus observés (${s.done.length}/${s.items.length}) :`];
       for (const i of s.items) L.push(`  ${debrief.done[i.id] ? `[x] ${i.t} (T+${tPlus(debrief.done[i.id].ts)})` : `[ ] ${i.t}`}`);
       L.push(``, `PNI prises : ${s.nibpN} — Alarmes : ${s.alarmN} (${s.alarmHigh} hautes) — Pauses : ${s.pauses} — Notes : ${s.notes}`, ``, `Tensions :`);
@@ -4653,13 +4886,14 @@
     function exportReport(asText) {
       const s = computeStats();
       const rows = delayRows();
-      const tl = events.map((e) => `<tr class="c-${e.cat}"><td>${sim.startedAt ? fmtDur(e.ts - sim.startedAt) : ``}</td><td>${hhmmss(e.sts || e.ts)}</td><td>${esc({ step: `Étape`, action: `Action`, sensor: `Dispositif`, nibp: `PNI`, alarm: `Alarme`, learner: `Scope`, note: `Note`, system: `Séance` }[e.cat] || e.cat)}</td><td>${esc(e.text)}${e.detail || e.tgt ? `<br><small>${esc(e.detail || e.tgt)}</small>` : ``}</td></tr>`).join(``);
+      const tl = events.map((e) => `<tr class="c-${e.cat}"><td>${sim.startedAt ? fmtDur(e.ts - sim.startedAt) : ``}</td><td>${hhmmss(e.sts || e.ts)}</td><td>${esc({ step: `Étape`, action: `Action`, sensor: `Dispositif`, nibp: `PNI`, alarm: `Alarme`, learner: `Scope`, note: `Note`, system: `Séance`, call: `Appel` }[e.cat] || e.cat)}</td><td>${esc(e.text)}${e.detail || e.tgt ? `<br><small>${esc(e.detail || e.tgt)}</small>` : ``}</td></tr>`).join(``);
       const nb = events.filter(isNibpResult).map((e) => `<tr><td>${evClock(e)}</td><td>${esc(e.text)}</td></tr>`).join(``);
       const g = debrief.guide;
       const html = `<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Débriefing — ${esc(s.sc.short)}</title>
 <style>body{font:14px/1.5 system-ui,Segoe UI,Arial,sans-serif;color:#1b2329;max-width:900px;margin:24px auto;padding:0 18px}h1{font-size:22px;margin:0 0 4px}h2{font-size:16px;margin:26px 0 8px;padding-bottom:4px;border-bottom:2px solid #0a7a8a;color:#0a5d69}table{width:100%;border-collapse:collapse;font-size:13px}th,td{text-align:left;padding:5px 6px;border-bottom:1px solid #dfe5e8;vertical-align:top}th{background:#f1f5f6}small{color:#5d6b73}.kpi{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.kpi div{border:1px solid #dfe5e8;border-radius:8px;padding:8px}.kpi b{display:block;font-size:20px}.muted{color:#5d6b73}.c-step td{background:#eef8fa;font-weight:600}.c-alarm td:nth-child(4){color:#b3261e}.c-note td:nth-child(4){font-style:italic}.box{border:1px solid #dfe5e8;border-radius:8px;padding:10px;white-space:pre-wrap;min-height:40px}.ok{color:#1d7a3a}.ko{color:#b3261e}@media print{body{margin:0}h2{break-after:avoid}tr{break-inside:avoid}}</style></head><body>
 <h1>Compte-rendu de simulation — ${esc(s.sc.title)}</h1>
 <div class="muted">${esc(s.sc.patient)} · ${new Date(sim.startedAt || Date.now()).toLocaleString(`fr-FR`)} · heure simulée de départ ${esc(sim.clockStart || `—`)} · durée active ${fmtDur(s.dur)}</div>
+<h2>Équipe</h2><table><tr><th>Formateurs</th><th>Apprenants</th></tr><tr><td>${staffPlain(s.sc).map(esc).join(`<br>`) || `—`}</td><td>${learnersTxt().map(esc).join(`<br>`) || `—`}</td></tr></table>
 <h2>Indicateurs</h2><div class="kpi"><div><b>${fmtDur(s.dur)}</b>Durée active</div><div><b>${s.stepsReached}/${s.sc.steps.length}</b>Étapes jouées</div><div><b>${s.done.length}/${s.items.length}</b>Attendus observés</div><div><b>${s.nibpN}</b>PNI prises (${s.nibpOk} réussies)</div><div><b>${s.alarmN}</b>Alarmes (${s.alarmHigh} hautes)</div><div><b>${s.pauses}</b>Pauses</div></div>
 <h2>Délais clés</h2><table><tr><th>Repère</th><th>T+</th><th>Dans l'étape</th></tr>${rows.map((r) => `<tr><td>${esc(r.label)}</td><td>${r.ev ? fmtDur(r.ev.ts - sim.startedAt) : `<span class="ko">non observé</span>`}</td><td>${r.ev && r.step ? `${esc(r.step.text.replace(/ — .*/, ``))} +${fmtDur(r.ev.ts - r.step.ts)}` : ``}</td></tr>`).join(``)}</table>
 <h2>Tensions mesurées</h2>${nb ? `<table><tr><th>Heure</th><th>Mesure</th></tr>${nb}</table>` : `<p class="muted">Aucune.</p>`}
@@ -4782,6 +5016,8 @@
     })();
     function remoteTick() {
       pendTick();
+      callTick();
+      if (curTab === `prep`) renderCallDevs();
       renderHeader();
       renderScopeStatus();
       if (voiceOn) $(`vp-time`).textContent = fmtDur(Date.now() - voiceStartAt);
@@ -4796,6 +5032,529 @@
     function renderRemoteAll() { renderHeader(); renderScopeStatus(); showTab(curTab); renderMic(); }
 
     /* =====================================================================
+       V7 — TÉLÉPHONE D'APPEL (apprenants), POSTE MÉDECIN, APPELS
+       Le téléphone d'appel (?role=phone) appelle selon le réglage de la télécommande :
+       télécommande ou poste médecin (voix par WebRTC, signalisation par le relais),
+       vrai numéro (tel:) ou IA (Gemini, clé gardée sur le téléphone d'appel seulement).
+       ===================================================================== */
+    const devSeen = {};
+    let call = null;                 // appel en cours sur cet appareil
+    const callsSeen = {};            // télécommande : suivi des appels pour le journal
+    const RTC_CFG = { iceServers: [{ urls: [`stun:stun.l.google.com:19302`, `stun:stun1.l.google.com:19302`] }] };
+    const isCallee = () => (role === `remote` && callCfg().mode === `remote`) || role === `doctor`;
+    const DEFAULT_CONTACTS = [{ id: `nephro`, name: `Néphrologue d'astreinte`, persona: `` }, { id: `samu`, name: `SAMU — Centre 15`, persona: `` }];
+    const phoneContacts = () => { const c = (scenarioById(sim.scenarioId).contacts || []).filter((x) => x && x.name); return c.length ? c : DEFAULT_CONTACTS; };
+
+    /* ---------- Sons (sonnerie, retour d'appel) ---------- */
+    let toneCtx = null, toneTimer = null;
+    function toneAudio() { try { toneCtx = toneCtx || new (window.AudioContext || window.webkitAudioContext)(); if (toneCtx.state === `suspended`) toneCtx.resume(); } catch (_) {} return toneCtx; }
+    function ctBeep(freqs, dur, vol) {
+      const c = toneAudio(); if (!c) return;
+      const g = c.createGain(); g.gain.value = vol || 0.12; g.connect(c.destination);
+      freqs.forEach((f) => { const o = c.createOscillator(); o.frequency.value = f; o.connect(g); o.start(); o.stop(c.currentTime + dur); });
+    }
+    function stopTone() { clearInterval(toneTimer); toneTimer = null; }
+    function ringback() { stopTone(); const f = () => ctBeep([440], 1.5, 0.1); f(); toneTimer = setInterval(f, 5000); }   // tonalité française : 1,5 s / 3,5 s
+    function ringIncoming() {
+      stopTone();
+      const f = () => { buzz(); if (role === `doctor`) { ctBeep([1046, 1318], 0.35, 0.14); setTimeout(() => ctBeep([1046, 1318], 0.35, 0.14), 500); } };
+      f(); toneTimer = setInterval(f, 2500);
+    }
+    function busyTone() { stopTone(); let n = 0; toneTimer = setInterval(() => { ctBeep([440], 0.25, 0.1); if (++n > 5) stopTone(); }, 500); }
+
+    /* ---------- Voix (WebRTC) ---------- */
+    async function rtcOpen() {
+      const pc = new RTCPeerConnection(RTC_CFG);
+      let st = null;
+      try { st = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true } }); }
+      catch (_) { toast(`Micro refusé : autorisez le micro pour ce site`); }
+      if (st) st.getTracks().forEach((t) => pc.addTrack(t, st)); else pc.addTransceiver(`audio`, { direction: `recvonly` });
+      pc.ontrack = (e) => { const a = $(`call-audio`); if (a) { a.srcObject = e.streams[0] || new MediaStream([e.track]); a.play().catch(() => {}); } };
+      pc.onconnectionstatechange = () => {
+        if (!call || call.pc !== pc) return;
+        if (pc.connectionState === `connected`) { call.voice = true; renderCallUi(); }
+        if (pc.connectionState === `failed`) { toast(`Liaison audio impossible (réseau)`); callLog(`Liaison audio de l'appel impossible (réseau)`); }
+      };
+      return { pc, st };
+    }
+    const iceDone = (pc) => new Promise((res) => {
+      if (pc.iceGatheringState === `complete`) return res();
+      const t = setTimeout(res, 2500);
+      pc.addEventListener(`icegatheringstatechange`, () => { if (pc.iceGatheringState === `complete`) { clearTimeout(t); res(); } });
+    });
+    function rtcClose() {
+      if (!call) return;
+      try { if (call.st) call.st.getTracks().forEach((t) => t.stop()); } catch (_) {}
+      try { if (call.pc) call.pc.close(); } catch (_) {}
+      call.pc = null; call.st = null;
+      const a = $(`call-audio`); if (a) a.srcObject = null;
+    }
+    function toggleMute() {
+      if (!call || !call.st) return;
+      call.muted = !call.muted;
+      call.st.getAudioTracks().forEach((t) => { t.enabled = !call.muted; });
+      renderCallUi();
+    }
+
+    /* ---------- Journal (la télécommande garde le journal) ---------- */
+    function callLog(text, extra) {
+      if (role === `remote`) remEvent(`call`, text, extra);
+      else publishSyncMessage({ type: `CALL_LOG`, text, extra: extra || null, sid: sim.sessionId });
+    }
+
+    /* ---------- Fiche d'appel de la phase en cours ---------- */
+    function phaseCall(contactId) {
+      const sc = scenarioById(sim.scenarioId), st = sc.steps[sim.stepIdx];
+      const c = st && st.call;
+      return c && (!contactId || !c.who || c.who === contactId) ? c : null;
+    }
+    function callSheetHtml(cid) {
+      const sc = scenarioById(sim.scenarioId), st = sc.steps[sim.stepIdx];
+      const c = phaseCall(call && call.contact ? call.contact.id : ``);
+      const heard = (call && call.heard) || {};
+      if (!c) return `<div class="cs-empty">Pas de fiche d'appel pour ${st ? `la phase « ${esc(st.label)} »` : `ce moment`}. Jouez le médecin librement : faites préciser la situation (SAED) et exigez la reformulation des prescriptions.</div>`;
+      const L = (arr) => (arr || []).filter(Boolean);
+      return `<div class="cs">
+        <div class="cs-h">Doit entendre <small>touchez quand c'est dit</small></div>
+        <div class="cs-hear">${L(c.hear).map((h, i) => `<button type="button" class="${heard[i] ? `on` : ``}" onclick="markHeard(${i})">${heard[i] ? `✓` : `○`} ${esc(h)}</button>`).join(``)}</div>
+        ${L(c.ask).length ? `<div class="cs-h">S'il manque des éléments, demander</div><ul>${L(c.ask).map((x) => `<li>${esc(x)}</li>`).join(``)}</ul>` : ``}
+        ${c.answer ? `<div class="cs-h">Réponse quand l'essentiel est transmis</div><p>${esc(c.answer)}</p>` : ``}
+        ${L(c.presc).length ? `<div class="cs-h">Prescriptions orales (à faire reformuler)</div><ul>${L(c.presc).map((x) => `<li>${esc(x)}</li>`).join(``)}</ul>` : ``}
+        ${c.avoid ? `<div class="cs-h warn">À ne pas dire</div><p>${esc(c.avoid)}</p>` : ``}
+      </div>`;
+    }
+    function markHeard(i) {
+      if (!call) return;
+      const c = phaseCall(call.contact ? call.contact.id : ``); if (!c || !c.hear || !c.hear[i]) return;
+      call.heard = call.heard || {};
+      call.heard[i] = !call.heard[i];
+      if (call.heard[i]) callLog(`SAED — entendu : ${c.hear[i]}`);
+      renderCallUi();
+    }
+
+    /* =========== CÔTÉ TÉLÉPHONE D'APPEL (apprenants) =========== */
+    function placeCall(i) {
+      if (call && call.state !== `ended`) return;
+      toneAudio();
+      requestWakeLock();
+      const ct = phoneContacts()[i]; if (!ct) return;
+      const C = callCfg();
+      call = { cid: uid(), contact: { id: ct.id, name: ct.name, persona: ct.persona || `` }, mode: C.mode, state: `calling`, t0: Date.now(), liveAt: 0, txt: [] };
+      publishSyncMessage({ type: `CALL_RING`, cid: call.cid, contact: call.contact, mode: C.mode, sid: sim.sessionId, step: sim.stepIdx });
+      if (C.mode === `tel`) {
+        if (!C.tel) { publishSyncMessage({ type: `CALL_END`, cid: call.cid, why: `no-number` }); phoneEnded(`Numéro non attribué`); return; }
+        call.state = `tel`; renderPhone();
+        setTimeout(() => { window.location.href = `tel:${C.tel}`; }, 300);
+        return;
+      }
+      if (C.mode === `ia`) {
+        const k = iaCfg();
+        if (!k.key) { callLog(`Appel IA impossible : pas de clé sur le téléphone d'appel`); publishSyncMessage({ type: `CALL_END`, cid: call.cid, why: `no-key` }); phoneEnded(`Service indisponible`); return; }
+        ringback(); renderPhone();
+        setTimeout(() => { if (call && call.state === `calling`) iaAnswer(); }, 4200 + Math.random() * 3000);
+        return;
+      }
+      ringback(); renderPhone();
+      call.noAns = setTimeout(() => { if (call && call.state === `calling`) { publishSyncMessage({ type: `CALL_END`, cid: call.cid, why: `noanswer` }); phoneEnded(`Pas de réponse`); } }, 45000);
+    }
+    /* Fin d'appel côté téléphone : message, tonalité occupé, puis retour à la liste */
+    function phoneEnded(why) {
+      if (!call) return;
+      const was = call;
+      clearTimeout(was.noAns); iaStop(); rtcClose();
+      was.state = `ended`; was.why = why;
+      busyTone(); renderPhone();
+      setTimeout(() => { if (call === was) { call = null; renderPhone(); } }, 3000);
+    }
+    async function phoneOnAnswer(m) {
+      if (!call || m.cid !== call.cid || call.state !== `calling`) return;
+      clearTimeout(call.noAns);
+      stopTone();
+      call.state = `live`; call.liveAt = Date.now(); call.by = m.by;
+      renderPhone();
+      const r = await rtcOpen();
+      if (!call || call.cid !== m.cid) { try { r.pc.close(); if (r.st) r.st.getTracks().forEach((t) => t.stop()); } catch (_) {} return; }
+      call.pc = r.pc; call.st = r.st;
+      await r.pc.setLocalDescription(await r.pc.createOffer());
+      await iceDone(r.pc);
+      publishSyncMessage({ type: `CALL_SDP`, cid: call.cid, to: m.by, kind: `offer`, sdp: r.pc.localDescription.sdp });
+    }
+    function endCall(why) {
+      if (!call) return;
+      const was = call;
+      clearTimeout(was.noAns);
+      stopTone();
+      iaStop();
+      rtcClose();
+      if (was.state !== `ended`) {
+        was.state = `ended`; was.why = why || ``;
+        publishSyncMessage({ type: `CALL_END`, cid: was.cid, why: why || `hangup`, dur: was.liveAt ? Date.now() - was.liveAt : 0, txt: was.txt && was.txt.length ? was.txt : undefined });
+      }
+      if (role === `phone`) { renderPhone(); setTimeout(() => { if (call === was) { call = null; renderPhone(); } }, 2500); }
+      else { call = null; renderCallUi(); }
+    }
+    /* Retour sur la page après un vrai appel GSM : fin approximative */
+    document.addEventListener(`visibilitychange`, () => {
+      if (role !== `phone` || !call || call.state !== `tel`) return;
+      if (document.visibilityState === `hidden`) { call.hiddenAt = Date.now(); return; }
+      if (call.hiddenAt) { publishSyncMessage({ type: `CALL_END`, cid: call.cid, why: `tel`, dur: Date.now() - call.hiddenAt }); phoneEnded(`Appel terminé`); }
+    });
+
+    function renderPhone() {
+      if (role !== `phone`) return;
+      const el = $(`ph-main`); if (!el) return;
+      const ok = !!sim.rev;
+      if (!call) {
+        el.innerHTML = `<div class="ph-title">Appel médecin</div>
+          <div class="ph-list">${phoneContacts().map((c, i) => `<button type="button" class="ph-ct" onclick="placeCall(${i})"><span class="ph-av">${esc((c.name || `?`).slice(0, 1))}</span><span class="grow"><b>${esc(c.name)}</b><small>Toucher pour appeler</small></span><span class="ph-go">📞</span></button>`).join(``)}</div>
+          ${ok ? `` : `<div class="ph-net">Recherche du réseau…</div>`}`;
+        return;
+      }
+      const dur = call.liveAt ? fmtDur(Date.now() - call.liveAt) : ``;
+      const stat = call.state === `calling` ? `Appel en cours…` : call.state === `tel` ? `Appel téléphonique…` : call.state === `live` ? (call.thinking ? `…` : dur) : (call.why || `Appel terminé`);
+      el.innerHTML = `<div class="ph-call ${call.state}">
+        <div class="ph-av big">${esc((call.contact.name || `?`).slice(0, 1))}</div>
+        <div class="ph-cn">${esc(call.contact.name)}</div>
+        <div class="ph-st" id="ph-st">${esc(stat)}</div>
+        ${call.state === `live` && call.mode === `ia` ? `<div class="ph-mic ${call.listening ? `on` : ``}">${call.listening ? `● Parlez` : call.speaking ? `◀ ◀` : ``}</div>` : ``}
+        <div class="ph-btns">
+          ${call.state === `live` && call.mode !== `ia` ? `<button type="button" class="ph-b ${call.muted ? `on` : ``}" onclick="toggleMute()">🎙<small>${call.muted ? `Micro coupé` : `Muet`}</small></button>` : ``}
+          ${call.state !== `ended` ? `<button type="button" class="ph-b red" onclick="endCall('hangup')">✆<small>Raccrocher</small></button>` : ``}
+        </div></div>`;
+    }
+
+    /* ---------- Réglages cachés du téléphone d'appel (appui long 3 s sur l'heure) ---------- */
+    function iaCfg() { try { return Object.assign({ key: ``, model: `gemini-flash-lite-latest` }, JSON.parse(localStorage.getItem(`im60_ia`) || `{}`)); } catch (_) { return { key: ``, model: `gemini-flash-lite-latest` }; } }
+    function iaSave(k) { try { localStorage.setItem(`im60_ia`, JSON.stringify(k)); } catch (_) {} }
+    function openPhoneSettings() {
+      const k = iaCfg();
+      $(`ph-set`).classList.remove(`hidden`);
+      $(`ph-set`).innerHTML = `<div class="ph-set-box">
+        <h3>Réglages (formateur)</h3>
+        <div class="muted">Code de salon : <b>${appState.pin}</b> · Appels : <b>${esc(callModeLbl())}</b></div>
+        <label class="lbl" for="ia-key">Clé d'accès Gemini (gardée sur ce téléphone seulement)</label>
+        <input type="password" id="ia-key" value="${esc(k.key)}" placeholder="AIza…" autocomplete="off">
+        <label class="lbl" for="ia-model">Modèle</label>
+        <input type="text" id="ia-model" value="${esc(k.model)}">
+        <div class="muted">Clé gratuite sur aistudio.google.com (compte Google). Ne la mettez jamais dans un fichier publié sur GitHub.</div>
+        <div class="row"><button type="button" class="btn pri" onclick="savePhoneSettings()">Enregistrer</button><button type="button" class="btn" onclick="testIa()">Tester la voix</button></div>
+        <div id="ia-test" class="muted"></div>
+        <div class="row"><button type="button" class="btn" onclick="iaSave({key:'',model:iaCfg().model});openPhoneSettings()">Effacer la clé</button><button type="button" class="btn" onclick="$('ph-set').classList.add('hidden')">Fermer</button></div>
+      </div>`;
+    }
+    function savePhoneSettings() { iaSave({ key: $(`ia-key`).value.trim(), model: $(`ia-model`).value.trim() || `gemini-flash-lite-latest` }); toast(`Réglages enregistrés`); $(`ph-set`).classList.add(`hidden`); }
+    async function testIa() {
+      savePhoneSettings(); openPhoneSettings();
+      const out = $(`ia-test`); out.textContent = `Test en cours…`;
+      try { const r = await iaAsk(`Tu réponds au téléphone. Dis seulement : « Allô, j'écoute. »`, [{ role: `user`, parts: [{ text: `(Le téléphone sonne.)` }] }]); out.textContent = `Réponse : ${r}`; iaSpeak(r); }
+      catch (e) { out.textContent = `Échec : ${e.message}`; }
+    }
+
+    /* ---------- IA : écoute (reconnaissance vocale), réponse (Gemini), voix (synthèse) ---------- */
+    function iaPrompt(ct) {
+      const sc = scenarioById(sim.scenarioId), st = sc.steps[sim.stepIdx] || {}, c = phaseCall(ct.id);
+      const L = (arr) => (arr || []).filter(Boolean).map((x) => `- ${x}`).join(`\n`) || `- (rien de précisé)`;
+      const vit = `FC ${st.hr ?? `?`}, TA ${st.nibpFail ? `non mesurable` : `${st.sys ?? `?`}/${st.dia ?? `?`}`}, SpO2 ${st.spo2 ?? `?`} %, FR ${st.rr ?? `?`}`;
+      const head = [
+        `Tu joues le rôle de : ${ct.name}.${ct.persona ? ` ${ct.persona}` : ``}`,
+        `Tu réponds au téléphone à une infirmière ou un infirmier d'un centre d'hémodialyse. C'est une simulation de formation : ne sors jamais du rôle, ne dis jamais que tu es une IA, ne fais pas de cours.`,
+        `Parle comme au téléphone : phrases courtes, deux ou trois au maximum par réponse, en français, sans liste ni mise en forme (ta réponse est lue à voix haute).`,
+        ``, `CE QUE TU SAIS DÉJÀ (ne le révèle pas, sers-t'en pour réagir) :`,
+        `- Patient : ${sc.patient || `patient hémodialysé`}.`,
+        `- Situation : ${sc.trigger || sc.context || ``}`,
+        `- Moment de la simulation : ${st.label || ``}. ${st.cue || ``}`,
+        `- Constantes actuelles : ${vit}.`
+      ];
+      if (c && c.prompt) return c.prompt + `\n\nRAPPEL : ta réponse est lue à voix haute, pas de liste ni de mise en forme.`;
+      if (c) return head.concat([
+        ``, `CE QUE TU DOIS ENTENDRE DE L'APPELANT AVANT DE DÉCIDER :`, L(c.hear),
+        ``, `S'IL MANQUE DES ÉLÉMENTS, pose ces questions, une à la fois :`, L(c.ask),
+        `Tant que l'essentiel n'est pas transmis, ne propose pas de diagnostic ni de traitement.`,
+        ``, `QUAND L'ESSENTIEL EST TRANSMIS, réponds dans cet esprit :`, String(c.answer || `(rien de précisé)`).trim(),
+        ``, `PRESCRIPTIONS À DONNER ORALEMENT, puis demande à l'appelant de les reformuler. Corrige-le s'il se trompe :`, L(c.presc),
+        ``, `À NE PAS DIRE OU FAIRE :`, String(c.avoid || `(rien de précisé)`).trim(),
+        (sc.saed || {}).doctor ? `\nCONSIGNES COMMUNES :\n${sc.saed.doctor}` : ``,
+        ``, `Si l'appelant ne se présente pas ou ne dit pas d'où il appelle, demande-le en premier.`
+      ]).join(`\n`);
+      return head.concat([
+        ``, `Aucune consigne particulière n'est prévue pour cet appel à ce moment. Réagis de façon réaliste et prudente : fais préciser la situation (qui appelle, le patient, ce qui se passe, les constantes, ce qu'on attend de toi), ne donne pas de diagnostic tant que tu n'as pas les éléments, et fais reformuler toute prescription.`,
+        (sc.saed || {}).doctor ? `\nCONSIGNES COMMUNES :\n${sc.saed.doctor}` : ``
+      ]).join(`\n`);
+    }
+    async function iaAsk(system, contents) {
+      const k = iaCfg();
+      const ctl = new AbortController(), t = setTimeout(() => ctl.abort(), 20000);
+      try {
+        const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(k.model)}:generateContent`, {
+          method: `POST`, signal: ctl.signal,
+          headers: { 'Content-Type': `application/json`, 'x-goog-api-key': k.key },
+          body: JSON.stringify({ systemInstruction: { parts: [{ text: system }] }, contents, generationConfig: { temperature: 0.7, maxOutputTokens: 600 } })
+        });
+        const j = await r.json().catch(() => ({}));
+        if (!r.ok) throw new Error((j.error && j.error.message) || `erreur ${r.status}`);
+        const parts = (((j.candidates || [])[0] || {}).content || {}).parts || [];
+        const txt = parts.map((p) => p.text || ``).join(` `).replace(/[*_#`]/g, ``).trim();
+        if (!txt) throw new Error(`réponse vide`);
+        return txt;
+      } finally { clearTimeout(t); }
+    }
+    function iaVoice() {
+      const vs = (window.speechSynthesis && speechSynthesis.getVoices()) || [];
+      return vs.find((v) => /^fr(-|_)FR/i.test(v.lang) && /google/i.test(v.name)) || vs.find((v) => /^fr(-|_)FR/i.test(v.lang)) || vs.find((v) => /^fr/i.test(v.lang)) || null;
+    }
+    function iaSpeak(text, done) {
+      if (!window.speechSynthesis) { if (done) done(); return; }
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang = `fr-FR`; u.rate = 1.05;
+      const v = iaVoice(); if (v) u.voice = v;
+      let fin = false; const end = () => { if (fin) return; fin = true; if (done) done(); };
+      u.onend = end; u.onerror = end;
+      setTimeout(end, 1500 + text.length * 110);        // filet de sécurité si onend ne vient pas
+      speechSynthesis.cancel(); speechSynthesis.speak(u);
+    }
+    function iaAnswer() {
+      if (!call) return;
+      stopTone();
+      call.state = `live`; call.liveAt = Date.now(); call.hist = []; call.sys = iaPrompt(call.contact);
+      publishSyncMessage({ type: `CALL_ANSWER`, cid: call.cid, by: `ia` });
+      const nm = call.contact.name.replace(/\s*\(.*\)\s*/, ``), hello = /samu|\b15\b/i.test(call.contact.name) ? `SAMU, centre 15, je vous écoute.` : `Allô, ${nm.charAt(0).toLowerCase() + nm.slice(1)}, je vous écoute.`;
+      call.hist.push({ role: `user`, parts: [{ text: `(Le téléphone sonne, tu décroches.)` }] }, { role: `model`, parts: [{ text: hello }] });
+      iaLine(`Médecin (IA)`, hello);
+      renderPhone();
+      call.speaking = true; iaSpeak(hello, () => { if (call) { call.speaking = false; iaListen(); } });
+    }
+    function iaLine(who, text) {
+      if (!call) return;
+      call.txt.push({ t: Date.now(), who, text });
+      publishSyncMessage({ type: `CALL_TXT`, cid: call.cid, who, text });
+    }
+    let iaRec = null;
+    function iaListen() {
+      if (!call || call.state !== `live` || call.mode !== `ia`) return;
+      const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SR) { toast(`Reconnaissance vocale indisponible : utilisez Chrome`); callLog(`IA : reconnaissance vocale indisponible sur le téléphone d'appel`); return; }
+      const rec = new SR(); iaRec = rec;
+      rec.lang = `fr-FR`; rec.interimResults = false; rec.continuous = false; rec.maxAlternatives = 1;
+      let said = ``;
+      rec.onresult = (e) => { for (let i = e.resultIndex; i < e.results.length; i++) if (e.results[i].isFinal) said += ` ` + e.results[i][0].transcript; };
+      rec.onerror = () => {};
+      rec.onend = () => {
+        if (iaRec !== rec) return;
+        iaRec = null;
+        if (!call || call.state !== `live`) return;
+        call.listening = false;
+        said = said.trim();
+        if (!said) { setTimeout(iaListen, 150); renderPhone(); return; }
+        iaTurn(said);
+      };
+      call.listening = true; renderPhone();
+      try { rec.start(); } catch (_) { setTimeout(iaListen, 400); }
+    }
+    async function iaTurn(said) {
+      if (!call) return;
+      const cid = call.cid;
+      iaLine(`Apprenant`, said);
+      call.hist.push({ role: `user`, parts: [{ text: said }] });
+      call.thinking = true; renderPhone();
+      let reply = ``;
+      try { reply = await iaAsk(call.sys, call.hist); }
+      catch (e) { if (!call || call.cid !== cid) return; reply = `Pardon, je vous entends mal. Vous pouvez répéter ?`; call.hist.pop(); callLog(`IA : erreur (${e.message})`); }
+      if (!call || call.cid !== cid) return;
+      call.thinking = false;
+      if (call.hist[call.hist.length - 1].role === `user`) call.hist.push({ role: `model`, parts: [{ text: reply }] });
+      iaLine(`Médecin (IA)`, reply);
+      call.speaking = true; renderPhone();
+      iaSpeak(reply, () => { if (call && call.cid === cid) { call.speaking = false; iaListen(); } });
+    }
+    function iaStop() {
+      if (iaRec) { const r = iaRec; iaRec = null; try { r.abort(); } catch (_) {} }
+      try { if (window.speechSynthesis) speechSynthesis.cancel(); } catch (_) {}
+    }
+
+    /* =========== CÔTÉ QUI DÉCROCHE (télécommande ou poste médecin) =========== */
+    function calleeOnRing(m) {
+      if (!isCallee() || (call && call.state !== `ended`)) return;
+      if (m.mode !== (role === `doctor` ? `doctor` : `remote`)) return;
+      call = { cid: m.cid, contact: m.contact || { name: `médecin` }, mode: m.mode, state: `ringing`, t0: Date.now(), liveAt: 0, heard: {} };
+      ringIncoming();
+      renderCallUi();
+      setTimeout(() => { if (call && call.cid === m.cid && call.state === `ringing`) { stopTone(); call = null; renderCallUi(); } }, 46000);
+    }
+    function answerCall() {
+      if (!call || call.state !== `ringing`) return;
+      stopTone();
+      call.state = `live`; call.liveAt = Date.now();
+      publishSyncMessage({ type: `CALL_ANSWER`, cid: call.cid, by: senderId, who: role });
+      if (role === `remote`) remoteCallSeen({ type: `CALL_ANSWER`, cid: call.cid, by: senderId, who: role });
+      renderCallUi();
+    }
+    function declineCall() {
+      if (!call) return;
+      stopTone();
+      publishSyncMessage({ type: `CALL_END`, cid: call.cid, why: `declined` });
+      if (role === `remote`) remoteCallSeen({ type: `CALL_END`, cid: call.cid, why: `declined` });
+      call = null; renderCallUi();
+    }
+    async function calleeOnOffer(m) {
+      if (!call || m.cid !== call.cid || m.to !== senderId || m.kind !== `offer`) return;
+      const r = await rtcOpen();
+      if (!call || call.cid !== m.cid) { try { r.pc.close(); if (r.st) r.st.getTracks().forEach((t) => t.stop()); } catch (_) {} return; }
+      call.pc = r.pc; call.st = r.st;
+      await r.pc.setRemoteDescription({ type: `offer`, sdp: m.sdp });
+      await r.pc.setLocalDescription(await r.pc.createAnswer());
+      await iceDone(r.pc);
+      publishSyncMessage({ type: `CALL_SDP`, cid: call.cid, to: m.sender, kind: `answer`, sdp: r.pc.localDescription.sdp });
+    }
+    function hangUpCallee() {
+      if (!call) return;
+      if (role === `remote`) remoteCallSeen({ type: `CALL_END`, cid: call.cid, why: `hangup-trainer`, dur: call.liveAt ? Date.now() - call.liveAt : 0 });
+      endCall(`hangup-trainer`);
+    }
+    let csOpen = true;
+    function renderCallUi() {
+      if (role !== `remote` && role !== `doctor`) return;
+      const el = $(role === `doctor` ? `dr-main` : `callov`); if (!el) return;
+      const iaLive = role === `remote` && Object.values(callsSeen).find((c) => c.live && !c.end && c.mode !== `remote` && Date.now() - c.live < 1800000);
+      if (!call && !iaLive) {
+        if (role === `doctor`) {
+          const on = !!sim.rev;
+          el.innerHTML = `<div class="dr-idle"><div class="ph-title">Poste médecin</div>
+            <div class="muted">${on ? `Connecté · ${esc(scenarioById(sim.scenarioId).short || ``)}` : `Recherche de la télécommande… (PIN ${appState.pin})`}</div>
+            <div class="muted">${callCfg().mode === `doctor` ? `Les appels des apprenants arriveront ici.` : `Attention : la télécommande envoie les appels « ${esc(callModeLbl().toLowerCase())} ». Choisissez « Sur un autre téléphone » dans Préparation › Téléphone d'appel.`}</div>
+            <button type="button" class="btn" onclick="toneAudio();ctBeep([1046,1318],0.3,0.14);requestWakeLock();toast('Sonnerie activée')">🔔 Tester / activer la sonnerie</button></div>`;
+        } else { el.classList.add(`hidden`); el.innerHTML = ``; }
+        return;
+      }
+      el.classList.remove(`hidden`);
+      if (!call && iaLive) {
+        const lines = (iaLive.txt || []).slice(-4);
+        el.innerHTML = `<div class="co-bar"><span>☎ ${esc(iaLive.contact ? iaLive.contact.name : ``)} · ${iaLive.mode === `ia` ? `IA` : iaLive.mode === `tel` ? `vrai numéro` : `poste médecin`}</span><b id="co-time" data-t0="${iaLive.live}">${fmtDur(Date.now() - (iaLive.live || Date.now()))}</b></div>
+          ${lines.length ? `<div class="co-txt">${lines.map((l) => `<div><b>${esc(l.who)} :</b> ${esc(l.text)}</div>`).join(``)}</div>` : ``}`;
+        return;
+      }
+      if (call.state === `ringing`) {
+        el.innerHTML = `<div class="co-ring"><div class="co-ic">☎</div><div class="grow"><b>Appel de l'apprenant</b><small>vers ${esc(call.contact.name)}</small></div>
+          <button type="button" class="btn red" onclick="declineCall()">Refuser</button><button type="button" class="btn grn" onclick="answerCall()">Décrocher</button></div>`;
+        return;
+      }
+      el.innerHTML = `<div class="co-bar"><span>☎ En ligne · ${esc(call.contact.name)}${call.voice ? `` : ` · <i>liaison…</i>`}</span><b id="co-time" data-t0="${call.liveAt}">${fmtDur(Date.now() - call.liveAt)}</b>
+          <button type="button" class="btn sm ${call.muted ? `amb` : ``}" onclick="toggleMute()">${call.muted ? `Micro coupé` : `Muet`}</button>
+          ${role === `remote` ? `<button type="button" class="btn sm" onclick="csOpen=!csOpen;renderCallUi()">${csOpen ? `▴ Fiche` : `▾ Fiche`}</button>` : ``}
+          <button type="button" class="btn sm red" onclick="hangUpCallee()">Raccrocher</button></div>
+        ${csOpen || role === `doctor` ? callSheetHtml() : ``}`;
+    }
+
+    /* =========== TÉLÉCOMMANDE : journal de tous les appels =========== */
+    const CALL_MODE_SHORT = { remote: `télécommande`, doctor: `poste médecin`, tel: `vrai numéro`, ia: `IA` };
+    function remoteCallSeen(m) {
+      if (role !== `remote`) return;
+      const c = callsSeen[m.cid] || (callsSeen[m.cid] = { txt: [] });
+      if (m.type === `CALL_RING`) {
+        if (c.ring) return;
+        c.ring = Date.now(); c.contact = m.contact; c.mode = m.mode;
+        remEvent(`call`, `☎ Appel de l'apprenant vers ${m.contact ? m.contact.name : `?`} (${CALL_MODE_SHORT[m.mode] || m.mode})`);
+        if (m.mode === `tel`) c.live = Date.now();
+      } else if (m.type === `CALL_ANSWER`) {
+        if (c.live && m.by !== `ia`) return;
+        c.live = Date.now(); c.mode = c.mode || ``;
+        remEvent(`call`, `Appel décroché ${m.by === `ia` ? `par l'IA` : m.who === `doctor` ? `sur le poste médecin` : `sur la télécommande`}${c.ring ? ` après ${fmtDur(c.live - c.ring)}` : ``}`);
+        if (call && call.cid === m.cid && call.state === `ringing` && m.by !== senderId) { stopTone(); call = null; }
+      } else if (m.type === `CALL_TXT`) {
+        c.txt.push({ who: m.who, text: m.text });
+      } else if (m.type === `CALL_END`) {
+        if (c.end) return;
+        c.end = Date.now();
+        if (m.txt && m.txt.length && !c.txt.length) c.txt = m.txt;
+        const why = { declined: `refusé`, noanswer: `sans réponse`, 'no-number': `aucun numéro programmé`, 'no-key': `IA sans clé`, 'hangup-trainer': `raccroché par le formateur` }[m.why] || `terminé`;
+        const dur = m.dur || (c.live ? c.end - c.live : 0);
+        const tr = c.txt.map((l) => `${l.who} : ${l.text}`).join(`\n`);
+        remEvent(`call`, `Fin d'appel — ${why}${dur ? ` · durée ${m.why === `tel` ? `≈ ` : ``}${fmtDur(dur)}` : ``}`, tr ? { detail: tr } : null);
+        if (tr) saedAuto(c);
+      }
+      renderCallUi();
+    }
+    /* Grille SAED cochée d'après la transcription (mots-clés de l'éditeur) */
+    function saedAuto(c) {
+      const g = scenarioById(sim.scenarioId).saed || {};
+      const said = norm(c.txt.filter((l) => l.who === `Apprenant`).map((l) => l.text).join(` `));
+      const res = [`S`, `A`, `E`, `D`].map((k) => {
+        const kws = String(g[`kw` + k] || ``).split(`,`).map((x) => norm(x)).filter(Boolean);
+        if (!kws.length) return null;
+        const hit = kws.filter((w) => said.includes(w));
+        return `${k} ${hit.length ? `✓` : `✗`}${hit.length ? ` (${hit.slice(0, 3).join(`, `)})` : ``}`;
+      }).filter(Boolean);
+      if (res.length) remEvent(`call`, `Grille SAED (automatique, d'après la transcription) : ${res.join(` · `)}`);
+    }
+
+    /* ---------- Aiguillage des messages d'appel (tous les rôles) ---------- */
+    function handleCallMsg(m) {
+      if (m.type === `DEV`) { devSeen[m.kind] = Date.now(); if (role === `remote` && curTab === `prep`) renderCallDevs(); return true; }
+      if (m.type === `CALL_LOG`) { if (role === `remote` && (!m.sid || m.sid === sim.sessionId)) remEvent(`call`, m.text, m.extra || null); return true; }
+      if (!/^CALL_/.test(m.type)) return false;
+      if (role === `remote`) remoteCallSeen(m);
+      if (role === `phone`) {
+        if (m.type === `CALL_ANSWER`) phoneOnAnswer(m);
+        else if (m.type === `CALL_SDP` && call && m.cid === call.cid && m.kind === `answer` && m.to === senderId && call.pc) call.pc.setRemoteDescription({ type: `answer`, sdp: m.sdp }).catch(() => {});
+        else if (m.type === `CALL_END` && call && m.cid === call.cid && call.state !== `ended`) phoneEnded(m.why === `declined` ? `Correspondant indisponible` : `Appel terminé`);
+      }
+      if (role === `remote` || role === `doctor`) {
+        if (m.type === `CALL_RING`) calleeOnRing(m);
+        else if (m.type === `CALL_ANSWER` && call && m.cid === call.cid && call.state === `ringing` && m.by !== senderId) { stopTone(); call = null; renderCallUi(); }
+        else if (m.type === `CALL_SDP`) calleeOnOffer(m);
+        else if (m.type === `CALL_END` && call && m.cid === call.cid) { stopTone(); rtcClose(); call = null; renderCallUi(); if (role === `doctor`) toast(`Appel terminé`); }
+      }
+      return true;
+    }
+
+    function callTick() { const ct = $(`co-time`); if (ct && ct.dataset.t0) ct.textContent = fmtDur(Date.now() - Number(ct.dataset.t0)); }
+
+    /* ---------- Démarrage du téléphone d'appel et du poste médecin ---------- */
+    function loadDevice() {
+      const s = storeGet(`im60p1`);
+      if (s && s.sim) sim = Object.assign(deep(SIM_DEFAULT), s.sim);
+      if (s && s.pin) appState.pin = s.pin;
+    }
+    let saveDevT = null;
+    function saveDevice() { clearTimeout(saveDevT); saveDevT = setTimeout(() => storeSet(`im60p1`, { pin: appState.pin, sim }), 400); }
+    function deviceOnSim(nsim) {
+      if (!nsim || !(nsim.rev > sim.rev)) return;
+      sim = Object.assign(deep(SIM_DEFAULT), nsim);
+      saveDevice();
+      if (role === `phone`) { if (!call) renderPhone(); } else renderCallUi();
+    }
+    let devScnAt = 0;
+    function deviceTick() {
+      publishSyncMessage({ type: `DEV`, kind: role });
+      if (!sim.rev) publishSyncMessage({ type: `PH_REQ` });
+      if (sim.scenarioId && sim.scenarioId !== `free` && !SCENARIOS.some((x) => x.id === sim.scenarioId) && Date.now() - devScnAt > 8000) { devScnAt = Date.now(); publishSyncMessage({ type: `SCN_REQ`, id: sim.scenarioId }); }
+      const st = $(`ph-st`); if (st && call && call.state === `live` && !call.thinking && call.mode !== `ia`) st.textContent = fmtDur(Date.now() - call.liveAt);
+      const ck = $(`ph-clock`); if (ck) ck.textContent = hhmm(Date.now());
+    }
+    function initDevice(r) {
+      role = r;
+      loadDevice();
+      $(`view-monitor`).classList.add(`hidden`);
+      $(`view-remote`).classList.add(`hidden`);
+      $(`view-phone`).classList.remove(`hidden`);
+      $(`ph-top`).classList.toggle(`dr`, r === `doctor`);
+      document.title = r === `phone` ? `Téléphone` : `Poste médecin iM60`;
+      initSyncChannels();
+      if (r === `phone`) {
+        $(`dr-main`).classList.add(`hidden`);
+        const ck = $(`ph-clock`); let t = null;
+        ck.addEventListener(`pointerdown`, () => { t = setTimeout(openPhoneSettings, 3000); });
+        [`pointerup`, `pointerleave`, `pointercancel`].forEach((k) => ck.addEventListener(k, () => clearTimeout(t)));
+        if (window.speechSynthesis) speechSynthesis.getVoices();
+        renderPhone();
+      } else { $(`ph-main`).classList.add(`hidden`); renderCallUi(); }
+      document.addEventListener(`pointerdown`, () => { requestWakeLock(); toneAudio(); }, { once: true });
+      document.addEventListener(`visibilitychange`, () => { if (document.visibilityState === `visible`) requestWakeLock(); });
+      deviceTick();
+      setInterval(deviceTick, 1000 * 3);
+      setInterval(() => { const st = $(`ph-st`); if (st && call && call.state === `live` && !call.thinking && call.mode !== `ia`) st.textContent = fmtDur(Date.now() - call.liveAt); callTick(); }, 1000);
+    }
+
+    /* =====================================================================
        18. AIGUILLAGE DES MESSAGES + INITIALISATION
        ===================================================================== */
     function broadcastFullState() {
@@ -4808,6 +5567,13 @@
     const FROM_REMOTE = new Set([`SYNC_REQ`, `SIM`, `CMD`, `PING`]);
     function handleIncomingSyncMessage(msg) {
       if (!msg || !msg.type) return;
+      if (handleCallMsg(msg)) return;
+      if (msg.type === `PH_REQ`) { if (role === `monitor`) publishSyncMessage({ type: `SIM_STATE`, sim }); else if (role === `remote` && sim.rev) publishSyncMessage({ type: `SIM`, sim }); return; }
+      if (role === `phone` || role === `doctor`) {
+        if (msg.type === `SCN_CHUNK`) onScnChunk(msg);
+        else if ((msg.type === `SIM` || msg.type === `SIM_STATE`) && msg.sim) deviceOnSim(msg.sim);
+        return;
+      }
       if (msg.type === `SCN_CHUNK`) { onScnChunk(msg); return; }
       if (msg.type === `SCN_REQ`) { if (role === `remote` && RAW_SCN[msg.id]) shareScenario(msg.id); return; }
       if (msg.type === `SCN_ACK`) return;
@@ -4864,6 +5630,11 @@
       const urlPin = params.get(`pin`);
       EMBED = params.get(`embed`) === `1`;
       if (urlRole === `split`) { initSplit(urlPin && /^\d{4}$/.test(urlPin) ? urlPin : appState.pin); return; }
+      if (urlRole === `phone` || urlRole === `doctor`) {
+        if (urlPin && /^\d{4}$/.test(urlPin)) { const s0 = storeGet(`im60p1`); if (!s0 || s0.pin !== urlPin) storeSet(`im60p1`, { pin: urlPin, sim: null }); }
+        initDevice(urlRole);
+        return;
+      }
       role = urlRole === `remote` ? `remote` : `monitor`;
       if (role === `monitor`) loadMonitor(); else loadRemote();
       if (urlPin && /^\d{4}$/.test(urlPin)) appState.pin = urlPin;
