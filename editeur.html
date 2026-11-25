@@ -8,7 +8,7 @@
   :root {
     --bg: #f4f5f7; --card: #ffffff; --ink: #1b1f24; --ink-2: #5a636e; --line: #dde1e6;
     --acc: #0a6e6e; --acc-2: #e3f1f1; --warn: #a35a00; --warn-bg: #fff4e0; --err: #b3261e; --err-bg: #fde8e6; --ok: #1f7a3a;
-    --ecg: #12a33a; --spo2: #0a8fb0; --pni: #c0392b; --resp: #b38f00;
+    --call: #2c4a9a; --call-bg: #eef2fc;
   }
   * { box-sizing: border-box; }
   body { margin: 0; font: 15px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; color: var(--ink); background: var(--bg); }
@@ -28,6 +28,7 @@
   .btn.sm { padding: 5px 10px; font-size: 13px; border-radius: 8px; }
   .btn.ghost { background: transparent; }
   .btn.danger { color: var(--err); }
+  .btn.callb { background: var(--call-bg); border-color: #c5d2f2; color: var(--call); font-weight: 600; }
   header.top .btn { border-color: #39505f; background: #1c2f3c; color: #fff; }
   header.top .btn.pri { background: #14a3a3; border-color: #14a3a3; }
 
@@ -73,7 +74,6 @@
   .checks { display: flex; gap: 16px; flex-wrap: wrap; }
   .checks label { display: flex; gap: 6px; align-items: center; }
 
-  /* Phases */
   .phase { border: 1px solid var(--line); border-radius: 12px; background: var(--card); margin-bottom: 14px; overflow: hidden; }
   .phase-head { display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: #f7f9fa; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
   .phase-num { width: 34px; height: 34px; border-radius: 50%; background: #12202b; color: #fff; display: grid; place-items: center; font-weight: 700; font-size: 14px; flex: none; }
@@ -90,33 +90,57 @@
   .next-row select { flex: 1; min-width: 150px; }
   .act-row input[type=text] { flex: 2; }
   .act-row label input { padding: 6px; }
+  /* v10 : effet d'une action sur le scope */
+  .act-box { border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px 4px; margin-bottom: 8px; background: #fcfcfd; }
+  .act-box .next-row { margin-bottom: 4px; }
+  .eff { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font-size: 12.5px; color: var(--ink-2); margin-bottom: 4px; }
+  .eff label { display: flex; align-items: center; gap: 3px; }
+  .eff input[type=number] { width: 66px; padding: 4px 6px; }
+  .eff select { width: auto; padding: 4px 6px; }
+  .eff.on { color: var(--ink); }
+  .eff.on b { color: var(--acc); }
   .quick { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
   .quick .btn { background: #f7f9fa; }
+  .quick .btn.callb { background: var(--call-bg); }
   .tall textarea { min-height: 130px; field-sizing: content; }
   pre.prompt { white-space: pre-wrap; background: #0e1419; color: #d9f2e6; padding: 12px 14px; border-radius: 10px; font-size: 13px; max-height: 420px; overflow: auto; }
+  pre.prompt b { color: #ffd479; }
+
+  /* Appel relié à une action */
+  .callbox { border: 1px solid #c5d2f2; background: #fafbff; border-radius: 12px; margin: 4px 0 10px; overflow: hidden; }
+  .callbox-h { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; padding: 8px 10px; background: var(--call-bg); }
+  .callbox-h .ic { font-size: 18px; }
+  .callbox-h input[type=text] { flex: 2; min-width: 160px; font-weight: 600; }
+  .callbox-h select { flex: 1; min-width: 150px; }
+  .callbox-b { padding: 12px; display: grid; gap: 12px; }
+  .samu-note { font-size: 13px; background: #fff; border: 1px dashed #c5d2f2; border-radius: 10px; padding: 8px 10px; color: var(--call); }
+  .presets { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+  .cb { border-top: 1px dashed #c5d2f2; padding-top: 10px; display: grid; gap: 10px; }
+  .cb-h { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; font-weight: 600; color: var(--call); }
+  .cb-h select { width: auto; }
+
   .flow { display: flex; flex-direction: column; gap: 0; font-size: 13.5px; }
   .tl-row { display: grid; grid-template-columns: 40px 1fr; gap: 10px; padding: 8px 0; border-bottom: 1px dashed var(--line); }
   .tl-row:last-child { border-bottom: none; }
   .tl-p { width: 32px; height: 32px; border-radius: 50%; background: #12202b; color: #fff; display: grid; place-items: center; font-weight: 700; font-size: 12.5px; }
   .tl-c { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
   .tl-v { color: var(--ink-2); font-size: 12.5px; margin-left: 6px; }
-  .tl-call { font-size: 11.5px; padding: 1px 8px; border-radius: 10px; background: #e8eefc; color: #2c4a9a; margin-left: 4px; }
+  .tl-call { font-size: 11.5px; padding: 1px 8px; border-radius: 10px; background: var(--call-bg); color: var(--call); margin-left: 4px; }
   .tl-a { color: var(--ink); }
   .tl-a span { font-size: 11.5px; font-weight: 700; color: var(--ink-2); text-transform: uppercase; letter-spacing: .4px; margin-right: 6px; }
   .tl-a small, .go small { color: var(--ink-2); }
   .tl-g { display: flex; flex-wrap: wrap; gap: 6px; }
   .go { padding: 3px 10px; border-radius: 14px; border: 1px solid var(--line); font-size: 13px; }
   .go.auto { background: #fff4e0; border-color: #f0d3a0; font-weight: 600; }
+  .go.tel { background: var(--call-bg); border-color: #c5d2f2; font-weight: 600; color: var(--call); }
   .go.man { background: #f3f5f7; }
   .go.end { background: var(--acc-2); border-color: #b5dada; }
 
-  /* Documents */
   .docs { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
   .doc { border: 1px solid var(--line); border-radius: 12px; padding: 12px; background: #fff; display: flex; flex-direction: column; gap: 8px; }
   .doc .thumb { height: 150px; border-radius: 8px; background: #f0f2f4 center/contain no-repeat; display: grid; place-items: center; color: var(--ink-2); font-size: 13px; border: 1px dashed #c8ced5; cursor: pointer; text-align: center; padding: 8px; }
   .doc .thumb.has { border-style: solid; }
 
-  /* Vérification */
   .issues { display: flex; flex-direction: column; gap: 6px; }
   .issue { padding: 8px 12px; border-radius: 8px; font-size: 14px; }
   .issue.err { background: var(--err-bg); color: var(--err); }
@@ -124,6 +148,9 @@
   .issue.ok { background: #e6f4ea; color: var(--ok); }
   .saed { display: grid; grid-template-columns: 46px 1fr 1fr; gap: 8px 12px; align-items: start; }
   .saed .L { font-size: 22px; font-weight: 800; color: var(--acc); text-align: center; padding-top: 22px; }
+  .ct-card { border: 1px solid var(--line); border-radius: 10px; padding: 10px; margin-bottom: 8px; display: grid; gap: 8px; }
+  .samu-flow { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font-size: 13px; }
+  .samu-flow span { padding: 4px 10px; border-radius: 14px; background: var(--call-bg); color: var(--call); }
 
   .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #12202b; color: #fff; padding: 10px 18px; border-radius: 10px; font-size: 14px; opacity: 0; transition: opacity .2s; pointer-events: none; z-index: 50; }
   .toast.on { opacity: 1; }
@@ -165,6 +192,7 @@
       <button class="btn" type="button" onclick="saveFile()">Enregistrer le fichier</button>
       <button class="btn" type="button" onclick="saveAll()">Tout enregistrer</button>
       <button class="btn danger" type="button" onclick="deleteScenario()">Supprimer</button>
+      <button class="btn" type="button" id="btn-orig" onclick="resetToDefault()" style="grid-column:1/-1">↺ Reprendre la version d'origine</button>
     </div>
     <input type="file" id="file-open" accept=".json,application/json" class="hidden" onchange="openFile(this)">
     <p class="hint">Tout est gardé automatiquement dans ce navigateur. « Enregistrer le fichier » crée une sauvegarde à garder ou à partager avec un collègue.</p>
@@ -190,6 +218,13 @@ const BRIEF_POINTS_DEFAUT = [
   `On fait les gestes pour de vrai. Les médicaments sont annoncés à voix haute.`,
   `Le téléphone « Appel médecin » est sur la table. Le formateur peut faire une pause.`,
   `Ressources : chariot d'urgence, DAE, i-STAT, ECG 12 dérivations, renfort joignable.`
+];
+
+/* v10 : médecins d'astreinte possibles (le formateur choisit celui du jour au briefing) */
+const DOCS_DEFAUT = [
+  `Dr Martin : calme et précis, un peu pressé. Vouvoie l'infirmier.`,
+  `Dr Leroy : chaleureux mais exigeant, veut des chiffres précis et pose beaucoup de questions.`,
+  `Dr Nguyen : bref et sec, supporte mal les messages flous ; si le message n'est pas structuré, il coupe : « Bon, qu'est-ce qui se passe exactement ? »`
 ];
 
 const ROLES_DEFAUT = [
@@ -228,14 +263,14 @@ const SCENARIOS_DEFAUT = [
       { id: `p3`, label: `HTIC — réaction de Cushing`, cue: `GCS 9, anisocorie, respiration irrégulière. HTA + bradycardie + respiration irrégulière.`, hr: 50, spo2: 94, rr: 10, sys: 198, dia: 108, temp: 37.1, rhythm: `sinus`, resp: `irregular`, ectopy: `none`, nibpFail: false, rosc: false, trans: 60,
         tech: [`Protection des voies aériennes, PLS si besoin`, `Transfert médicalisé pour TDM organisé`, `Rappel du médecin avec l'aggravation`],
         crm: [`Reformulation à voix haute`],
-        call: { on: true, who: `samu`, hear: [`Adresse et service`, `Patient sous AVK, chute avec choc crânien`, `Glasgow 9, anisocorie`, `TA 198/108, FC 50, respiration irrégulière`, `Heure de début de l'aggravation`], ask: [`Quel est le Glasgow ?`, `Les pupilles sont comment ?`, `Il est sous anticoagulant ?`, `À quelle heure les troubles ont commencé ?`], answer: `Suspicion d'hypertension intracrânienne sur hématome sous AVK. Vous envoyez une équipe SMUR. Position semi-assise ou PLS si vomissements, oxygène, surveillance continue.`, presc: [`Oxygène pour une SpO2 ≥ 94 %`, `PLS si vomissements ou troubles de conscience`, `Ne rien donner par la bouche`, `Préparer le dossier, le traitement et l'INR`], avoid: `Ne pas donner de traitement médicamenteux par téléphone.` },
+        call: { on: true, who: `samu`, hear: [`Adresse et service`, `Patient sous AVK, chute avec choc crânien`, `Glasgow 9, anisocorie`, `TA 198/108, FC 50, respiration irrégulière`, `Heure de début de l'aggravation`], ask: [`Quel est le Glasgow ?`, `Les pupilles sont comment ?`, `Il est sous anticoagulant ?`, `À quelle heure les troubles ont commencé ?`], answer: `Suspicion d'hypertension intracrânienne sur hématome sous AVK. Tu engages une équipe SMUR. Position semi-assise ou PLS si vomissements, oxygène, surveillance continue.`, presc: [`Oxygène pour une SpO2 ≥ 94 %`, `PLS si vomissements ou troubles de conscience`, `Ne rien donner par la bouche`, `Préparer le dossier, le traitement et l'INR`], avoid: `Ne pas donner de traitement médicamenteux par téléphone.` },
         next: [{ label: `En attente du SAMU`, to: `p4` }] },
       { id: `p4`, label: `En attente du SAMU`, cue: `Surveillance rapprochée (PNI automatique), O2 si besoin, transmissions structurées.`, hr: 56, spo2: 96, rr: 12, sys: 186, dia: 100, temp: 37.1, rhythm: `sinus`, resp: `irregular`, ectopy: `none`, nibpFail: false, rosc: false, trans: 30,
         tech: [`PNI répétée / mode automatique`, `Transmissions SAED au SAMU`],
         crm: [],
         next: [] }
     ],
-    contacts: [{ id: `nephro`, name: `Néphrologue d'astreinte`, persona: `Dr Martin, calme et précis, un peu pressé. Vouvoie l'infirmier.` }, { id: `samu`, name: `Médecin régulateur du SAMU (15)`, persona: `Médecin régulateur, directif, questions courtes, veut l'adresse et l'heure.` }],
+    contacts: [{ id: `nephro`, kind: `medecin`, name: `Néphrologue d'astreinte`, persona: ``, doctors: DOCS_DEFAUT.slice() }, { id: `samu`, kind: `samu`, name: `SAMU — Centre 15`, persona: `Médecin régulateur, directif, questions courtes, vouvoie l'infirmier, veut l'heure de début des troubles.`, arm: `Voix posée, rapide et très structurée.` }],
     call: {
       S: `Qui appelle, d'où ; M. W., 70 ans ; chute dans l'ascenseur à l'arrivée ; céphalées`,
       A: `Hémodialysé ; sous AVK ; chute avec choc crânien la veille`,
@@ -304,7 +339,7 @@ const SCENARIOS_DEFAUT = [
         actions: [],
         next: [] }
     ],
-    contacts: [{ id: `nephro`, name: `Néphrologue d'astreinte`, persona: `Dr Martin, calme et précis, un peu pressé. Vouvoie l'infirmier.` }, { id: `samu`, name: `Médecin régulateur du SAMU (15)`, persona: `Médecin régulateur, directif, questions courtes, veut l'adresse et l'heure.` }],
+    contacts: [{ id: `nephro`, kind: `medecin`, name: `Néphrologue d'astreinte`, persona: ``, doctors: DOCS_DEFAUT.slice() }, { id: `samu`, kind: `samu`, name: `SAMU — Centre 15`, persona: `Médecin régulateur, directif, questions courtes, vouvoie l'infirmier, veut l'heure de début des troubles.`, arm: `Voix posée, rapide et très structurée.` }],
     call: {
       S: `Qui appelle, d'où ; M. P., lit 2 ; bradycardie à 41 avec malaise`,
       A: `Hémodialysé anurique ; dernière dialyse il y a 72 h ; traitements`,
@@ -342,14 +377,15 @@ const SCENARIOS_DEFAUT = [
     trainer: { roles: ROLES_DEFAUT.slice(), dsa: `FV (P5) : choc indiqué ; RACS après le 1er choc.`, notes: `` },
     briefing: { situation: `Mardi, ouverture de la salle. Un patient est assis dans le sas d'accueil, il respire mal. L'ambulancier vous appelle.`, points: BRIEF_POINTS_DEFAUT.slice() },
     steps: [
-      { id: `p1`, label: `Détresse respiratoire (OAP)`, cue: `Tachycardie sinusale, HVG. Position assise, O2, scope, appel médecin.`, hr: 100, spo2: 93, rr: 30, sys: 180, dia: 100, temp: 36.6, rhythm: `lvh`, resp: `shallow`, ectopy: `none`, nibpFail: false, rosc: false, trans: 0,
+      { id: `p1`, label: `Détresse respiratoire (OAP)`, cue: `Tachycardie sinusale, HVG. SpO2 88 % à l'air. Quand l'O2 est posé, touchez « Oxygène 4 L/min » : la SpO2 monte à 92 % en 1 min.`, hr: 100, spo2: 88, rr: 30, sys: 180, dia: 100, temp: 36.6, rhythm: `lvh`, resp: `shallow`, ectopy: `none`, nibpFail: false, rosc: false, trans: 0,
         tech: [`Position assise`, `Oxygène`, `Scope + PNI`, `Appel médecin`], crm: [`Leader désigné`, `Proche pris en charge`],
-        call: { on: true, who: `nephro`, hear: [`Identité de l'appelant et du patient`, `Détresse respiratoire, SpO2 93 % à l'air`, `PA 180/100, FC 100, FR 30`, `+5 kg au-dessus du poids sec, œdèmes, crépitants`, `BPCO`], ask: [`Combien il a pris de poids ?`, `Il a mal à la poitrine ?`, `Il est sous oxygène ?`], answer: `OAP de surcharge. Position assise, oxygène, on branche pour une ultrafiltration isolée. Rappelez-moi s'il a mal à la poitrine.`, presc: [`Oxygène 4 L/min, viser 88-92 % (BPCO)`, `Position assise`, `Branchement en UF isolée`, `ECG 12 dérivations`], avoid: `Ne pas parler de SCA si l'appelant ne mentionne pas de douleur.` },
-        next: [{ label: `Sous O2, UF isolée`, to: `p2` }] },
-      { id: `p2`, label: `Sous O2 4 L/min, UF isolée`, cue: `Décision médicale : brancher pour UF pure.`, hr: 99, spo2: 94, rr: 30, sys: 177, dia: 100, temp: 36.7, rhythm: `lvh`, resp: `shallow`, ectopy: `none`, nibpFail: false, rosc: false, trans: 30,
-        tech: [`Branchement pour UF isolée`], crm: [`Réévaluation régulière`],
+        actions: [{ label: `Oxygène 4 L/min`, times: 1, to: ``, delay: 0, set: { spo2: 92 }, setTrans: 60 }],
+        call: { on: true, who: `nephro`, hear: [`Identité de l'appelant et du patient`, `Détresse respiratoire : SpO2 88 % à l'air (92 % sous O2 si déjà posé)`, `PA 180/100, FC 100, FR 30`, `+5 kg au-dessus du poids sec, œdèmes, crépitants`, `BPCO`], ask: [`Il a pris combien par rapport à son poids sec ?`, `Il sature à combien ? Il est sous oxygène ?`, `Et la tension ?`], answer: `C'est un OAP de surcharge. Vous le laissez assis sous oxygène et vous le branchez tout de suite pour une ultrafiltration seule : 1,5 litre en 1 heure. Surveillance de la tension rapprochée pendant l'UF.`, presc: [`Position assise`, `Oxygène 4 L/min, objectif SpO2 88 à 92 % (BPCO)`, `Branchement en UF seule : 1,5 L en 1 h`, `Surveillance tensionnelle toutes les 15 min pendant l'UF`, `Rappeler si la SpO2 ne remonte pas ou si la tension baisse`], avoid: `Pour toi, c'est un OAP de surcharge et rien d'autre : ne parle pas de cause cardiaque ni de douleur thoracique, ne demande pas d'ECG. C'est une UF seule, pas une dialyse classique.` },
+        next: [{ label: `Sous O2, UF seule 1,5 L / 1 h`, to: `p2` }] },
+      { id: `p2`, label: `Sous O2 4 L/min, UF seule`, cue: `Branché en UF seule, 1,5 L en 1 h. PNI toutes les 15 min.`, hr: 99, spo2: 92, rr: 30, sys: 177, dia: 100, temp: 36.7, rhythm: `lvh`, resp: `shallow`, ectopy: `none`, nibpFail: false, rosc: false, trans: 30,
+        tech: [`Branchement en UF seule (1,5 L en 1 h)`, `Surveillance tensionnelle toutes les 15 min`], crm: [`Réévaluation régulière`],
         next: [{ label: `Douleur thoracique — ST+`, to: `p3` }] },
-      { id: `p3`, label: `Douleur thoracique — ST+`, cue: `Douleur rétrosternale constrictive, irradiant mâchoire et bras gauche. ST+ inférieur.`, hr: 99, spo2: 94, rr: 30, sys: 177, dia: 100, temp: 36.8, rhythm: `stemi`, resp: `shallow`, ectopy: `none`, nibpFail: false, rosc: false, trans: 60,
+      { id: `p3`, label: `Douleur thoracique — ST+`, cue: `Douleur rétrosternale constrictive, irradiant mâchoire et bras gauche. ST+ inférieur.`, hr: 99, spo2: 92, rr: 30, sys: 177, dia: 100, temp: 36.8, rhythm: `stemi`, resp: `shallow`, ectopy: `none`, nibpFail: false, rosc: false, trans: 60,
         tech: [`ECG 12D dès la douleur`, `Arrêt UF / clampage`, `Appel SAMU (15)`, `DAE posé`], crm: [`Sortie du biais d'ancrage`],
         call: { on: true, who: `samu`, hear: [`Adresse et service`, `Douleur thoracique constrictive irradiant`, `Sus-décalage ST inférieur`, `Patient en dialyse, UF arrêtée`, `Constantes actuelles`], ask: [`Depuis quand la douleur ?`, `Vous avez un ECG ? Qu'est-ce qu'il montre ?`, `Le DSA est à côté ?`], answer: `Syndrome coronarien avec sus-décalage. Le SMUR part. Arrêtez l'ultrafiltration, électrodes du DSA posées, ne le laissez pas seul.`, presc: [`Arrêt de l'UF`, `Électrodes du DSA posées`, `Oxygène`, `Préparer l'ECG pour l'équipe`], avoid: `Ne pas prescrire d'anticoagulant ou d'antiagrégant par téléphone sans l'avis du néphrologue.` },
         next: [{ label: `ESV menaçantes`, to: `p4` }] },
@@ -364,14 +400,14 @@ const SCENARIOS_DEFAUT = [
         tech: [`Transmissions au SAMU`], crm: [],
         next: [] }
     ],
-    contacts: [{ id: `nephro`, name: `Néphrologue d'astreinte`, persona: `Dr Martin, calme et précis, un peu pressé. Vouvoie l'infirmier.` }, { id: `samu`, name: `Médecin régulateur du SAMU (15)`, persona: `Médecin régulateur, directif, questions courtes, veut l'adresse et l'heure.` }],
+    contacts: [{ id: `nephro`, kind: `medecin`, name: `Néphrologue d'astreinte`, persona: ``, doctors: DOCS_DEFAUT.slice() }, { id: `samu`, kind: `samu`, name: `SAMU — Centre 15`, persona: `Médecin régulateur, directif, questions courtes, vouvoie l'infirmier, veut l'heure de début des troubles.`, arm: `Voix posée, rapide et très structurée.` }],
     call: {
       S: `Qui appelle ; M. V. ; détresse respiratoire dans le sas`,
       A: `IRC terminale, BPCO sévère ; +5 kg au-dessus du poids sec`,
-      E: `PA 180/100, FC 100, SpO2 93 %, FR 30 ; crépitants, œdèmes`,
-      D: `Venue immédiate ; conduite à tenir (O2, UF)`,
+      E: `PA 180/100, FC 100, SpO2 88 % à l'air, FR 30 ; crépitants, œdèmes`,
+      D: `Conduite à tenir : O2, UF seule 1,5 L en 1 h, surveillance tensionnelle`,
       kwS: `détresse, respire, essoufflé`, kwA: `BPCO, poids sec, kilos`, kwE: `saturation, crépitants, œdèmes, tension`, kwD: `venir, oxygène, UF, ultrafiltration`,
-      doctor: `Prescrire O2 et UF isolée. Lors de la douleur : demander l'ECG et faire appeler le 15.` },
+      doctor: `Toujours faire reformuler les prescriptions.` },
     documents: [],
     debrief: {
       questions: [`Comment l'équipe s'est-elle réorganisée quand l'OAP s'est enrichi d'une douleur thoracique ?`, `Quels éléments du scope ont permis d'identifier le SCA avant l'arrêt cardiaque ?`, `Comment avez-vous géré l'entourage en panique pendant la réanimation ?`],
@@ -414,7 +450,7 @@ const SCENARIOS_DEFAUT = [
       { id: `p5`, label: `RACS (facultatif)`, cue: `Reprise d'une activité circulatoire sous remplissage + adrénaline.`, hr: 118, spo2: 91, rr: 22, sys: 86, dia: 48, temp: 37.0, rhythm: `sinus`, resp: `normal`, ectopy: `none`, nibpFail: false, rosc: true, trans: 15,
         tech: [], crm: [], next: [] }
     ],
-    contacts: [{ id: `nephro`, name: `Néphrologue d'astreinte`, persona: `Dr Martin, calme et précis, un peu pressé. Vouvoie l'infirmier.` }, { id: `samu`, name: `Médecin régulateur du SAMU (15)`, persona: `Médecin régulateur, directif, questions courtes, veut l'adresse et l'heure.` }],
+    contacts: [{ id: `nephro`, kind: `medecin`, name: `Néphrologue d'astreinte`, persona: ``, doctors: DOCS_DEFAUT.slice() }, { id: `samu`, kind: `samu`, name: `SAMU — Centre 15`, persona: `Médecin régulateur, directif, questions courtes, vouvoie l'infirmier, veut l'heure de début des troubles.`, arm: `Voix posée, rapide et très structurée.` }],
     call: {
       S: `Qui appelle ; Mme A. ; hémorragie sur déconnexion de l'aiguille, malaise`,
       A: `Hémodialysée, FAV bras gauche ; fin de séance`,
@@ -435,6 +471,180 @@ const SCENARIOS_DEFAUT = [
   }
 ];
 
+/* ---------- Appels : code commun à l'éditeur et au simulateur (v8) ----------
+   Une phase peut contenir plusieurs appels (calls[]), un par interlocuteur.
+   Chaque appel est relié à une action « ☎ Appel … » de la phase.
+   SAMU : fonctionnement réel du centre 15 — l'ARM décroche, localise, identifie,
+   évalue la gravité en deux questions, puis passe le médecin régulateur. */
+const ARM_ITEMS = [`Adresse exacte (centre, ville, étage, salle, code)`, `Numéro de rappel`, `Qui appelle (nom, fonction)`, `Patient : nom, âge`, `Motif en une phrase`, `Conscient ? Respire normalement ?`];
+const isSamuCt = (ct) => !!ct && (ct.kind ? ct.kind === `samu` : (ct.id === `samu` || /samu|centre 15|\(15\)/i.test(ct.name || ``)));
+const callLabelFor = (ct) => (isSamuCt(ct) ? `Appel SAMU` : `Appel médecin`);
+/* v10 : médecins possibles pour un interlocuteur (un par ligne : « Dr Martin : calme, précis, un peu pressé »).
+   Le formateur choisit au briefing celui qui est d'astreinte ; l'IA joue ce médecin. */
+function docLine(line) {
+  const s = String(line || ``).trim(); if (!s) return null;
+  const i = s.search(/\s*[:—–]\s+|\s+-\s+/);
+  if (i > 0) return { name: s.slice(0, i).trim(), persona: s.slice(i).replace(/^\s*[:—–-]\s*/, ``).trim() };
+  return { name: s, persona: `` };
+}
+function personaToLine(p) {
+  const s = String(p || ``).trim(); if (!s) return ``;
+  const m = s.match(/^((?:Dr|Docteur|Pr)\.?\s+[A-ZÉÈÀÂÎÔÛ][\wÀ-ÿ'-]*(?:\s+[A-ZÉÈÀÂÎÔÛ][\wÀ-ÿ'-]*)?)\s*[,:—–-]\s*(.*)$/);
+  return m ? `${m[1]} : ${m[2]}` : s;
+}
+function docPool(ct) {
+  if (!ct || isSamuCt(ct)) return [];
+  const lines = (ct.doctors || []).map(docLine).filter(Boolean);
+  if (lines.length) return lines;
+  const l = docLine(personaToLine(ct.persona));
+  return l && /^(Dr|Docteur|Pr)\b/i.test(l.name) ? [l] : [];
+}
+function migrateStepCalls(st, contacts) {
+  if (!Array.isArray(st.actions)) st.actions = [];
+  if (!Array.isArray(st.calls)) {
+    st.calls = [];
+    if (st.call && st.call.on) { const c = Object.assign({}, st.call); delete c.on; delete c.prompt; st.calls.push(c); }
+  }
+  delete st.call;
+  st.calls.forEach((c) => {
+    if (!c.who && contacts && contacts[0]) c.who = contacts[0].id;
+    if (!st.actions.some((a) => a.kind === `call` && a.who === c.who)) {
+      const ct = (contacts || []).find((x) => x.id === c.who);
+      st.actions.unshift({ kind: `call`, who: c.who, label: callLabelFor(ct), times: 1, to: ``, delay: 0 });
+    }
+  });
+  return st;
+}
+/* ctx : { patient, trigger, stepLabel, cue, vit, common, address }
+   v9 : consignes cadrées. Une trame fixe, une question à la fois, les éléments obtenus sont notés
+   (fonction en mode Live, champ JSON en mode classique) et la décision prévue n'est donnée
+   à l'IA que lorsque l'essentiel a été transmis (verifier_decision). mode : `live` ou `json`. */
+function buildCallPrompts(ctx, c, ct, mode) {
+  const LV = mode !== `json`;
+  const N = (arr) => (arr || []).map((x) => String(x).trim()).filter(Boolean);
+  const L = (arr) => N(arr).map((x) => `- ${x}`).join(`\n`) || `- (rien de précisé)`;
+  const NUM = (arr) => N(arr).map((x, i) => `${i + 1}. ${x}`).join(`\n`) || `(aucun élément précisé)`;
+  const T = (s) => String(s || ``).trim();
+  const sim = `C'est une simulation de formation pour des infirmiers d'un centre d'hémodialyse. Ne sors jamais du rôle, ne dis jamais que tu es une IA, ne fais jamais de cours.`;
+  const talk = `Façon de parler : comme au vrai téléphone. Une ou deux phrases courtes à chaque fois, une seule question à la fois, en français, sans liste. Tu laisses l'appelant parler et tu attends sa réponse. Tu n'expliques jamais ton raisonnement.`;
+  const note = LV ? `appelle la fonction noter_element avec son numéro (sans le dire à voix haute)` : `ajoute son numéro dans le champ « elements »`;
+  /* v10 : l'IA ne connaît ni la situation en cours ni la suite du scénario : seulement ce que l'appelant dit */
+  const samuCt = isSamuCt(ct);
+  const know = [
+    ``, `CE QUE TU SAIS AVANT L'APPEL :`,
+    samuCt ? `- Rien sur ce patient : tout vient de l'appelant.` : `- C'est un patient du centre, que tu connais : ${T(ctx.patient) || `patient hémodialysé`}.`,
+    `- Tu ne sais rien de ce qui se passe en ce moment et tu ne connais pas la suite. Tu raisonnes uniquement sur ce que l'appelant te dit, comme un vrai médecin au téléphone.`,
+    ``, `LIMITES STRICTES :`,
+    `- Tu ne prescris, ne demandes et ne proposes que ce qui figure dans ta décision prévue et tes prescriptions : aucun examen, aucun bilan, aucun avis en plus.`,
+    `- Tu n'évoques aucun autre diagnostic que celui de ta décision prévue et tu n'annonces jamais ce qui pourrait arriver ensuite, sauf si l'appelant t'en parle lui-même. Si l'appelant t'apprend un élément nouveau et inquiétant, tu lui demandes de te rappeler ou d'appeler le 15, sans inventer de traitement.`
+  ];
+  const vous = `Dans les consignes du formateur, « vous » peut te désigner, toi le médecin (par exemple « vous envoyez le SMUR » veut dire : tu engages le SMUR).`;
+  const common = T(ctx.common) ? [``, `CONSIGNES COMMUNES DU FORMATEUR :`, T(ctx.common)] : [];
+  const decide = LV
+    ? `Quand tu crois avoir l'essentiel, reformule en une phrase ce que tu as compris, puis appelle la fonction verifier_decision. Elle te dit si tu peux décider et te donne ta décision prévue et tes prescriptions. Si elle répond « pas encore », pose une question courte sur ce qui manque. Tu ne donnes ni diagnostic ni traitement avant qu'elle t'ait autorisé.`
+    : `Tu ne connais pas encore ta décision : elle te sera donnée dans une note interne entre crochets quand l'essentiel aura été transmis. Avant cette note, tu ne donnes ni diagnostic ni traitement : tu poses les questions.`;
+  const hang = LV ? `puis appelle la fonction raccrocher` : `et mets « raccrocher » à true`;
+  /* v10 : fin d'appel naturelle, jamais brutale */
+  const bye = `Fin de l'appel, sans te presser : quand la reformulation est juste, demande « Vous avez des questions ? » et attends la réponse ; réponds aux questions. Ensuite seulement, conclus en une phrase (« Rappelez-moi si ça ne s'améliore pas ou si quelque chose change. »), dis au revoir et attends que l'appelant dise au revoir à son tour, ${hang}. Tu ne raccroches jamais avant d'avoir donné ta décision, ni pendant que l'appelant parle.`;
+  const urg = LV ? `appelle verifier_decision avec urgence_vitale à true` : `mets « urgence » à true`;
+  const body = c ? [
+    ``, `ÉLÉMENTS QUE L'APPELANT DOIT TE TRANSMETTRE (numérotés) :`, NUM(c.hear),
+    ``, `QUESTIONS PRÉVUES SI UN ÉLÉMENT MANQUE :`, L(c.ask),
+    LV ? `` : `\nTA DÉCISION PRÉVUE ET TES PRESCRIPTIONS ARRIVERONT DANS LA NOTE INTERNE.`
+  ] : [
+    ``, `Aucune fiche n'est prévue pour cet appel à ce moment. Fais préciser la situation (qui, quoi, constantes, ce qu'on attend de toi), puis décide de façon réaliste et prudente, et fais reformuler toute consigne.`
+  ];
+  if (!isSamuCt(ct)) {
+    const nm = T(ct && ct.name) || `médecin`;
+    const doc = ct.doc || docPool(ct)[0] || null;
+    const docName = doc && doc.name ? doc.name : ``;
+    return { main: [
+      `Tu joues le rôle de : ${nm}${docName ? `, ${docName}` : ``}.${[doc && doc.persona, T(ct && ct.persona)].filter(Boolean).length ? ` Ta personnalité : ${[doc && doc.persona, T(ct && ct.persona)].filter(Boolean).join(` `)}` : ``}`,
+      `Garde cette personnalité du début à la fin (ton, patience, façon de parler), sans jamais la décrire.`,
+      `Une infirmière ou un infirmier du centre d'hémodialyse t'appelle. ${sim}`, talk, vous,
+      ``, `TRAME DE L'APPEL (respecte l'ordre) :`,
+      `1. Tu décroches en disant seulement « Allô ? » (ou « Oui, allô ? »). Tu ne te présentes pas : un médecin d'astreinte ne dit pas son nom en décrochant. C'est l'appelant qui se présente et qui demande à qui il parle. Si on te demande qui tu es, ou si on vérifie (« C'est bien le docteur … ? »), tu réponds simplement${docName ? ` : « Oui, ${docName}. »` : ` avec ton nom`}. Si l'appelant ne dit pas qui il est et pour quel patient il appelle, demande-le (« Oui, c'est qui ? », « C'est pour quel patient ? »).`,
+      `2. Tu le laisses faire son message. Chaque fois qu'il transmet un des éléments numérotés ci-dessous, ${note}.`,
+      `3. Pour chaque élément encore manquant, pose UNE question courte (inspire-toi des questions prévues). Si un élément n'a pas été dit, tu le demandes : tu ne le devines pas.`,
+      `4. ${decide}`,
+      `5. Quand tu décides : tu dis ce que tu décides (tu viens, dans combien de temps, ou tu renvoies vers le 15), puis tes prescriptions une par une, puis « Répétez-moi ce que vous allez faire ». Tu corriges si la reformulation est fausse ou incomplète.`,
+      `6. ${bye}`
+    ].concat(body, know, common).join(`\n`) };
+  }
+  const arm = [
+    `Tu joues le rôle de l'ARM (assistant ou assistante de régulation médicale) qui décroche au SAMU, centre 15.${T(ct.arm) ? ` ${T(ct.arm)}` : ``}`,
+    sim, talk,
+    `Comme un vrai ARM, tu ne donnes aucun avis médical et aucun traitement : tu localises, tu identifies, tu évalues la gravité, puis tu passes le médecin régulateur. Tu ne sais rien du patient : tout vient de l'appelant.`,
+    ``, `ÉLÉMENTS À OBTENIR, DANS CET ORDRE (numérotés) :`,
+    ARM_ITEMS.map((x, i) => `${i + 1}. ${x}`).join(`\n`),
+    `La première question est toujours l'adresse exacte. Chaque fois que tu obtiens un élément, ${note}.`,
+    `Si l'appelant se lance dans les détails médicaux, recentre-le poliment (« D'accord, je note. Vous êtes où exactement ? ») : les détails sont pour le médecin.`,
+    `Si le patient ne répond pas et ne respire pas normalement : dis que tu engages tout de suite une équipe SMUR, demande de commencer le massage cardiaque et d'apporter le défibrillateur, puis passe le médecin sans attendre le reste.`,
+    LV ? `Dès que tu as au moins l'adresse, le numéro de rappel et le motif, dis : « Je vous passe le médecin régulateur, ne quittez pas. » puis appelle la fonction transferer_au_regulateur et tais-toi.`
+      : `Dès que tu as au moins l'adresse, le numéro de rappel et le motif, dis : « Je vous passe le médecin régulateur, ne quittez pas. » et mets « transfert » à true.`,
+    T(ctx.address) ? `Adresse réelle du centre (vérifie que l'appelant la donne précisément, fais-la préciser sinon) : ${T(ctx.address)}` : ``
+  ].filter((x) => x !== ``).join(`\n`);
+  const main = [
+    `Tu joues le rôle du médecin régulateur du SAMU, centre 15.${T(ct.persona) ? ` ${T(ct.persona)}` : ``}`,
+    `L'ARM vient de te passer l'appel d'une infirmière ou d'un infirmier du centre d'hémodialyse : l'adresse et le motif sont déjà notés, ne les redemande pas. ${sim}`,
+    talk + ` Ton ton est calme, directif, efficace.`, vous,
+    ``, `TRAME DE LA RÉGULATION (respecte l'ordre) :`,
+    `1. Tu te présentes en une phrase (« Médecin régulateur, je vous écoute. Faites-moi votre bilan. ») et tu laisses l'appelant faire son bilan sans l'interrompre.`,
+    `2. Chaque fois qu'il transmet un des éléments numérotés ci-dessous, ${note}.`,
+    `3. Pour chaque élément encore manquant, pose UNE question courte (inspire-toi des questions prévues). Tu veux toujours l'heure de début des troubles. Si un élément n'a pas été dit, tu le demandes : tu ne le devines pas.`,
+    `4. ${decide}`,
+    `5. Annonce de la décision, dans cet ordre : le moyen engagé et le délai (par exemple « J'engage une équipe SMUR, elle sera chez vous dans une vingtaine de minutes »), puis les consignes d'attente une par une, puis « Répétez-moi ce que vous allez faire ». Tu corriges si la reformulation est fausse ou incomplète.`,
+    `6. ${bye.replace(`(« Rappelez-moi si ça ne s'améliore pas ou si quelque chose change. »)`, `(« Vous restez près de lui, vous rappelez le 15 immédiatement si ça change. »)`)}`,
+    `À tout moment, si l'appelant décrit un arrêt cardiaque, tu engages le SMUR tout de suite, tu fais masser sans interruption et tu ${urg}.`
+  ].concat(body, know, common).join(`\n`);
+  return { arm, main };
+}
+/* Décision prévue, donnée à l'IA seulement quand l'essentiel est transmis */
+function callDecision(c) {
+  const N = (arr) => (arr || []).map((x) => String(x).trim()).filter(Boolean);
+  if (!c) return { decision: `Aucune décision prévue : décide de façon réaliste et prudente.`, prescriptions: [], a_ne_pas_dire: `` };
+  return { decision: String(c.answer || ``).trim() || `Décide de façon réaliste et prudente.`, prescriptions: N(c.presc), a_ne_pas_dire: String(c.avoid || ``).trim() };
+}
+/* Réponses toutes prêtes (l'interlocuteur renvoie vers quelqu'un d'autre) */
+const CALL_PRESETS = {
+  medecin: [
+    [`Renvoie vers le 15`, `Il a l'air de dire que ça le dépasse : « Qu'est-ce que vous voulez que j'y fasse d'ici ? Raccrochez et appelez le 15 tout de suite. Rappelez-moi après. »`, `Ne donne aucune prescription : tu renvoies vers le SAMU.`],
+    [`Prend en charge, arrive`, `Tu prends la situation en main, tu donnes les consignes et tu annonces que tu arrives (délai réaliste).`, ``],
+    [`Injoignable / occupé`, `Tu es occupé (au bloc, en consultation) : « Je ne peux pas me déplacer, je suis bloqué. Si ça s'aggrave, appelez le 15. » Tu donnes au maximum une consigne simple.`, ``]
+  ],
+  samu: [
+    [`Renvoie vers l'astreinte`, `Le régulateur estime que ce n'est pas (encore) une urgence vitale : « Avez-vous appelé le médecin d'astreinte ? Appelez-le d'abord, et rappelez le 15 si ça s'aggrave. »`, `N'envoie pas de moyens tant que l'astreinte n'a pas été jointe, sauf signe de détresse vitale.`],
+    [`Envoie le SMUR`, `Le régulateur engage une équipe SMUR, donne les consignes d'attente et demande de rappeler le 15 si quelque chose change.`, ``],
+    [`Conseil seul`, `Le régulateur donne un conseil médical sans envoyer de moyens et demande de rappeler le 15 en cas d'aggravation.`, ``]
+  ]
+};
+/* Rappel : l'interlocuteur rappelle les apprenants pour prendre des nouvelles */
+function buildCallbackPrompt(ctx, c, ct, mode) {
+  const LV = mode !== `json`;
+  const L = (arr) => (arr || []).map((x) => String(x).trim()).filter(Boolean).map((x) => `- ${x}`).join(`\n`) || `- (rien de précisé)`;
+  const T = (s) => String(s || ``).trim();
+  const cb = (c && c.cb) || {};
+  const doc = isSamuCt(ct) ? null : (ct && ct.doc) || docPool(ct)[0] || null;
+  const docName = doc && doc.name ? doc.name : ``;
+  const who = isSamuCt(ct) ? `le médecin régulateur du SAMU (centre 15)` : `: ${T(ct && ct.name) || `médecin`}${docName ? `, ${docName}` : ``}`;
+  return [
+    `Tu joues le rôle de ${who}.${[doc && doc.persona, T(ct && ct.persona)].filter(Boolean).length ? ` Ta personnalité : ${[doc && doc.persona, T(ct && ct.persona)].filter(Boolean).join(` `)}` : ``}`,
+    `Tu RAPPELLES toi-même le centre d'hémodialyse pour prendre des nouvelles du patient, après un premier appel de l'équipe. C'est une simulation de formation : ne sors jamais du rôle, ne dis jamais que tu es une IA.`,
+    `Façon de parler : comme au vrai téléphone. Une ou deux phrases courtes, une seule question à la fois, sans liste. Tu attends les réponses.`,
+    `Tu parles le premier : comme tu rappelles, tu te présentes en une phrase${!isSamuCt(ct) && docName ? ` (« Bonjour, ${docName}, je rappelle pour avoir des nouvelles. »)` : ``} et tu demandes des nouvelles du patient.`,
+    ``, `CE QUE TU SAIS :`,
+    isSamuCt(ct) ? `- Seulement ce que l'équipe t'a dit au premier appel.` : `- C'est un patient du centre, que tu connais : ${T(ctx.patient) || `patient hémodialysé`}.`,
+    `- Tu ne sais pas comment il va maintenant ni ce qui va se passer : l'équipe doit te le dire. Tu n'annonces jamais une évolution ou un diagnostic que l'équipe n'a pas évoqué.`,
+    c && T(c.answer) ? `- Lors du premier appel, ta décision était : ${T(c.answer)} (« vous » peut te désigner, toi).` : ``,
+    c && (c.presc || []).length ? `- Tu avais prescrit :\n${L(c.presc)}` : ``,
+    ``, `CE QUE TU VEUX SAVOIR, une question à la fois :`, L(cb.ask && cb.ask.length ? cb.ask : [`Comment va le patient ?`, `Les constantes actuelles ?`, `Ce qui a été fait depuis mon appel ?`]),
+    ``, `SELON LES NOUVELLES :`, T(cb.note) || `Si ça va mieux, tu donnes la suite de la surveillance. Si ça s'aggrave, tu demandes d'appeler le 15 ou tu annonces que tu arrives.`,
+    `Quand tu as ce qu'il te faut, tu conclus en une phrase, tu dis au revoir et tu attends que l'appelant dise au revoir à son tour, ${LV ? `puis appelle la fonction raccrocher` : `et mets « raccrocher » à true`}. Tu ne raccroches jamais pendant que l'appelant parle.`,
+    T(ctx.common) ? `\nCONSIGNES COMMUNES :\n${T(ctx.common)}` : ``
+  ].filter((x) => x !== ``).join(`\n`);
+}
+const CB_DELAYS = [[0, `à la main seulement`], [60, `1 min après l'appel`], [120, `2 min après`], [180, `3 min après`], [300, `5 min après`], [600, `10 min après`]];
+
 
 const RHYTHMS = [
   [`sinus`, `Sinusal`], [`lvh`, `Sinusal + HVG (surcharge)`], [`af`, `Fibrillation atriale`], [`bav3`, `BAV complet (III) + échappement`],
@@ -445,11 +655,15 @@ const RHYTHMS = [
 const RESP = [[`normal`, `Régulière`], [`shallow`, `Superficielle`], [`irregular`, `Irrégulière`], [`agonal`, `Gasps agoniques`]];
 const ECTOPY = [[`none`, `Aucune`], [`freq`, `ESV fréquentes`], [`bigem`, `Bigéminisme`]];
 const TRANS = [[0, `Immédiate`], [15, `15 s`], [30, `30 s`], [60, `1 min`], [120, `2 min`]];
-const TABS = [[`id`, `1. Briefing formateur`], [`brief`, `2. Briefing apprenants`], [`steps`, `3. Phases`], [`call`, `4. Appels (IA)`], [`docs`, `5. Documents`], [`debrief`, `6. Débriefing`], [`check`, `Vérifier`]];
+const TABS = [[`id`, `1. Briefing formateur`], [`brief`, `2. Briefing apprenants`], [`steps`, `3. Phases et actions`], [`call`, `4. Interlocuteurs`], [`docs`, `5. Documents`], [`debrief`, `6. Débriefing`], [`check`, `Vérifier`]];
 const STORE = `im60_editeur_v3`;
 const DELAYS = [[0, `aussitôt`], [5, `après 5 s`], [10, `après 10 s`], [20, `après 20 s`], [30, `après 30 s`], [60, `après 1 min`]];
 const DRUGS = [`Gluconate de calcium 10 %`, `Chlorure de calcium 10 %`, `Insuline + G10 %`, `Salbutamol aérosol`, `Bicarbonate de sodium`, `Adrénaline 1 mg`, `Atropine`, `Amiodarone`, `Remplissage`, `Oxygène`, `Choc DSA délivré`];
 const LIMITS = { hr: [0, 250], spo2: [0, 100], rr: [0, 60], sys: [0, 260], dia: [0, 180], temp: [30, 43] };
+const KINDS = [[`medecin`, `Médecin (astreinte, néphrologue…)`], [`samu`, `SAMU — centre 15 (ARM puis médecin régulateur)`]];
+/* v10 : constantes qu'une action peut modifier sans changer de phase */
+const EFF_KEYS = [[`spo2`, `SpO2`], [`hr`, `FC`], [`rr`, `FR`], [`sys`, `PAS`], [`dia`, `PAD`]];
+const EFF_TRANS = [[0, `aussitôt`], [15, `en 15 s`], [30, `en 30 s`], [60, `en 1 min`], [120, `en 2 min`], [300, `en 5 min`]];
 
 const $ = (id) => document.getElementById(id);
 const DEFAULT_MAIL = `sbonnal@atir.asso.nc`;
@@ -469,7 +683,7 @@ function load() {
   if (!lib.length) lib = deep(SCENARIOS_DEFAUT);
   lib.forEach(normalize);
   if (!lib.find((s) => s.id === curId)) curId = lib[0].id;
-  try { const p = localStorage.getItem(STORE + `_pin`); if (p) $(`pin`).value = p; } catch (_) {}
+  try { const p = new URLSearchParams(location.search).get(`pin`) || localStorage.getItem(STORE + `_pin`); if (p) $(`pin`).value = p; } catch (_) {}
 }
 let saveT = null;
 function save() {
@@ -479,9 +693,14 @@ function save() {
     catch (e) { toast(`Mémoire du navigateur pleine : enregistrez le fichier et allégez les images.`); }
   }, 300);
 }
-function blankCall() { return { on: false, who: ``, hear: [], ask: [], answer: ``, presc: [], avoid: `` }; }
+function blankCb() { return { on: false, delay: 180, ask: [], note: `` }; }
+function blankCall(who) { return { who: who || ``, hear: [], ask: [], answer: ``, presc: [], avoid: ``, cb: blankCb() }; }
 function blankStep(n) {
-  return { id: uid(`p`), label: `Phase ${n}`, cue: ``, hr: 80, spo2: 98, rr: 16, sys: 130, dia: 80, temp: 37.0, rhythm: `sinus`, resp: `normal`, ectopy: `none`, nibpFail: false, rosc: false, trans: 30, tech: [], crm: [], actions: [], next: [], call: blankCall() };
+  return { id: uid(`p`), label: `Phase ${n}`, cue: ``, hr: 80, spo2: 98, rr: 16, sys: 130, dia: 80, temp: 37.0, rhythm: `sinus`, resp: `normal`, ectopy: `none`, nibpFail: false, rosc: false, trans: 30, tech: [], crm: [], actions: [], next: [], calls: [] };
+}
+function defaultContacts() {
+  return [{ id: `nephro`, kind: `medecin`, name: `Néphrologue d'astreinte`, persona: ``, doctors: DOCS_DEFAUT.slice() },
+    { id: `samu`, kind: `samu`, name: `SAMU — Centre 15`, persona: `Médecin régulateur, directif, questions courtes.`, arm: `Voix posée, rapide et très structurée.` }];
 }
 function blankScenario() {
   return {
@@ -491,8 +710,8 @@ function blankScenario() {
     trainer: { roles: ROLES_DEFAUT.slice(), dsa: ``, notes: `` },
     briefing: { situation: ``, points: BRIEF_POINTS_DEFAUT.slice() },
     steps: [blankStep(1)],
-    contacts: [{ id: `nephro`, name: `Néphrologue d'astreinte`, persona: `Dr Martin, calme, précis, un peu pressé.` }, { id: `samu`, name: `Médecin régulateur du SAMU (15)`, persona: `Médecin régulateur, directif, questions courtes.` }],
-    call: { S: ``, A: ``, E: ``, D: ``, kwS: ``, kwA: ``, kwE: ``, kwD: ``, doctor: `` },
+    contacts: defaultContacts(),
+    call: { S: ``, A: ``, E: ``, D: ``, kwS: ``, kwA: ``, kwE: ``, kwD: ``, doctor: ``, address: `` },
     documents: [], debrief: { questions: [], messages: [] }
   };
 }
@@ -504,10 +723,25 @@ function normalize(s) {
   s.call = Object.assign({}, b.call, s.call);
   s.trainer = Object.assign({}, b.trainer, s.trainer);
   s.debrief = Object.assign({}, b.debrief, s.debrief);
-  s.steps.forEach((st, i) => { const bs = blankStep(i + 1); for (const k of Object.keys(bs)) if (st[k] == null) st[k] = bs[k]; st.call = Object.assign(blankCall(), st.call); });
+  s.contacts.forEach((c) => {
+    if (!c.kind) c.kind = isSamuCt(c) ? `samu` : `medecin`;
+    if (c.kind === `samu` && c.arm == null) c.arm = ``;
+    /* v10 : liste des médecins possibles ; l'ancienne « personnalité » (« Dr Martin, calme… ») devient la première ligne */
+    if (c.kind !== `samu` && !Array.isArray(c.doctors)) {
+      const line = personaToLine(c.persona);
+      if (line && /^(Dr|Docteur|Pr)\b/i.test(line)) { c.doctors = [line]; c.persona = ``; } else c.doctors = [];
+    }
+  });
+  s.steps.forEach((st, i) => {
+    const bs = blankStep(i + 1);
+    migrateStepCalls(st, s.contacts);
+    for (const k of Object.keys(bs)) if (st[k] == null) st[k] = bs[k];
+    st.calls = st.calls.map((c) => { const n = Object.assign(blankCall(), c); n.cb = Object.assign(blankCb(), c.cb); return n; });
+  });
   return s;
 }
 const cur = () => lib.find((s) => s.id === curId);
+const ctOf = (sc, id) => sc.contacts.find((c) => c.id === id);
 
 /* ---------- Édition des champs ---------- */
 function getPath(obj, path) { return path.split(`.`).reduce((o, k) => (o == null ? o : o[k]), obj); }
@@ -519,14 +753,13 @@ function upd(path, el, kind) {
   setPath(cur(), path, v);
   save();
   if (path === `short`) renderLib();
-  if (kind === `num`) el.classList.toggle(`bad`, false);
 }
 const val = (path) => getPath(cur(), path);
 function inp(path, label, opts = {}) {
   const v = val(path);
   const ph = opts.ph ? ` placeholder="${esc(opts.ph)}"` : ``;
   if (opts.area) return `<label class="f"><span>${label}</span><textarea${ph} oninput="upd('${path}', this)">${esc(v)}</textarea></label>`;
-  if (opts.list) return `<label class="f"><span>${label} <em>(un élément par ligne)</em></span><textarea class="list" rows="${Math.max(4, (v || []).length + 1)}"${ph} oninput="upd('${path}', this, 'list')">${esc((v || []).join(`\n`))}</textarea></label>`;
+  if (opts.list) return `<label class="f"><span>${label} <em>(un élément par ligne)</em></span><textarea class="list" rows="${Math.max(3, (v || []).length + 1)}"${ph} oninput="upd('${path}', this, 'list')">${esc((v || []).join(`\n`))}</textarea></label>`;
   return `<label class="f"><span>${label}</span><input type="${opts.type || `text`}"${ph} value="${esc(v)}" oninput="upd('${path}', this${opts.type === `number` ? `, 'num'` : ``})"></label>`;
 }
 function sel(path, label, options, onchange = ``) {
@@ -534,6 +767,43 @@ function sel(path, label, options, onchange = ``) {
   return `<label class="f"><span>${label}</span><select onchange="upd('${path}', this${typeof options[0][0] === `number` ? `, 'num'` : ``});${onchange}">${options.map(([k, l]) => `<option value="${esc(k)}"${String(k) === String(v) ? ` selected` : ``}>${esc(l)}</option>`).join(``)}</select></label>`;
 }
 const clean = (arr) => (arr || []).map((x) => String(x).trim()).filter(Boolean);
+
+/* ---------- v10 : effet d'une action sur le scope ---------- */
+function effOf(a) {
+  const set = {};
+  EFF_KEYS.forEach(([k]) => { const v = a && a.set ? a.set[k] : null; if (v !== `` && v != null && !isNaN(+v)) set[k] = +v; });
+  return set;
+}
+function effTxt(a) {
+  const set = effOf(a), ks = Object.keys(set);
+  if (!ks.length) return ``;
+  const t = (EFF_TRANS.find((x) => x[0] === Number(a.setTrans)) || [0, ``])[1];
+  return EFF_KEYS.filter(([k]) => k in set).map(([k, l]) => `${l} → ${set[k]}`).join(`, `) + (t ? ` ${t}` : ``);
+}
+function setEff(i, j, k, el) {
+  const a = cur().steps[i].actions[j];
+  a.set = Object.assign({}, a.set);
+  const v = String(el.value).replace(`,`, `.`).trim();
+  if (v === ``) delete a.set[k]; else a.set[k] = Number(v);
+  if (!Object.keys(a.set).length) delete a.set;
+  if (a.setTrans == null) a.setTrans = 60;
+  save(); refreshFlow();
+  const box = el.closest(`.eff`); if (box) box.classList.toggle(`on`, !!a.set);
+}
+function setEffTrans(i, j, el) { cur().steps[i].actions[j].setTrans = Number(el.value) || 0; save(); refreshFlow(); }
+function actRowHtml(sc, i, j) {
+  const p = `steps.${i}`, a = sc.steps[i].actions[j], set = a.set || {};
+  const on = Object.keys(effOf(a)).length > 0;
+  return `<div class="act-box"><div class="next-row act-row">
+    <input type="text" value="${esc(a.label)}" placeholder="Ex. : Insuline + G10 %" oninput="upd('${p}.actions.${j}.label', this); refreshFlow()">
+    <label class="hint" style="display:flex;align-items:center;gap:4px">à la <input type="number" min="1" max="9" style="width:58px" value="${esc(a.times)}" oninput="upd('${p}.actions.${j}.times', this, 'num'); refreshFlow()">ᵉ fois</label>
+    <select onchange="upd('${p}.actions.${j}.to', this); refreshFlow()">${[[``, `noter seulement`]].concat(sc.steps.map((s2, k) => [s2.id, `→ P${k + 1} — ${s2.label}`])).map(([k, l]) => `<option value="${esc(k)}"${k === a.to ? ` selected` : ``}>${esc(l)}</option>`).join(``)}</select>
+    <select onchange="upd('${p}.actions.${j}.delay', this, 'num')">${DELAYS.map(([k, l]) => `<option value="${k}"${Number(a.delay) === k ? ` selected` : ``}>${l}</option>`).join(``)}</select>
+    <button class="btn sm ghost danger" type="button" onclick="delAction(${i},${j})">Retirer</button></div>
+    <div class="eff ${on ? `on` : ``}"><b>Effet sur le scope</b> <span>(laisser vide = pas de changement)</span>
+      ${EFF_KEYS.map(([k, l]) => `<label>${l} <input type="number" inputmode="numeric" value="${set[k] == null ? `` : esc(set[k])}" placeholder="—" oninput="setEff(${i},${j},'${k}',this)"></label>`).join(``)}
+      <select onchange="setEffTrans(${i},${j},this)" title="Vitesse du changement">${EFF_TRANS.map(([k, l]) => `<option value="${k}"${Number(a.setTrans == null ? 60 : a.setTrans) === k ? ` selected` : ``}>${l}</option>`).join(``)}</select></div></div>`;
+}
 
 /* ---------- Rendu ---------- */
 let modFilter = 0;
@@ -549,13 +819,62 @@ function renderLib() {
     return `<div class="lib-mod">${m ? `Module ${m}` : `Sans module`} <small>${list.length}</small></div>` + list.map((s) => `<button type="button" class="${s.id === curId ? `sel` : ``}" onclick="pick('${s.id}')">${esc(s.short || s.title || `Sans nom`)}<small>${s.steps.length} phase${s.steps.length > 1 ? `s` : ``}</small></button>`).join(``);
   }).join(``);
 }
+/* v10 : remplace un scénario fourni (sc1 à sc4) par sa dernière version d'origine */
+function resetToDefault() {
+  const d = SCENARIOS_DEFAUT.find((s) => s.id === curId);
+  if (!d) return toast(`Ce scénario n'a pas de version d'origine (il a été créé ici).`);
+  if (!confirm(`Remplacer « ${cur().short} » par sa version d'origine (v10) ? Vos modifications de ce scénario seront perdues. Pensez à « Enregistrer le fichier » avant si vous voulez les garder.`)) return;
+  const i = lib.findIndex((s) => s.id === curId);
+  lib[i] = normalize(deep(d)); save(); render(); toast(`Version d'origine reprise : pensez à l'envoyer au simulateur`);
+}
 function renderTabs() {
+  const bo = $(`btn-orig`); if (bo) bo.classList.toggle(`hidden`, !SCENARIOS_DEFAUT.some((s) => s.id === curId));
   const errs = issues(cur()).filter((i) => i.level === `err`).length;
   $(`tabs`).innerHTML = TABS.map(([k, l]) => `<button type="button" class="${tab === k ? `sel` : ``}" onclick="setTab('${k}')">${l}${k === `check` && errs ? `<span class="n">${errs}</span>` : ``}</button>`).join(``);
 }
-function render() { renderLib(); renderTabs(); $(`view`).innerHTML = VIEWS[tab](); }
+function render() { const y = window.scrollY; renderLib(); renderTabs(); $(`view`).innerHTML = VIEWS[tab](); window.scrollTo(0, y); }
 function pick(id) { curId = id; save(); render(); window.scrollTo(0, 0); }
 function setTab(k) { tab = k; render(); window.scrollTo(0, 0); }
+
+/* Bloc « appel » d'une action de type appel : consignes du médecin / SAMU + rappel */
+function callBoxHtml(sc, i, j) {
+  const st = sc.steps[i], a = st.actions[j];
+  const k = st.calls.findIndex((c) => c.who === a.who);
+  const ct = ctOf(sc, a.who);
+  const samu = isSamuCt(ct);
+  const tgt = [[``, `noter seulement`]].concat(sc.steps.map((s2, n) => [s2.id, `→ P${n + 1} — ${s2.label}`]));
+  const head = `<div class="callbox-h"><span class="ic">☎</span>
+    <input type="text" value="${esc(a.label)}" placeholder="Texte du bouton (ex. : Appel SAMU)" oninput="upd('steps.${i}.actions.${j}.label', this); refreshFlow()">
+    <select onchange="setCallWho(${i},${j},this.value)" title="Qui répond">${sc.contacts.map((c) => `<option value="${esc(c.id)}"${c.id === a.who ? ` selected` : ``}>${esc(c.name || `?`)}</option>`).join(``)}</select>
+    <span class="hint">à la fin de l'appel</span>
+    <select onchange="upd('steps.${i}.actions.${j}.to', this); refreshFlow()">${tgt.map(([v, l]) => `<option value="${esc(v)}"${v === a.to ? ` selected` : ``}>${esc(l)}</option>`).join(``)}</select>
+    <select onchange="upd('steps.${i}.actions.${j}.delay', this, 'num')">${DELAYS.map(([v, l]) => `<option value="${v}"${Number(a.delay) === v ? ` selected` : ``}>${l}</option>`).join(``)}</select>
+    <button class="btn sm ghost danger" type="button" onclick="delAction(${i},${j})">Retirer</button></div>`;
+  if (k < 0) return `<div class="callbox">${head}</div>`;
+  const p = `steps.${i}.calls.${k}`, c = st.calls[k];
+  const presets = (CALL_PRESETS[samu ? `samu` : `medecin`] || []).map(([l], n) => `<button class="btn sm" type="button" onclick="applyPreset(${i},${k},${n})">${esc(l)}</button>`).join(``);
+  return `<div class="callbox">${head}<div class="callbox-b">
+    ${samu ? `<div class="samu-note"><b>Circuit réel du 15 :</b> l'<b>ARM</b> décroche (« SAMU, centre 15, j'écoute »), demande l'adresse exacte, un numéro de rappel, qui appelle, le patient et le motif, pose deux questions de gravité, puis met en attente et <b>passe le médecin régulateur</b>. Arrêt cardiaque : l'ARM engage le SMUR tout de suite et fait masser. Les consignes ci-dessous sont celles du <b>médecin régulateur</b>.</div>` : `<div class="samu-note">Le médecin décroche par « Allô ? » sans se présenter. Il ne connaît que ce qu'on lui dit : il ne sait ni ce qui se passe ni la suite du scénario. Il ne prescrit et ne demande que ce qui est écrit ci-dessous : <b>tout ce que vous ne voulez pas entendre ne doit pas y figurer</b>.</div>`}
+    <div class="presets"><span class="hint">Réponse toute prête :</span>${presets}</div>
+    <div class="grid two">
+      ${inp(`${p}.hear`, samu ? `Ce que le régulateur doit entendre` : `Ce que le médecin doit entendre`, { list: true, ph: `Ex. : FC 41\nECG : T pointues, QRS larges` })}
+      ${inp(`${p}.ask`, `Questions à poser s'il manque des éléments`, { list: true, ph: `Ex. : Quelle est la kaliémie ?` })}
+      <div class="tall">${inp(`${p}.answer`, `Réponse quand l'essentiel est transmis`, { area: true, ph: `Ce que dit et décide ${samu ? `le régulateur` : `le médecin`}` })}</div>
+      ${inp(`${p}.presc`, `Prescriptions orales (l'apprenant doit les reformuler)`, { list: true, ph: `Ex. : UF seule 1,5 L en 1 h\nPNI toutes les 15 min` })}
+    </div>
+    ${inp(`${p}.avoid`, `Ce qu'il ne doit pas dire ou faire`, { area: true, ph: `Ex. : ne pas donner le diagnostic avant d'avoir entendu l'ECG` })}
+    <div class="cb">
+      <div class="cb-h"><label style="display:flex;gap:6px;align-items:center"><input type="checkbox" ${c.cb.on ? `checked` : ``} onchange="upd('${p}.cb.on', this); render()"> 📞 ${samu ? `Le régulateur rappelle` : `Le médecin rappelle`} pour prendre des nouvelles</label>
+        ${c.cb.on ? `<select onchange="upd('${p}.cb.delay', this, 'num')">${CB_DELAYS.map(([v, l]) => `<option value="${v}"${Number(c.cb.delay) === v ? ` selected` : ``}>${l}</option>`).join(``)}</select>` : ``}</div>
+      ${c.cb.on ? `<div class="grid two">
+        ${inp(`${p}.cb.ask`, `Ce qu'il demande en rappelant`, { list: true, ph: `Ex. : Comment il va ?\nLa tension maintenant ?\nLe calcium est passé ?` })}
+        ${inp(`${p}.cb.note`, `Ce qu'il fait selon les nouvelles`, { area: true, ph: `Ex. : si la FC reste < 40, il demande d'appeler le 15 ; sinon il arrive dans 10 min` })}
+      </div>` : `<div class="hint">Le formateur peut aussi déclencher un rappel à tout moment depuis la télécommande ou le poste médecin.</div>`}
+    </div>
+    <div><button class="btn sm" type="button" onclick="showPrompt(${i},${k})">Consignes pour l'IA</button> <button class="btn sm" type="button" onclick="copyPrompt(${i},${k})">Copier</button></div>
+    <pre id="prompt-${i}-${k}" class="prompt hidden"></pre>
+  </div></div>`;
+}
 
 const VIEWS = {
   id() {
@@ -610,8 +929,8 @@ const VIEWS = {
   },
   steps() {
     const sc = cur();
-    const opts = (from) => [[``, `— choisir —`]].concat(sc.steps.map((s, i) => [s.id, `P${i + 1} — ${s.label}`]));
-    return `<div class="card"><h3>Enchaînement des phases</h3><p class="sub">⚡ = action qui déclenche la phase suivante (ex. : un médicament) · ✋ = bouton manuel du formateur, toujours disponible en secours.</p>
+    const opts = () => [[``, `— choisir —`]].concat(sc.steps.map((s, i) => [s.id, `P${i + 1} — ${s.label}`]));
+    return `<div class="card"><h3>Enchaînement des phases</h3><p class="sub">⚡ = action qui déclenche la phase suivante (ex. : un médicament) · ☎ = appel (déclenche à la fin de l'appel) · ✋ = bouton manuel du formateur, toujours disponible en secours · ↗ = action qui change une constante sans changer de phase (ex. : oxygène → SpO2).</p>
       <div class="flow">${flowHtml(sc)}</div></div>
       ${sc.steps.map((st, i) => { const p = `steps.${i}`; return `<section class="phase">
         <div class="phase-head"><div class="phase-num">P${i + 1}</div>
@@ -635,18 +954,14 @@ const VIEWS = {
             <label><input type="checkbox" ${st.nibpFail ? `checked` : ``} onchange="upd('${p}.nibpFail', this)"> PNI non mesurable (TA imprenable)</label>
             <label><input type="checkbox" ${st.rosc ? `checked` : ``} onchange="upd('${p}.rosc', this)"> Reprise d'activité (RACS)</label>
           </div>
-          <div class="private" style="padding-left:12px">${inp(`${p}.cue`, `Note pour le formateur <span class="private-tag">Formateur</span>`, { area: true, ph: `Ce que le formateur doit savoir ou jouer dans cette phase` })}</div>
+          <div class="private" style="padding-left:12px">${inp(`${p}.cue`, `Note pour le formateur <span class="private-tag">Formateur</span> <em>— jamais transmise à l'IA</em>`, { area: true, ph: `Ce que le formateur doit savoir ou jouer dans cette phase` })}</div>
           <div class="grid two">
-            ${inp(`${p}.tech`, `Attendus techniques de cette phase`, { list: true })}
-            ${inp(`${p}.crm`, `Attendus CRM de cette phase`, { list: true })}
+            ${inp(`${p}.tech`, `Attendus techniques de cette phase <em>— visibles sur la télécommande seulement pendant cette phase</em>`, { list: true })}
+            ${inp(`${p}.crm`, `Attendus CRM de cette phase <em>— idem</em>`, { list: true })}
           </div>
-          <div class="f"><span>Actions et médicaments <em>(boutons sur la télécommande : chaque appui est noté avec l'heure, et peut faire passer à une autre phase)</em></span>
-            ${(st.actions || []).map((a, j) => `<div class="next-row act-row">
-              <input type="text" value="${esc(a.label)}" placeholder="Ex. : Insuline + G10 %" oninput="upd('${p}.actions.${j}.label', this); refreshFlow()">
-              <label class="hint" style="display:flex;align-items:center;gap:4px">à la <input type="number" min="1" max="9" style="width:58px" value="${esc(a.times)}" oninput="upd('${p}.actions.${j}.times', this, 'num'); refreshFlow()">ᵉ injection</label>
-              <select onchange="upd('${p}.actions.${j}.to', this); refreshFlow()">${[[``, `noter seulement`]].concat(sc.steps.map((s2, k) => [s2.id, `→ P${k + 1} — ${s2.label}`])).map(([k, l]) => `<option value="${esc(k)}"${k === a.to ? ` selected` : ``}>${esc(l)}</option>`).join(``)}</select>
-              <select onchange="upd('${p}.actions.${j}.delay', this, 'num')">${DELAYS.map(([k, l]) => `<option value="${k}"${Number(a.delay) === k ? ` selected` : ``}>${l}</option>`).join(``)}</select>
-              <button class="btn sm ghost danger" type="button" onclick="delAction(${i},${j})">Retirer</button></div>`).join(``)}
+          <div class="f"><span>Actions, médicaments et appels <em>(boutons sur la télécommande : chaque appui est noté avec l'heure, peut changer une constante et peut faire passer à une autre phase)</em></span>
+            ${(st.actions || []).map((a, j) => a.kind === `call` ? callBoxHtml(sc, i, j) : actRowHtml(sc, i, j)).join(``)}
+            <div class="quick">${sc.contacts.map((c) => `<button class="btn sm callb" type="button" onclick="addCall(${i}, '${esc(c.id)}')">+ ☎ ${esc(callLabelFor(c))}<small style="font-weight:400">&nbsp;(${esc(c.name)})</small></button>`).join(``)}</div>
             <div class="quick">${DRUGS.map((d) => `<button class="btn sm" type="button" onclick="addAction(${i}, '${d.replace(/'/g, `\\'`)}')">+ ${esc(d)}</button>`).join(``)}<button class="btn sm" type="button" onclick="addAction(${i}, '')">+ Autre</button></div>
           </div>
           <div class="f"><span>Boutons de passage manuels sur la télécommande</span>
@@ -662,33 +977,29 @@ const VIEWS = {
   },
   call() {
     const sc = cur();
-    const who = [[``, `— choisir —`]].concat(sc.contacts.map((c) => [c.id, c.name]));
-    return `<div class="card"><h3>Appels : l'IA joue le médecin</h3>
-      <p class="sub">Quand l'apprenant appelle, une IA répond à la place du médecin, avec les consignes de la phase en cours. Pour chaque phase : qui répond, ce que le médecin doit entendre, les questions qu'il pose s'il manque des éléments, et ce qu'il répond ou prescrit. Le bouton « Consignes pour l'IA » montre le texte exact qui sera donné à l'IA : vous pouvez déjà le copier dans Gemini pour tester.</p></div>
-      <div class="card private"><h3>Interlocuteurs <span class="private-tag">Formateur</span></h3><p class="sub">Les personnes que l'apprenant peut appeler. Leur nom s'affichera sur le téléphone d'appel.</p>
-      ${sc.contacts.map((c, i) => `<div class="next-row">
-        <input type="text" value="${esc(c.name)}" placeholder="Ex. : Néphrologue d'astreinte" oninput="upd('contacts.${i}.name', this)">
-        <input type="text" style="flex:3" value="${esc(c.persona)}" placeholder="Personnalité : nom, ton, attitude" oninput="upd('contacts.${i}.persona', this)">
-        <button class="btn sm ghost danger" type="button" onclick="delContact(${i})">Retirer</button></div>`).join(``)}
+    const planned = [];
+    sc.steps.forEach((st, i) => (st.actions || []).forEach((a) => { if (a.kind === `call`) { const c = st.calls.find((x) => x.who === a.who); planned.push(`<div class="tl-a"><b>P${i + 1}</b> ${esc(st.label)} — ☎ ${esc(a.label)} → ${esc((ctOf(sc, a.who) || {}).name || `?`)}${c && c.cb && c.cb.on ? ` · 📞 rappel ${esc((CB_DELAYS.find((d) => d[0] === Number(c.cb.delay)) || [0, ``])[1])}` : ``}</div>`); } }));
+    return `<div class="card"><h3>Qui peut-on appeler ?</h3>
+      <p class="sub">Les noms s'affichent sur le téléphone d'appel des apprenants. Selon le réglage de la télécommande, c'est l'IA ou un formateur (poste médecin) qui répond, et le formateur peut reprendre la main à tout moment. Les consignes de chaque appel se règlent <b>dans l'onglet 3, sous l'action « ☎ Appel »</b> de la phase : une réponse différente par interlocuteur et par phase.</p>
+      ${sc.contacts.map((c, i) => `<div class="ct-card">
+        <div class="next-row" style="margin:0">
+          <input type="text" value="${esc(c.name)}" placeholder="Nom affiché (ex. : Néphrologue d'astreinte)" oninput="upd('contacts.${i}.name', this)">
+          <select onchange="upd('contacts.${i}.kind', this); normalize(cur()); render()">${KINDS.map(([k, l]) => `<option value="${k}"${c.kind === k ? ` selected` : ``}>${l}</option>`).join(``)}</select>
+          <button class="btn sm ghost danger" type="button" onclick="delContact(${i})">Retirer</button></div>
+        <div class="grid two">
+          ${c.kind === `samu` ? `` : inp(`contacts.${i}.doctors`, `Médecins qui peuvent être d'astreinte — « Nom : personnalité » <em>(le formateur choisit celui du jour sur la télécommande, au briefing)</em>`, { list: true, ph: `Dr Martin : calme et précis, un peu pressé\nDr Leroy : chaleureux mais exigeant, veut des chiffres` })}
+          ${inp(`contacts.${i}.persona`, c.kind === `samu` ? `Médecin régulateur : nom, ton, attitude` : `Ton commun à tous ces médecins <em>(facultatif, ex. : vouvoie l'infirmier)</em>`)}
+          ${c.kind === `samu` ? inp(`contacts.${i}.arm`, `ARM (qui décroche) : ton, attitude`) : ``}
+        </div>
+        ${c.kind === `samu` ? `<div class="samu-flow"><span>1. ARM décroche</span>→<span>adresse, n° de rappel, qui appelle, patient, motif</span>→<span>conscient ? respire ?</span>→<span>⏸ attente</span>→<span>2. médecin régulateur</span>→<span>décision : conseil / ambulance / SMUR</span></div>` : `<div class="hint">Au téléphone, le médecin décroche par « Allô ? » et ne donne son nom que si l'infirmier le demande.</div>`}
+      </div>`).join(``)}
       <button class="btn sm" type="button" onclick="addContact()">+ Ajouter un interlocuteur</button>
-      <div style="height:12px"></div>
-      ${inp(`call.doctor`, `Consignes communes à tous les appels de ce scénario`, { area: true, ph: `Ex. : toujours exiger la reformulation des prescriptions` })}</div>
-      ${sc.steps.map((st, i) => { const p = `steps.${i}.call`, c = st.call; return `<section class="phase">
-        <div class="phase-head"><div class="phase-num">P${i + 1}</div><b style="flex:1">${esc(st.label)}</b>
-          <label style="display:flex;gap:6px;align-items:center"><input type="checkbox" ${c.on ? `checked` : ``} onchange="upd('${p}.on', this); render()"> Appel programmé dans cette phase</label></div>
-        ${c.on ? `<div class="phase-body">
-          <div class="grid">${sel(`${p}.who`, `Qui répond`, who)}</div>
-          <div class="grid two">
-            ${inp(`${p}.hear`, `Ce que le médecin doit entendre`, { list: true, ph: `Ex. : FC 41\nECG : T pointues, QRS larges` })}
-            ${inp(`${p}.ask`, `Questions à poser s'il manque des éléments`, { list: true, ph: `Ex. : Quelle est la kaliémie ?` })}
-            <div class="tall">${inp(`${p}.answer`, `Réponse quand l'essentiel est transmis`, { area: true, ph: `Ce que dit et décide le médecin` })}</div>
-            ${inp(`${p}.presc`, `Prescriptions orales (l'apprenant doit les reformuler)`, { list: true })}
-          </div>
-          ${inp(`${p}.avoid`, `Ce que le médecin ne doit pas dire ou faire`, { area: true, ph: `Ex. : ne pas donner le diagnostic avant d'avoir entendu l'ECG` })}
-          <div><button class="btn sm" type="button" onclick="showPrompt(${i})">Consignes pour l'IA</button> <button class="btn sm" type="button" onclick="copyPrompt(${i})">Copier</button></div>
-          <pre id="prompt-${i}" class="prompt hidden"></pre>
-        </div>` : ``}</section>`; }).join(``)}
-      <div class="card"><h3>Grille SAED de l'appel</h3><p class="sub">Sert à noter la qualité de l'appel au débriefing. Les mots-clés serviront à la cocher automatiquement à partir de la transcription.</p>
+      <div class="grid two" style="margin-top:12px">
+        ${inp(`call.address`, `Adresse exacte du centre (l'ARM vérifie qu'elle est donnée précisément)`, { area: true, ph: `Ex. : Centre de dialyse …, rue …, Nouméa — 1er étage, salle 2, code porte 1234` })}
+        ${inp(`call.doctor`, `Consignes communes à tous les appels de ce scénario <em>— valables à toutes les phases : n'y mettez rien sur la suite du scénario</em>`, { area: true, ph: `Ex. : toujours exiger la reformulation des prescriptions` })}
+      </div></div>
+      <div class="card"><h3>Appels programmés</h3>${planned.join(``) || `<div class="hint">Aucun appel : ajoutez « + ☎ Appel » dans les actions d'une phase (onglet 3).</div>`}</div>
+      <div class="card"><h3>Grille SAED de l'appel</h3><p class="sub">Sert à noter la qualité de l'appel au débriefing. Les mots-clés servent à la cocher automatiquement à partir de la transcription (mode IA).</p>
       <div class="saed">
         ${[[`S`, `Situation`], [`A`, `Antécédents`], [`E`, `Évaluation`], [`D`, `Demande`]].map(([k, l]) => `<div class="L">${k}</div>
           ${inp(`call.${k}`, `${l} — éléments attendus`, { area: true })}
@@ -718,13 +1029,14 @@ const VIEWS = {
   check() {
     const sc = cur(), list = issues(sc);
     const size = JSON.stringify(exportScenario(sc)).length;
+    const nCalls = sc.steps.reduce((n, s) => n + (s.actions || []).filter((a) => a.kind === `call`).length, 0);
     return `<div class="card"><h3>Vérification du scénario</h3><p class="sub">À faire avant l'envoi. Les points rouges empêchent un bon fonctionnement, les orange sont des conseils.</p>
       <div class="issues">${list.length ? list.map((x) => `<div class="issue ${x.level}">${esc(x.msg)}</div>`).join(``) : `<div class="issue ok">Aucun problème détecté. Le scénario est prêt à être envoyé.</div>`}</div>
       <p class="hint" style="margin-top:12px">Taille du scénario : ${Math.round(size / 1024)} Ko${size > 1500000 ? ` — c'est lourd, réduisez le nombre d'images.` : `.`}</p></div>
       <div class="card"><h3>Résumé</h3>
       <p><b>${esc(sc.title)}</b> — ${esc(sc.patient)} — départ ${esc(sc.startTime)}</p>
       <div class="flow">${flowHtml(sc)}</div>
-      <p class="hint">${sc.steps.reduce((n, s) => n + (s.actions || []).length, 0)} actions / médicaments · ${sc.steps.reduce((n, s) => n + clean(s.tech).length, 0)} attendus techniques · ${sc.steps.reduce((n, s) => n + clean(s.crm).length, 0)} attendus CRM · ${sc.documents.length} documents · ${clean(sc.debrief.questions).length} questions de débriefing</p></div>`;
+      <p class="hint">${sc.steps.reduce((n, s) => n + (s.actions || []).length, 0) - nCalls} actions / médicaments · ${nCalls} appels · ${sc.steps.reduce((n, s) => n + clean(s.tech).length, 0)} attendus techniques · ${sc.steps.reduce((n, s) => n + clean(s.crm).length, 0)} attendus CRM · ${sc.documents.length} documents · ${clean(sc.debrief.questions).length} questions de débriefing</p></div>`;
   }
 };
 
@@ -733,15 +1045,20 @@ function flowHtml(sc) {
   const D = (s) => (Number(s) ? ` <small>(${Number(s) < 60 ? `${s} s` : `${s / 60} min`})</small>` : ``);
   const short = (arr, n) => { const c = clean(arr); return c.slice(0, n).map(esc).join(` · `) + (c.length > n ? ` <small>+${c.length - n}</small>` : ``); };
   return sc.steps.map((s, i) => {
-    const trig = (s.actions || []).filter((a) => a.to).map((a) => `<span class="go auto">⚡ ${esc(a.label || `action`)}${Number(a.times) > 1 ? ` ×${a.times}` : ``} → ${P(a.to)}${D(a.delay)}</span>`);
+    const acts = s.actions || [];
+    const trig = acts.filter((a) => a.to).map((a) => a.kind === `call`
+      ? `<span class="go tel">☎ ${esc(a.label || `appel`)} → ${P(a.to)}${D(a.delay)}</span>`
+      : `<span class="go auto">⚡ ${esc(a.label || `action`)}${Number(a.times) > 1 ? ` ×${a.times}` : ``} → ${P(a.to)}${D(a.delay)}</span>`);
+    const effs = acts.filter((a) => a.kind !== `call` && effTxt(a)).map((a) => `<span class="go auto">↗ ${esc(a.label || `action`)} : ${esc(effTxt(a))}</span>`);
     const man = (s.next || []).filter((n) => n.to).map((n) => `<span class="go man">✋ ${esc(n.label || `bouton`)} → ${P(n.to)}</span>`);
-    const noted = clean((s.actions || []).filter((a) => !a.to).map((a) => a.label));
+    const noted = clean(acts.filter((a) => !a.to && a.kind !== `call` && !effTxt(a)).map((a) => a.label));
+    const calls = acts.filter((a) => a.kind === `call`).map((a) => { const c = (s.calls || []).find((x) => x.who === a.who); return `<span class="tl-call">☎ ${esc((ctOf(sc, a.who) || {}).name || a.label)}${c && c.cb && c.cb.on ? ` · 📞 rappel` : ``}</span>`; }).join(``);
     const vit = s.hr === 0 && s.sys === 0 ? `pas de pouls` : `FC ${s.hr} · TA ${s.nibpFail ? `imprenable` : `${s.sys}/${s.dia}`} · SpO2 ${s.spo2}`;
     return `<div class="tl-row"><div class="tl-p">P${i + 1}</div><div class="tl-c">
-      <div><b>${esc(s.label)}</b> <span class="tl-v">${vit}</span>${s.call && s.call.on ? ` <span class="tl-call">☎ appel</span>` : ``}</div>
+      <div><b>${esc(s.label)}</b> <span class="tl-v">${vit}</span>${calls}</div>
       ${clean(s.tech).length ? `<div class="tl-a"><span>Attendus</span> ${short(s.tech, 4)}</div>` : ``}
       ${noted.length ? `<div class="tl-a"><span>Actions notées</span> ${short(noted, 4)}</div>` : ``}
-      <div class="tl-g">${trig.concat(man).join(``) || `<span class="go end">Fin de simulation</span>`}</div>
+      <div class="tl-g">${effs.concat(trig, man).join(``) || `<span class="go end">Fin de simulation</span>`}</div>
     </div></div>`;
   }).join(``);
 }
@@ -753,45 +1070,59 @@ function dupStep(i) { const sc = cur(); const c = deep(sc.steps[i]); c.id = uid(
 function delStep(i) { const sc = cur(); if (sc.steps.length < 2) return toast(`Il faut au moins une phase.`); if (!confirm(`Supprimer la phase P${i + 1} « ${sc.steps[i].label} » ?`)) return; const id = sc.steps[i].id; sc.steps.splice(i, 1); sc.steps.forEach((s) => { s.next = (s.next || []).filter((n) => n.to !== id); }); save(); render(); }
 function moveStep(i, d) { const sc = cur(), j = i + d; if (j < 0 || j >= sc.steps.length) return; [sc.steps[i], sc.steps[j]] = [sc.steps[j], sc.steps[i]]; save(); render(); }
 function addNext(i) { const sc = cur(); const nxt = sc.steps[i + 1]; (sc.steps[i].next = sc.steps[i].next || []).push({ label: nxt ? nxt.label : ``, to: nxt ? nxt.id : `` }); save(); render(); }
-function addContact() { cur().contacts.push({ id: uid(`c`), name: ``, persona: `` }); save(); render(); }
-function delContact(i) { if (!confirm(`Retirer cet interlocuteur ?`)) return; cur().contacts.splice(i, 1); save(); render(); }
-function buildPrompt(sc, i) {
-  const st = sc.steps[i], c = st.call || blankCall(), who = sc.contacts.find((x) => x.id === c.who) || { name: `médecin`, persona: `` };
-  const L = (arr) => clean(arr).map((x) => `- ${x}`).join(`
-`) || `- (rien de précisé)`;
-  return [
-    `Tu joues le rôle de : ${who.name}.${who.persona ? ` ${who.persona}` : ``}`,
-    `Tu réponds au téléphone à une infirmière ou un infirmier d'un centre d'hémodialyse. C'est une simulation de formation : ne sors jamais du rôle, ne dis jamais que tu es une IA, ne fais pas de cours.`,
-    `Parle comme au téléphone : phrases courtes, deux ou trois au maximum par réponse, en français.`,
-    ``,
-    `CE QUE TU SAIS DÉJÀ (ne le révèle pas, sers-t'en pour réagir) :`,
-    `- Patient : ${sc.patient}.`,
-    `- Situation : ${sc.trigger}`,
-    `- Moment de la simulation : ${st.label}. ${st.cue}`,
-    `- Constantes actuelles : FC ${st.hr}, TA ${st.nibpFail ? `non mesurable` : `${st.sys}/${st.dia}`}, SpO2 ${st.spo2} %, FR ${st.rr}.`,
-    ``,
-    `CE QUE TU DOIS ENTENDRE DE L'APPELANT AVANT DE DÉCIDER :`, L(c.hear),
-    ``,
-    `S'IL MANQUE DES ÉLÉMENTS, pose ces questions, une à la fois :`, L(c.ask),
-    `Tant que l'essentiel n'est pas transmis, ne propose pas de diagnostic ni de traitement.`,
-    ``,
-    `QUAND L'ESSENTIEL EST TRANSMIS, réponds dans cet esprit :`, String(c.answer || `(rien de précisé)`).trim(),
-    ``,
-    `PRESCRIPTIONS À DONNER ORALEMENT, puis demande à l'appelant de les reformuler. Corrige-le s'il se trompe :`, L(c.presc),
-    ``,
-    `À NE PAS DIRE OU FAIRE :`, String(c.avoid || `(rien de précisé)`).trim(),
-    String(sc.call.doctor || ``).trim() ? `
-CONSIGNES COMMUNES :
-${String(sc.call.doctor).trim()}` : ``,
-    ``,
-    `Si l'appelant ne se présente pas ou ne dit pas d'où il appelle, demande-le en premier.`
-  ].join(`
-`);
+function addContact() { cur().contacts.push({ id: uid(`c`), kind: `medecin`, name: ``, persona: ``, doctors: [] }); save(); render(); }
+function delContact(i) {
+  const sc = cur(), id = sc.contacts[i].id;
+  const used = sc.steps.some((s) => (s.actions || []).some((a) => a.kind === `call` && a.who === id));
+  if (!confirm(used ? `Cet interlocuteur est utilisé dans des appels programmés : ils seront retirés. Continuer ?` : `Retirer cet interlocuteur ?`)) return;
+  sc.contacts.splice(i, 1);
+  sc.steps.forEach((s) => { s.actions = (s.actions || []).filter((a) => !(a.kind === `call` && a.who === id)); s.calls = (s.calls || []).filter((c) => c.who !== id); });
+  save(); render();
 }
-function showPrompt(i) { const el = $(`prompt-${i}`); el.textContent = buildPrompt(cur(), i); el.classList.toggle(`hidden`); }
-function copyPrompt(i) { const txt = buildPrompt(cur(), i); (navigator.clipboard ? navigator.clipboard.writeText(txt) : Promise.reject()).then(() => toast(`Consignes copiées : collez-les dans Gemini pour tester`)).catch(() => { const el = $(`prompt-${i}`); el.textContent = txt; el.classList.remove(`hidden`); toast(`Sélectionnez le texte affiché et copiez-le`); }); }
+function addCall(i, who) {
+  const sc = cur(), st = sc.steps[i], ct = ctOf(sc, who);
+  if ((st.actions || []).some((a) => a.kind === `call` && a.who === who)) return toast(`Cet appel existe déjà dans cette phase.`);
+  st.actions.unshift({ kind: `call`, who, label: callLabelFor(ct), times: 1, to: ``, delay: 0 });
+  if (!st.calls.some((c) => c.who === who)) st.calls.push(blankCall(who));
+  save(); render();
+}
+function setCallWho(i, j, who) {
+  const sc = cur(), st = sc.steps[i], a = st.actions[j], old = a.who;
+  if (old === who) return;
+  if (st.actions.some((x, n) => n !== j && x.kind === `call` && x.who === who)) { toast(`Il y a déjà un appel vers cet interlocuteur dans cette phase.`); render(); return; }
+  const c = st.calls.find((x) => x.who === old);
+  if (c) c.who = who; else st.calls.push(blankCall(who));
+  if (a.label === callLabelFor(ctOf(sc, old))) a.label = callLabelFor(ctOf(sc, who));
+  a.who = who; save(); render();
+}
+function applyPreset(i, k, n) {
+  const sc = cur(), c = sc.steps[i].calls[k], ct = ctOf(sc, c.who);
+  const P = (CALL_PRESETS[isSamuCt(ct) ? `samu` : `medecin`] || [])[n]; if (!P) return;
+  if (String(c.answer || ``).trim() && !confirm(`Remplacer la réponse actuelle par « ${P[0]} » ?`)) return;
+  c.answer = P[1]; if (P[2]) c.avoid = P[2];
+  save(); render(); toast(`Réponse « ${P[0]} » appliquée : adaptez-la si besoin`);
+}
+function buildPrompt(sc, i, k) {
+  const st = sc.steps[i], c = st.calls[k], ct = ctOf(sc, c.who) || { name: `médecin` };
+  const ctx = { patient: sc.patient, trigger: sc.trigger, stepLabel: st.label, cue: st.cue, common: sc.call.doctor, address: sc.call.address,
+    vit: `FC ${st.hr}, TA ${st.nibpFail ? `non mesurable` : `${st.sys}/${st.dia}`}, SpO2 ${st.spo2} %, FR ${st.rr}` };
+  const r = buildCallPrompts(ctx, c, ct);
+  const d = callDecision(c);
+  const parts = [];
+  if (r.arm) parts.push([`1. ARM (décroche au 15)`, r.arm], [`2. Médecin régulateur (après le transfert)`, r.main]);
+  else parts.push([`${ct.name}${(docPool(ct)[0] || {}).name ? ` — exemple avec ${docPool(ct)[0].name}` : ``}`, r.main]);
+  parts.push([`Donné à l'IA seulement quand l'essentiel est transmis`, `Décision : ${d.decision}\nPrescriptions :\n${d.prescriptions.map((x) => `- ${x}`).join(`\n`) || `- aucune`}\nÀ ne pas dire : ${d.a_ne_pas_dire || `rien de particulier`}`]);
+  if (c.cb && c.cb.on) parts.push([`Rappel pour prendre des nouvelles`, buildCallbackPrompt(ctx, c, ct)]);
+  return parts;
+}
+function showPrompt(i, k) { const el = $(`prompt-${i}-${k}`); el.innerHTML = buildPrompt(cur(), i, k).map(([t, x]) => `<b>— ${esc(t)} —</b>\n${esc(x)}`).join(`\n\n`); el.classList.toggle(`hidden`); }
+function copyPrompt(i, k) { const txt = buildPrompt(cur(), i, k).map(([t, x]) => `— ${t} —\n${x}`).join(`\n\n`); (navigator.clipboard ? navigator.clipboard.writeText(txt) : Promise.reject()).then(() => toast(`Consignes copiées : collez-les dans Gemini pour tester`)).catch(() => { const el = $(`prompt-${i}-${k}`); el.textContent = txt; el.classList.remove(`hidden`); toast(`Sélectionnez le texte affiché et copiez-le`); }); }
 function addAction(i, label) { (cur().steps[i].actions = cur().steps[i].actions || []).push({ label, times: 1, to: ``, delay: 0 }); save(); render(); }
-function delAction(i, j) { cur().steps[i].actions.splice(j, 1); save(); render(); }
+function delAction(i, j) {
+  const st = cur().steps[i], a = st.actions[j];
+  if (a.kind === `call`) { if (!confirm(`Retirer cet appel et ses consignes ?`)) return; st.calls = st.calls.filter((c) => c.who !== a.who); }
+  st.actions.splice(j, 1); save(); render();
+}
 function delNext(i, j) { cur().steps[i].next.splice(j, 1); save(); render(); }
 function resetBrief() { cur().briefing.points = BRIEF_POINTS_DEFAUT.slice(); save(); render(); }
 
@@ -825,7 +1156,20 @@ function issues(sc) {
     if (!String(s.label).trim()) E(`${P} n'a pas de nom.`);
     for (const [k, [lo, hi]] of Object.entries(LIMITS)) { const v = s[k]; if (v === `` || v == null || isNaN(v)) E(`${P} : la valeur ${k.toUpperCase()} est vide.`); else if (v < lo || v > hi) E(`${P} : ${k.toUpperCase()} = ${v} est hors limites (${lo} à ${hi}).`); }
     if (s.sys !== `` && s.dia !== `` && Number(s.dia) > Number(s.sys)) E(`${P} : la PAD est plus haute que la PAS.`);
-    (s.actions || []).forEach((a) => { if (!String(a.label).trim()) W(`${P} : une action n'a pas de nom.`); if (a.to && !ids.includes(a.to)) E(`${P} : l'action « ${a.label} » mène à une phase supprimée.`); if (!(Number(a.times) >= 1)) E(`${P} : l'action « ${a.label} » doit compter au moins 1 injection.`); });
+    (s.actions || []).forEach((a) => {
+      if (!String(a.label).trim()) W(`${P} : une action n'a pas de nom.`);
+      if (a.to && !ids.includes(a.to)) E(`${P} : l'action « ${a.label} » mène à une phase supprimée.`);
+      if (a.kind === `call`) {
+        if (!ctOf(sc, a.who)) E(`${P} : l'appel « ${a.label} » n'a pas d'interlocuteur.`);
+        const c = (s.calls || []).find((x) => x.who === a.who);
+        if (c && !clean(c.hear).length) W(`${P} : l'appel « ${a.label} » ne précise pas ce qu'il faut entendre.`);
+        if (c && !String(c.answer || ``).trim()) W(`${P} : l'appel « ${a.label} » n'a pas de réponse prévue.`);
+      } else {
+        if (!(Number(a.times) >= 1)) E(`${P} : l'action « ${a.label} » doit compter au moins 1 fois.`);
+        const set = effOf(a);
+        for (const [k, v] of Object.entries(set)) { const [lo, hi] = LIMITS[k]; if (v < lo || v > hi) E(`${P} : l'effet de « ${a.label} » met ${k.toUpperCase()} à ${v}, hors limites (${lo} à ${hi}).`); }
+      }
+    });
     (s.next || []).forEach((n, j) => { if (!n.to || !ids.includes(n.to)) E(`${P} : le bouton « ${n.label || j + 1} » ne mène à aucune phase.`); if (!String(n.label).trim()) W(`${P} : un bouton de passage n'a pas de texte.`); });
     if (!(s.next || []).length && (s.actions || []).some((a) => a.to)) W(`${P} : pas de bouton manuel. Si l'action n'est pas faite, le formateur ne pourra pas avancer : ajoutez un bouton de secours.`);
     if (!clean(s.tech).length && !clean(s.crm).length) W(`${P} : aucun attendu dans cette phase.`);
@@ -834,8 +1178,9 @@ function issues(sc) {
   while (grew) { grew = false; sc.steps.forEach((s) => { if (reach.has(s.id)) (s.next || []).concat(s.actions || []).forEach((n) => { if (n.to && !reach.has(n.to)) { reach.add(n.to); grew = true; } }); }); }
   sc.steps.forEach((s, i) => { if (!reach.has(s.id)) W(`P${i + 1} « ${s.label} » n'est atteinte par aucun bouton de passage.`); });
   if (!String(sc.briefing.situation).trim()) W(`Le briefing n'a pas de situation de départ.`);
-  if (!sc.steps.some((s) => s.call && s.call.on)) W(`Aucun appel n'est programmé (onglet 4).`);
-  sc.steps.forEach((s, i) => { if (s.call && s.call.on) { if (!sc.contacts.find((c) => c.id === s.call.who)) E(`P${i + 1} : l'appel n'a pas d'interlocuteur.`); if (!clean(s.call.hear).length) W(`P${i + 1} : l'appel ne précise pas ce que le médecin doit entendre.`); } });
+  if (!sc.steps.some((s) => (s.actions || []).some((a) => a.kind === `call`))) W(`Aucun appel n'est programmé (onglet 3 : « + ☎ Appel » dans les actions).`);
+  if (sc.contacts.some((c) => c.kind === `samu`) && !String(sc.call.address || ``).trim()) W(`Adresse du centre non renseignée (onglet 4) : l'ARM du 15 ne pourra pas vérifier l'adresse donnée.`);
+  sc.contacts.forEach((c) => { if (c.kind !== `samu` && !docPool(c).length) W(`« ${c.name || `Médecin`} » : aucun médecin nommé (onglet 4). L'IA donnera un nom au hasard si on le lui demande.`); });
   sc.documents.forEach((d) => { if (!d.img) W(`Le document « ${d.name} » n'a pas encore d'image.`); });
   if (!clean(sc.debrief.questions).length) W(`Aucune question de débriefing.`);
   return out;
@@ -849,17 +1194,22 @@ function exportScenario(sc) {
   s.briefing.points = clean(s.briefing.points);
   s.trainer.roles = clean(s.trainer.roles);
   s.debrief.questions = clean(s.debrief.questions); s.debrief.messages = clean(s.debrief.messages);
+  s.contacts.forEach((c) => { if (Array.isArray(c.doctors)) c.doctors = clean(c.doctors); });
   s.steps.forEach((st) => {
     st.tech = clean(st.tech); st.crm = clean(st.crm);
-    st.call = Object.assign(blankCall(), st.call); st.call.hear = clean(st.call.hear); st.call.ask = clean(st.call.ask); st.call.presc = clean(st.call.presc);
-    if (st.call.on) st.call.prompt = buildPrompt(sc, sc.steps.indexOf(sc.steps.find((x) => x.id === st.id)));
-    st.actions = (st.actions || []).filter((a) => String(a.label).trim()).map((a) => ({ label: String(a.label).trim(), times: Math.max(1, Number(a.times) || 1), to: a.to || ``, delay: Number(a.delay) || 0 }));
+    st.actions = (st.actions || []).filter((a) => String(a.label).trim()).map((a) => {
+      const o = { label: String(a.label).trim(), times: Math.max(1, Number(a.times) || 1), to: a.to || ``, delay: Number(a.delay) || 0 };
+      if (a.kind === `call`) return Object.assign(o, { kind: `call`, who: a.who });
+      const set = effOf(a);
+      return Object.keys(set).length ? Object.assign(o, { set, setTrans: a.setTrans == null ? 60 : Number(a.setTrans) || 0 }) : o;
+    });
+    st.calls = (st.calls || []).filter((c) => st.actions.some((a) => a.kind === `call` && a.who === c.who)).map((c) => ({ who: c.who, hear: clean(c.hear), ask: clean(c.ask), answer: String(c.answer || ``).trim(), presc: clean(c.presc), avoid: String(c.avoid || ``).trim(), cb: { on: !!(c.cb && c.cb.on), delay: Number(c.cb && c.cb.delay) || 0, ask: clean(c.cb && c.cb.ask), note: String((c.cb && c.cb.note) || ``).trim() } }));
     st.next = (st.next || []).filter((n) => n.to).map((n) => ({ label: String(n.label).trim() || `Phase suivante`, to: n.to }));
     [`hr`, `spo2`, `rr`, `sys`, `dia`, `temp`, `trans`].forEach((k) => { st[k] = Number(st[k]) || 0; });
   });
   s.module = Number(s.module) || 2;
   s.mailTo = getMail();
-  return Object.assign({ format: `im60-scenario`, version: 1, savedAt: new Date().toISOString() }, s);
+  return Object.assign({ format: `im60-scenario`, version: 2, savedAt: new Date().toISOString() }, s);
 }
 function download(name, text) {
   const a = document.createElement(`a`); a.href = URL.createObjectURL(new Blob([text], { type: `application/json` })); a.download = name;
@@ -867,7 +1217,7 @@ function download(name, text) {
 }
 const slug = (s) => String(s).normalize(`NFD`).replace(/[̀-ͯ]/g, ``).toLowerCase().replace(/[^a-z0-9]+/g, `-`).replace(/^-|-$/g, ``).slice(0, 50) || `scenario`;
 function saveFile() { const sc = cur(); download(`scenario-${slug(sc.short)}.json`, JSON.stringify(exportScenario(sc), null, 2)); toast(`Fichier enregistré dans vos téléchargements`); }
-function saveAll() { download(`bibliotheque-scenarios-im60.json`, JSON.stringify({ format: `im60-bibliotheque`, version: 1, savedAt: new Date().toISOString(), scenarios: lib.map(exportScenario) }, null, 2)); toast(`Bibliothèque enregistrée`); }
+function saveAll() { download(`bibliotheque-scenarios-im60.json`, JSON.stringify({ format: `im60-bibliotheque`, version: 2, savedAt: new Date().toISOString(), scenarios: lib.map(exportScenario) }, null, 2)); toast(`Bibliothèque enregistrée`); }
 function openFile(input) {
   const f = input.files && input.files[0]; if (!f) return;
   const rd = new FileReader();
@@ -911,7 +1261,6 @@ function sendCurrent() {
   const data = JSON.stringify(exportScenario(sc));
   const xid = uid(`x`), size = 20000, n = Math.ceil(data.length / size);
   const msgs = []; for (let i = 0; i < n; i++) msgs.push({ type: `SCN_CHUNK`, xid, i, n, data: data.slice(i * size, (i + 1) * size), name: sc.short, sender: senderId, ts: Date.now() });
-  /* Même appareil (onglet ouvert à côté) */
   try { const bc = new BroadcastChannel(`im60_dialyse_bc_` + pin); bc.onmessage = (ev) => onAck(ev.data, xid); msgs.forEach((m) => bc.postMessage(m)); setTimeout(() => bc.close(), 10000); } catch (_) {}
   sendMqtt(pin, msgs, xid, 0);
 }

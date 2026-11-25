@@ -1011,6 +1011,7 @@
       <div class="seg-r col" id="call-mode"></div>
       <div id="call-tel-box" class="hidden"><label class="lbl" for="call-tel">Numéro à appeler (téléphone du formateur qui joue le médecin)</label><input type="tel" id="call-tel" placeholder="Ex. : 77 12 34" onchange="setCallTel(this.value)"></div>
       <div id="call-mode-help" class="muted"></div>
+      <div id="call-oncall"></div>
       <div id="call-dev" class="muted"></div>
       <div class="row"><button type="button" class="btn grow" onclick="showQrSheet('phone')">QR téléphone d'appel</button><button type="button" class="btn grow" onclick="showQrSheet('doctor')">QR poste médecin</button></div>
     </div>
@@ -1247,6 +1248,13 @@
       `Ressources : chariot d'urgence, DAE, i-STAT, ECG 12 dérivations, renfort joignable.`
     ];
 
+    /* v10 : médecins d'astreinte possibles (le formateur choisit celui du jour au briefing) */
+    const DOCS_DEFAUT = [
+      `Dr Martin : calme et précis, un peu pressé. Vouvoie l'infirmier.`,
+      `Dr Leroy : chaleureux mais exigeant, veut des chiffres précis et pose beaucoup de questions.`,
+      `Dr Nguyen : bref et sec, supporte mal les messages flous ; si le message n'est pas structuré, il coupe : « Bon, qu'est-ce qui se passe exactement ? »`
+    ];
+    
     const ROLES_DEFAUT = [
       `Formateur 1 : télécommande (phases, constantes, PNI, actions)`,
       `Formateur 2 : joue le médecin d'astreinte au téléphone`,
@@ -1290,7 +1298,7 @@
             crm: [],
             next: [] }
         ],
-        contacts: [{ id: `nephro`, kind: `medecin`, name: `Néphrologue d'astreinte`, persona: `Dr Martin, calme et précis, un peu pressé. Vouvoie l'infirmier.` }, { id: `samu`, kind: `samu`, name: `SAMU — Centre 15`, persona: `Médecin régulateur, directif, questions courtes, vouvoie l'infirmier, veut l'heure de début des troubles.`, arm: `Voix posée, rapide et très structurée.` }],
+        contacts: [{ id: `nephro`, kind: `medecin`, name: `Néphrologue d'astreinte`, persona: ``, doctors: DOCS_DEFAUT.slice() }, { id: `samu`, kind: `samu`, name: `SAMU — Centre 15`, persona: `Médecin régulateur, directif, questions courtes, vouvoie l'infirmier, veut l'heure de début des troubles.`, arm: `Voix posée, rapide et très structurée.` }],
         call: {
           S: `Qui appelle, d'où ; M. W., 70 ans ; chute dans l'ascenseur à l'arrivée ; céphalées`,
           A: `Hémodialysé ; sous AVK ; chute avec choc crânien la veille`,
@@ -1359,7 +1367,7 @@
             actions: [],
             next: [] }
         ],
-        contacts: [{ id: `nephro`, kind: `medecin`, name: `Néphrologue d'astreinte`, persona: `Dr Martin, calme et précis, un peu pressé. Vouvoie l'infirmier.` }, { id: `samu`, kind: `samu`, name: `SAMU — Centre 15`, persona: `Médecin régulateur, directif, questions courtes, vouvoie l'infirmier, veut l'heure de début des troubles.`, arm: `Voix posée, rapide et très structurée.` }],
+        contacts: [{ id: `nephro`, kind: `medecin`, name: `Néphrologue d'astreinte`, persona: ``, doctors: DOCS_DEFAUT.slice() }, { id: `samu`, kind: `samu`, name: `SAMU — Centre 15`, persona: `Médecin régulateur, directif, questions courtes, vouvoie l'infirmier, veut l'heure de début des troubles.`, arm: `Voix posée, rapide et très structurée.` }],
         call: {
           S: `Qui appelle, d'où ; M. P., lit 2 ; bradycardie à 41 avec malaise`,
           A: `Hémodialysé anurique ; dernière dialyse il y a 72 h ; traitements`,
@@ -1397,14 +1405,15 @@
         trainer: { roles: ROLES_DEFAUT.slice(), dsa: `FV (P5) : choc indiqué ; RACS après le 1er choc.`, notes: `` },
         briefing: { situation: `Mardi, ouverture de la salle. Un patient est assis dans le sas d'accueil, il respire mal. L'ambulancier vous appelle.`, points: BRIEF_POINTS_DEFAUT.slice() },
         steps: [
-          { id: `p1`, label: `Détresse respiratoire (OAP)`, cue: `Tachycardie sinusale, HVG. Position assise, O2, scope, appel médecin.`, hr: 100, spo2: 93, rr: 30, sys: 180, dia: 100, temp: 36.6, rhythm: `lvh`, resp: `shallow`, ectopy: `none`, nibpFail: false, rosc: false, trans: 0,
+          { id: `p1`, label: `Détresse respiratoire (OAP)`, cue: `Tachycardie sinusale, HVG. SpO2 88 % à l'air. Quand l'O2 est posé, touchez « Oxygène 4 L/min » : la SpO2 monte à 92 % en 1 min.`, hr: 100, spo2: 88, rr: 30, sys: 180, dia: 100, temp: 36.6, rhythm: `lvh`, resp: `shallow`, ectopy: `none`, nibpFail: false, rosc: false, trans: 0,
             tech: [`Position assise`, `Oxygène`, `Scope + PNI`, `Appel médecin`], crm: [`Leader désigné`, `Proche pris en charge`],
-            call: { on: true, who: `nephro`, hear: [`Identité de l'appelant et du patient`, `Détresse respiratoire, SpO2 93 % à l'air`, `PA 180/100, FC 100, FR 30`, `+5 kg au-dessus du poids sec, œdèmes, crépitants`, `BPCO`], ask: [`Combien il a pris de poids ?`, `Il a mal à la poitrine ?`, `Il est sous oxygène ?`], answer: `OAP de surcharge. Position assise, oxygène, on branche pour une ultrafiltration isolée. Rappelez-moi s'il a mal à la poitrine.`, presc: [`Oxygène 4 L/min, viser 88-92 % (BPCO)`, `Position assise`, `Branchement en UF isolée`, `ECG 12 dérivations`], avoid: `Ne pas parler de SCA si l'appelant ne mentionne pas de douleur.` },
-            next: [{ label: `Sous O2, UF isolée`, to: `p2` }] },
-          { id: `p2`, label: `Sous O2 4 L/min, UF isolée`, cue: `Décision médicale : brancher pour UF pure.`, hr: 99, spo2: 94, rr: 30, sys: 177, dia: 100, temp: 36.7, rhythm: `lvh`, resp: `shallow`, ectopy: `none`, nibpFail: false, rosc: false, trans: 30,
-            tech: [`Branchement pour UF isolée`], crm: [`Réévaluation régulière`],
+            actions: [{ label: `Oxygène 4 L/min`, times: 1, to: ``, delay: 0, set: { spo2: 92 }, setTrans: 60 }],
+            call: { on: true, who: `nephro`, hear: [`Identité de l'appelant et du patient`, `Détresse respiratoire : SpO2 88 % à l'air (92 % sous O2 si déjà posé)`, `PA 180/100, FC 100, FR 30`, `+5 kg au-dessus du poids sec, œdèmes, crépitants`, `BPCO`], ask: [`Il a pris combien par rapport à son poids sec ?`, `Il sature à combien ? Il est sous oxygène ?`, `Et la tension ?`], answer: `C'est un OAP de surcharge. Vous le laissez assis sous oxygène et vous le branchez tout de suite pour une ultrafiltration seule : 1,5 litre en 1 heure. Surveillance de la tension rapprochée pendant l'UF.`, presc: [`Position assise`, `Oxygène 4 L/min, objectif SpO2 88 à 92 % (BPCO)`, `Branchement en UF seule : 1,5 L en 1 h`, `Surveillance tensionnelle toutes les 15 min pendant l'UF`, `Rappeler si la SpO2 ne remonte pas ou si la tension baisse`], avoid: `Pour toi, c'est un OAP de surcharge et rien d'autre : ne parle pas de cause cardiaque ni de douleur thoracique, ne demande pas d'ECG. C'est une UF seule, pas une dialyse classique.` },
+            next: [{ label: `Sous O2, UF seule 1,5 L / 1 h`, to: `p2` }] },
+          { id: `p2`, label: `Sous O2 4 L/min, UF seule`, cue: `Branché en UF seule, 1,5 L en 1 h. PNI toutes les 15 min.`, hr: 99, spo2: 92, rr: 30, sys: 177, dia: 100, temp: 36.7, rhythm: `lvh`, resp: `shallow`, ectopy: `none`, nibpFail: false, rosc: false, trans: 30,
+            tech: [`Branchement en UF seule (1,5 L en 1 h)`, `Surveillance tensionnelle toutes les 15 min`], crm: [`Réévaluation régulière`],
             next: [{ label: `Douleur thoracique — ST+`, to: `p3` }] },
-          { id: `p3`, label: `Douleur thoracique — ST+`, cue: `Douleur rétrosternale constrictive, irradiant mâchoire et bras gauche. ST+ inférieur.`, hr: 99, spo2: 94, rr: 30, sys: 177, dia: 100, temp: 36.8, rhythm: `stemi`, resp: `shallow`, ectopy: `none`, nibpFail: false, rosc: false, trans: 60,
+          { id: `p3`, label: `Douleur thoracique — ST+`, cue: `Douleur rétrosternale constrictive, irradiant mâchoire et bras gauche. ST+ inférieur.`, hr: 99, spo2: 92, rr: 30, sys: 177, dia: 100, temp: 36.8, rhythm: `stemi`, resp: `shallow`, ectopy: `none`, nibpFail: false, rosc: false, trans: 60,
             tech: [`ECG 12D dès la douleur`, `Arrêt UF / clampage`, `Appel SAMU (15)`, `DAE posé`], crm: [`Sortie du biais d'ancrage`],
             call: { on: true, who: `samu`, hear: [`Adresse et service`, `Douleur thoracique constrictive irradiant`, `Sus-décalage ST inférieur`, `Patient en dialyse, UF arrêtée`, `Constantes actuelles`], ask: [`Depuis quand la douleur ?`, `Vous avez un ECG ? Qu'est-ce qu'il montre ?`, `Le DSA est à côté ?`], answer: `Syndrome coronarien avec sus-décalage. Le SMUR part. Arrêtez l'ultrafiltration, électrodes du DSA posées, ne le laissez pas seul.`, presc: [`Arrêt de l'UF`, `Électrodes du DSA posées`, `Oxygène`, `Préparer l'ECG pour l'équipe`], avoid: `Ne pas prescrire d'anticoagulant ou d'antiagrégant par téléphone sans l'avis du néphrologue.` },
             next: [{ label: `ESV menaçantes`, to: `p4` }] },
@@ -1419,14 +1428,14 @@
             tech: [`Transmissions au SAMU`], crm: [],
             next: [] }
         ],
-        contacts: [{ id: `nephro`, kind: `medecin`, name: `Néphrologue d'astreinte`, persona: `Dr Martin, calme et précis, un peu pressé. Vouvoie l'infirmier.` }, { id: `samu`, kind: `samu`, name: `SAMU — Centre 15`, persona: `Médecin régulateur, directif, questions courtes, vouvoie l'infirmier, veut l'heure de début des troubles.`, arm: `Voix posée, rapide et très structurée.` }],
+        contacts: [{ id: `nephro`, kind: `medecin`, name: `Néphrologue d'astreinte`, persona: ``, doctors: DOCS_DEFAUT.slice() }, { id: `samu`, kind: `samu`, name: `SAMU — Centre 15`, persona: `Médecin régulateur, directif, questions courtes, vouvoie l'infirmier, veut l'heure de début des troubles.`, arm: `Voix posée, rapide et très structurée.` }],
         call: {
           S: `Qui appelle ; M. V. ; détresse respiratoire dans le sas`,
           A: `IRC terminale, BPCO sévère ; +5 kg au-dessus du poids sec`,
-          E: `PA 180/100, FC 100, SpO2 93 %, FR 30 ; crépitants, œdèmes`,
-          D: `Venue immédiate ; conduite à tenir (O2, UF)`,
+          E: `PA 180/100, FC 100, SpO2 88 % à l'air, FR 30 ; crépitants, œdèmes`,
+          D: `Conduite à tenir : O2, UF seule 1,5 L en 1 h, surveillance tensionnelle`,
           kwS: `détresse, respire, essoufflé`, kwA: `BPCO, poids sec, kilos`, kwE: `saturation, crépitants, œdèmes, tension`, kwD: `venir, oxygène, UF, ultrafiltration`,
-          doctor: `Prescrire O2 et UF isolée. Lors de la douleur : demander l'ECG et faire appeler le 15.` },
+          doctor: `Toujours faire reformuler les prescriptions.` },
         documents: [],
         debrief: {
           questions: [`Comment l'équipe s'est-elle réorganisée quand l'OAP s'est enrichi d'une douleur thoracique ?`, `Quels éléments du scope ont permis d'identifier le SCA avant l'arrêt cardiaque ?`, `Comment avez-vous géré l'entourage en panique pendant la réanimation ?`],
@@ -1469,7 +1478,7 @@
           { id: `p5`, label: `RACS (facultatif)`, cue: `Reprise d'une activité circulatoire sous remplissage + adrénaline.`, hr: 118, spo2: 91, rr: 22, sys: 86, dia: 48, temp: 37.0, rhythm: `sinus`, resp: `normal`, ectopy: `none`, nibpFail: false, rosc: true, trans: 15,
             tech: [], crm: [], next: [] }
         ],
-        contacts: [{ id: `nephro`, kind: `medecin`, name: `Néphrologue d'astreinte`, persona: `Dr Martin, calme et précis, un peu pressé. Vouvoie l'infirmier.` }, { id: `samu`, kind: `samu`, name: `SAMU — Centre 15`, persona: `Médecin régulateur, directif, questions courtes, vouvoie l'infirmier, veut l'heure de début des troubles.`, arm: `Voix posée, rapide et très structurée.` }],
+        contacts: [{ id: `nephro`, kind: `medecin`, name: `Néphrologue d'astreinte`, persona: ``, doctors: DOCS_DEFAUT.slice() }, { id: `samu`, kind: `samu`, name: `SAMU — Centre 15`, persona: `Médecin régulateur, directif, questions courtes, vouvoie l'infirmier, veut l'heure de début des troubles.`, arm: `Voix posée, rapide et très structurée.` }],
         call: {
           S: `Qui appelle ; Mme A. ; hémorragie sur déconnexion de l'aiguille, malaise`,
           A: `Hémodialysée, FAV bras gauche ; fin de séance`,
@@ -1647,6 +1656,26 @@
     const ARM_ITEMS = [`Adresse exacte (centre, ville, étage, salle, code)`, `Numéro de rappel`, `Qui appelle (nom, fonction)`, `Patient : nom, âge`, `Motif en une phrase`, `Conscient ? Respire normalement ?`];
     const isSamuCt = (ct) => !!ct && (ct.kind ? ct.kind === `samu` : (ct.id === `samu` || /samu|centre 15|\(15\)/i.test(ct.name || ``)));
     const callLabelFor = (ct) => (isSamuCt(ct) ? `Appel SAMU` : `Appel médecin`);
+    /* v10 : médecins possibles pour un interlocuteur (un par ligne : « Dr Martin : calme, précis, un peu pressé »).
+       Le formateur choisit au briefing celui qui est d'astreinte ; l'IA joue ce médecin. */
+    function docLine(line) {
+      const s = String(line || ``).trim(); if (!s) return null;
+      const i = s.search(/\s*[:—–]\s+|\s+-\s+/);
+      if (i > 0) return { name: s.slice(0, i).trim(), persona: s.slice(i).replace(/^\s*[:—–-]\s*/, ``).trim() };
+      return { name: s, persona: `` };
+    }
+    function personaToLine(p) {
+      const s = String(p || ``).trim(); if (!s) return ``;
+      const m = s.match(/^((?:Dr|Docteur|Pr)\.?\s+[A-ZÉÈÀÂÎÔÛ][\wÀ-ÿ'-]*(?:\s+[A-ZÉÈÀÂÎÔÛ][\wÀ-ÿ'-]*)?)\s*[,:—–-]\s*(.*)$/);
+      return m ? `${m[1]} : ${m[2]}` : s;
+    }
+    function docPool(ct) {
+      if (!ct || isSamuCt(ct)) return [];
+      const lines = (ct.doctors || []).map(docLine).filter(Boolean);
+      if (lines.length) return lines;
+      const l = docLine(personaToLine(ct.persona));
+      return l && /^(Dr|Docteur|Pr)\b/i.test(l.name) ? [l] : [];
+    }
     function migrateStepCalls(st, contacts) {
       if (!Array.isArray(st.actions)) st.actions = [];
       if (!Array.isArray(st.calls)) {
@@ -1676,11 +1705,15 @@
       const sim = `C'est une simulation de formation pour des infirmiers d'un centre d'hémodialyse. Ne sors jamais du rôle, ne dis jamais que tu es une IA, ne fais jamais de cours.`;
       const talk = `Façon de parler : comme au vrai téléphone. Une ou deux phrases courtes à chaque fois, une seule question à la fois, en français, sans liste. Tu laisses l'appelant parler et tu attends sa réponse. Tu n'expliques jamais ton raisonnement.`;
       const note = LV ? `appelle la fonction noter_element avec son numéro (sans le dire à voix haute)` : `ajoute son numéro dans le champ « elements »`;
+      /* v10 : l'IA ne connaît ni la situation en cours ni la suite du scénario : seulement ce que l'appelant dit */
+      const samuCt = isSamuCt(ct);
       const know = [
-        ``, `VÉRITÉ DE LA SIMULATION (sert seulement à réagir juste ; ne révèle jamais une information que l'appelant ne t'a pas donnée lui-même) :`,
-        `- Patient : ${T(ctx.patient) || `patient hémodialysé`}.`,
-        `- Ce qui se passe : ${T(ctx.trigger)} ${T(ctx.stepLabel)}. ${T(ctx.cue)}`,
-        `- Constantes réelles en ce moment : ${ctx.vit}.`
+        ``, `CE QUE TU SAIS AVANT L'APPEL :`,
+        samuCt ? `- Rien sur ce patient : tout vient de l'appelant.` : `- C'est un patient du centre, que tu connais : ${T(ctx.patient) || `patient hémodialysé`}.`,
+        `- Tu ne sais rien de ce qui se passe en ce moment et tu ne connais pas la suite. Tu raisonnes uniquement sur ce que l'appelant te dit, comme un vrai médecin au téléphone.`,
+        ``, `LIMITES STRICTES :`,
+        `- Tu ne prescris, ne demandes et ne proposes que ce qui figure dans ta décision prévue et tes prescriptions : aucun examen, aucun bilan, aucun avis en plus.`,
+        `- Tu n'évoques aucun autre diagnostic que celui de ta décision prévue et tu n'annonces jamais ce qui pourrait arriver ensuite, sauf si l'appelant t'en parle lui-même. Si l'appelant t'apprend un élément nouveau et inquiétant, tu lui demandes de te rappeler ou d'appeler le 15, sans inventer de traitement.`
       ];
       const vous = `Dans les consignes du formateur, « vous » peut te désigner, toi le médecin (par exemple « vous envoyez le SMUR » veut dire : tu engages le SMUR).`;
       const common = T(ctx.common) ? [``, `CONSIGNES COMMUNES DU FORMATEUR :`, T(ctx.common)] : [];
@@ -1688,6 +1721,8 @@
         ? `Quand tu crois avoir l'essentiel, reformule en une phrase ce que tu as compris, puis appelle la fonction verifier_decision. Elle te dit si tu peux décider et te donne ta décision prévue et tes prescriptions. Si elle répond « pas encore », pose une question courte sur ce qui manque. Tu ne donnes ni diagnostic ni traitement avant qu'elle t'ait autorisé.`
         : `Tu ne connais pas encore ta décision : elle te sera donnée dans une note interne entre crochets quand l'essentiel aura été transmis. Avant cette note, tu ne donnes ni diagnostic ni traitement : tu poses les questions.`;
       const hang = LV ? `puis appelle la fonction raccrocher` : `et mets « raccrocher » à true`;
+      /* v10 : fin d'appel naturelle, jamais brutale */
+      const bye = `Fin de l'appel, sans te presser : quand la reformulation est juste, demande « Vous avez des questions ? » et attends la réponse ; réponds aux questions. Ensuite seulement, conclus en une phrase (« Rappelez-moi si ça ne s'améliore pas ou si quelque chose change. »), dis au revoir et attends que l'appelant dise au revoir à son tour, ${hang}. Tu ne raccroches jamais avant d'avoir donné ta décision, ni pendant que l'appelant parle.`;
       const urg = LV ? `appelle verifier_decision avec urgence_vitale à true` : `mets « urgence » à true`;
       const body = c ? [
         ``, `ÉLÉMENTS QUE L'APPELANT DOIT TE TRANSMETTRE (numérotés) :`, NUM(c.hear),
@@ -1698,16 +1733,19 @@
       ];
       if (!isSamuCt(ct)) {
         const nm = T(ct && ct.name) || `médecin`;
+        const doc = ct.doc || docPool(ct)[0] || null;
+        const docName = doc && doc.name ? doc.name : ``;
         return { main: [
-          `Tu joues le rôle de : ${nm}.${T(ct && ct.persona) ? ` ${T(ct.persona)}` : ``}`,
+          `Tu joues le rôle de : ${nm}${docName ? `, ${docName}` : ``}.${[doc && doc.persona, T(ct && ct.persona)].filter(Boolean).length ? ` Ta personnalité : ${[doc && doc.persona, T(ct && ct.persona)].filter(Boolean).join(` `)}` : ``}`,
+          `Garde cette personnalité du début à la fin (ton, patience, façon de parler), sans jamais la décrire.`,
           `Une infirmière ou un infirmier du centre d'hémodialyse t'appelle. ${sim}`, talk, vous,
           ``, `TRAME DE L'APPEL (respecte l'ordre) :`,
-          `1. Tu décroches et tu te présentes en une phrase. Si l'appelant ne dit pas qui il est et pour quel patient, demande-le d'abord.`,
+          `1. Tu décroches en disant seulement « Allô ? » (ou « Oui, allô ? »). Tu ne te présentes pas : un médecin d'astreinte ne dit pas son nom en décrochant. C'est l'appelant qui se présente et qui demande à qui il parle. Si on te demande qui tu es, ou si on vérifie (« C'est bien le docteur … ? »), tu réponds simplement${docName ? ` : « Oui, ${docName}. »` : ` avec ton nom`}. Si l'appelant ne dit pas qui il est et pour quel patient il appelle, demande-le (« Oui, c'est qui ? », « C'est pour quel patient ? »).`,
           `2. Tu le laisses faire son message. Chaque fois qu'il transmet un des éléments numérotés ci-dessous, ${note}.`,
           `3. Pour chaque élément encore manquant, pose UNE question courte (inspire-toi des questions prévues). Si un élément n'a pas été dit, tu le demandes : tu ne le devines pas.`,
           `4. ${decide}`,
           `5. Quand tu décides : tu dis ce que tu décides (tu viens, dans combien de temps, ou tu renvoies vers le 15), puis tes prescriptions une par une, puis « Répétez-moi ce que vous allez faire ». Tu corriges si la reformulation est fausse ou incomplète.`,
-          `6. Tu conclus en une phrase (« Rappelez-moi si… »), tu dis au revoir ${hang}.`
+          `6. ${bye}`
         ].concat(body, know, common).join(`\n`) };
       }
       const arm = [
@@ -1733,7 +1771,7 @@
         `3. Pour chaque élément encore manquant, pose UNE question courte (inspire-toi des questions prévues). Tu veux toujours l'heure de début des troubles. Si un élément n'a pas été dit, tu le demandes : tu ne le devines pas.`,
         `4. ${decide}`,
         `5. Annonce de la décision, dans cet ordre : le moyen engagé et le délai (par exemple « J'engage une équipe SMUR, elle sera chez vous dans une vingtaine de minutes »), puis les consignes d'attente une par une, puis « Répétez-moi ce que vous allez faire ». Tu corriges si la reformulation est fausse ou incomplète.`,
-        `6. Tu conclus : « Vous restez près de lui, vous me rappelez au 15 immédiatement si ça change. » Puis tu dis au revoir ${hang}.`,
+        `6. ${bye.replace(`(« Rappelez-moi si ça ne s'améliore pas ou si quelque chose change. »)`, `(« Vous restez près de lui, vous rappelez le 15 immédiatement si ça change. »)`)}`,
         `À tout moment, si l'appelant décrit un arrêt cardiaque, tu engages le SMUR tout de suite, tu fais masser sans interruption et tu ${urg}.`
       ].concat(body, know, common).join(`\n`);
       return { arm, main };
@@ -1763,26 +1801,34 @@
       const L = (arr) => (arr || []).map((x) => String(x).trim()).filter(Boolean).map((x) => `- ${x}`).join(`\n`) || `- (rien de précisé)`;
       const T = (s) => String(s || ``).trim();
       const cb = (c && c.cb) || {};
-      const who = isSamuCt(ct) ? `le médecin régulateur du SAMU (centre 15)` : `: ${T(ct && ct.name) || `médecin`}`;
+      const doc = isSamuCt(ct) ? null : (ct && ct.doc) || docPool(ct)[0] || null;
+      const docName = doc && doc.name ? doc.name : ``;
+      const who = isSamuCt(ct) ? `le médecin régulateur du SAMU (centre 15)` : `: ${T(ct && ct.name) || `médecin`}${docName ? `, ${docName}` : ``}`;
       return [
-        `Tu joues le rôle de ${who}.${T(ct && ct.persona) ? ` ${T(ct.persona)}` : ``}`,
+        `Tu joues le rôle de ${who}.${[doc && doc.persona, T(ct && ct.persona)].filter(Boolean).length ? ` Ta personnalité : ${[doc && doc.persona, T(ct && ct.persona)].filter(Boolean).join(` `)}` : ``}`,
         `Tu RAPPELLES toi-même le centre d'hémodialyse pour prendre des nouvelles du patient, après un premier appel de l'équipe. C'est une simulation de formation : ne sors jamais du rôle, ne dis jamais que tu es une IA.`,
         `Façon de parler : comme au vrai téléphone. Une ou deux phrases courtes, une seule question à la fois, sans liste. Tu attends les réponses.`,
-        `Tu parles le premier : tu te présentes et tu demandes des nouvelles du patient.`,
-        ``, `VÉRITÉ DE LA SIMULATION (ne la révèle pas, l'équipe doit te le dire elle-même) :`,
-        `- Patient : ${T(ctx.patient) || `patient hémodialysé`}.`,
-        `- Moment actuel de la simulation : ${T(ctx.stepLabel)}. ${T(ctx.cue)}`,
-        `- Constantes réelles actuelles : ${ctx.vit}.`,
+        `Tu parles le premier : comme tu rappelles, tu te présentes en une phrase${!isSamuCt(ct) && docName ? ` (« Bonjour, ${docName}, je rappelle pour avoir des nouvelles. »)` : ``} et tu demandes des nouvelles du patient.`,
+        ``, `CE QUE TU SAIS :`,
+        isSamuCt(ct) ? `- Seulement ce que l'équipe t'a dit au premier appel.` : `- C'est un patient du centre, que tu connais : ${T(ctx.patient) || `patient hémodialysé`}.`,
+        `- Tu ne sais pas comment il va maintenant ni ce qui va se passer : l'équipe doit te le dire. Tu n'annonces jamais une évolution ou un diagnostic que l'équipe n'a pas évoqué.`,
         c && T(c.answer) ? `- Lors du premier appel, ta décision était : ${T(c.answer)} (« vous » peut te désigner, toi).` : ``,
         c && (c.presc || []).length ? `- Tu avais prescrit :\n${L(c.presc)}` : ``,
         ``, `CE QUE TU VEUX SAVOIR, une question à la fois :`, L(cb.ask && cb.ask.length ? cb.ask : [`Comment va le patient ?`, `Les constantes actuelles ?`, `Ce qui a été fait depuis mon appel ?`]),
         ``, `SELON LES NOUVELLES :`, T(cb.note) || `Si ça va mieux, tu donnes la suite de la surveillance. Si ça s'aggrave, tu demandes d'appeler le 15 ou tu annonces que tu arrives.`,
-        `Quand tu as ce qu'il te faut, tu conclus en une phrase, tu dis au revoir ${LV ? `puis appelle la fonction raccrocher` : `et mets « raccrocher » à true`}.`,
+        `Quand tu as ce qu'il te faut, tu conclus en une phrase, tu dis au revoir et tu attends que l'appelant dise au revoir à son tour, ${LV ? `puis appelle la fonction raccrocher` : `et mets « raccrocher » à true`}. Tu ne raccroches jamais pendant que l'appelant parle.`,
         T(ctx.common) ? `\nCONSIGNES COMMUNES :\n${T(ctx.common)}` : ``
       ].filter((x) => x !== ``).join(`\n`);
     }
     const CB_DELAYS = [[0, `à la main seulement`], [60, `1 min après l'appel`], [120, `2 min après`], [180, `3 min après`], [300, `5 min après`], [600, `10 min après`]];
     /* Conversion du format de l'éditeur vers le format interne du simulateur */
+    /* v10 : effet d'une action sur le scope sans changer de phase (ex. : Oxygène → SpO2 92 en 1 min) */
+    const EFF_KEYS = [[`spo2`, `SpO2`], [`hr`, `FC`], [`rr`, `FR`], [`sys`, `PAS`], [`dia`, `PAD`]];
+    function actEffect(a) {
+      const set = {};
+      EFF_KEYS.forEach(([k]) => { const v = a && a.set ? a.set[k] : null; if (v !== `` && v != null && !isNaN(+v)) set[k] = +v; });
+      return Object.keys(set).length ? { set, setTrans: +a.setTrans || 0 } : {};
+    }
     function fromEditor(e) {
       const L = (a) => (a || []).map((x) => String(x).trim()).filter(Boolean);
       const contacts = (e.contacts || []).map((c) => Object.assign({}, c, { kind: c.kind || (isSamuCt(c) ? `samu` : `medecin`) }));
@@ -1790,7 +1836,7 @@
         id: s.id, label: s.label || `Phase`, cue: s.cue || ``,
         hr: +s.hr || 0, spo2: +s.spo2 || 0, rr: +s.rr || 0, sys: +s.sys || 0, dia: +s.dia || 0, temp: s.temp === `` || s.temp == null ? 37 : +s.temp,
         rhythm: s.rhythm || `sinus`, resp: s.resp || `normal`, ectopy: s.ectopy || `none`, nibpFail: !!s.nibpFail, rosc: !!s.rosc, trans: +s.trans || 0,
-        actions: (s.actions || []).filter((a) => String(a.label || ``).trim()).map((a) => Object.assign({ label: String(a.label).trim(), times: Math.max(1, +a.times || 1), to: a.to || ``, delay: +a.delay || 0 }, a.kind === `call` ? { kind: `call`, who: a.who } : {})),
+        actions: (s.actions || []).filter((a) => String(a.label || ``).trim()).map((a) => Object.assign({ label: String(a.label).trim(), times: Math.max(1, +a.times || 1), to: a.to || ``, delay: +a.delay || 0 }, a.kind === `call` ? { kind: `call`, who: a.who } : {}, actEffect(a))),
         next: (s.next || []).filter((n) => n.to).map((n) => ({ label: String(n.label || ``).trim() || `Phase suivante`, to: n.to })),
         calls: (s.calls || []).filter((c) => c && c.who)
       }));
@@ -3754,7 +3800,27 @@
       $(`call-tel-box`).classList.toggle(`hidden`, C.mode !== `tel`);
       if (document.activeElement !== $(`call-tel`)) $(`call-tel`).value = C.tel || ``;
       $(`call-mode-help`).textContent = CALL_MODES[C.mode][1];
+      renderOncall();
       renderCallDevs();
+    }
+    /* v10 : qui est d'astreinte aujourd'hui (choisi entre formateurs, jamais montré aux apprenants) */
+    function renderOncall() {
+      const box = $(`call-oncall`); if (!box) return;
+      const list = phoneContacts().filter((ct) => docPool(ct).length);
+      box.innerHTML = list.length ? list.map((ct) => {
+        const pool = docPool(ct), cur = Math.min(oncallIdx(ct.id), pool.length - 1);
+        return `<label class="lbl" for="oc-${esc(ct.id)}">${esc(ct.name)} : qui est d'astreinte aujourd'hui ?</label>
+          <select id="oc-${esc(ct.id)}" onchange="setOncall('${esc(ct.id)}', this.value)">${pool.map((d, i) => `<option value="${i}"${i === cur ? ` selected` : ``}>${esc(d.name || `Médecin ${i + 1}`)}</option>`).join(``)}</select>
+          <div class="muted">${esc(pool[cur].persona || `Pas de personnalité précisée.`)}${pool.length > 1 ? ` <a href="#" onclick="setOncall('${esc(ct.id)}', -1);return false">Au hasard</a>` : ``}</div>`;
+      }).join(``) : `<div class="muted">Pour choisir le médecin d'astreinte, renseignez la liste des médecins possibles dans l'éditeur (onglet 4).</div>`;
+    }
+    function setOncall(id, v) {
+      const ct = phoneContacts().find((x) => x.id === id); if (!ct) return;
+      const pool = docPool(ct); let i = parseInt(v, 10);
+      if (i < 0) i = Math.floor(Math.random() * pool.length);
+      sim.oncall = Object.assign({}, sim.oncall, { [id]: Math.max(0, Math.min(i, pool.length - 1)) });
+      if (sim.running) remEvent(`system`, `Astreinte : ${pool[sim.oncall[id]].name || `médecin`}`);
+      pushSim(); renderOncall();
     }
     function renderCallDevs() {
       const el = $(`call-dev`); if (!el) return;
@@ -3838,6 +3904,14 @@
       if (a.kind === `call`) remEvent(`action`, `☎ ${a.label}${auto ? ` — appel passé` : ` — noté par le formateur`}`, { act: a.label });
       else if (/choc/i.test(a.label)) { sendCmd(`SHOCK`, null, true); remEvent(`action`, `⚡ Choc électrique délivré (${a.label})`, { act: a.label }); }
       else remEvent(`action`, `💉 ${a.label}${a.times > 1 ? ` (${n}/${a.times})` : n > 1 ? ` (${n}e)` : ``}`, { act: a.label });
+      if (a.set && n === a.times) {
+        const txt = [];
+        EFF_KEYS.forEach(([k, l]) => { if (a.set[k] != null) { txt.push(`${l} ${sim.t[k]} → ${a.set[k]}`); sim.t[k] = a.set[k]; } });
+        sim.transition = +a.setTrans || 0;
+        pushSim(); if (typeof renderAdj === `function`) renderAdj();
+        remEvent(`step`, `Effet de « ${a.label} » : ${txt.join(`, `)}${a.setTrans ? ` (en ${a.setTrans < 60 ? `${a.setTrans} s` : `${a.setTrans / 60} min`})` : ``}`);
+        toast(`${a.label} : ${txt.join(`, `)}`);
+      }
       const na = norm(a.label).split(` `).filter((w) => w.length > 3);
       sc.tech.filter((it) => it.ph === sim.stepIdx && !debrief.done[it.id] && na.length && na.every((w) => norm(it.t).includes(w))).forEach((it) => toggleDone(it.id));
       if (a.to && n >= a.times && !pendGo) {
@@ -5210,6 +5284,9 @@
     const DEFAULT_CONTACTS = [{ id: `nephro`, kind: `medecin`, name: `Néphrologue d'astreinte`, persona: `` }, { id: `samu`, kind: `samu`, name: `SAMU — Centre 15`, persona: `` }];
     const phoneContacts = () => { const c = (scenarioById(sim.scenarioId).contacts || []).filter((x) => x && x.name); return c.length ? c : DEFAULT_CONTACTS; };
     const fullCt = (ct) => (ct && phoneContacts().find((x) => x.id === ct.id)) || ct || { name: `médecin` };
+    /* v10 : médecin d'astreinte choisi par le formateur au briefing (sim.oncall[idContact] = numéro dans la liste) */
+    const oncallIdx = (id) => { const o = sim.oncall || {}; return Number.isInteger(o[id]) ? o[id] : 0; };
+    function withDoc(ct) { const pool = docPool(ct); return pool.length ? Object.assign({}, ct, { doc: pool[oncallIdx(ct.id)] || pool[0] }) : ct; }
     const ctBrief = (ct) => ({ id: ct.id, name: ct.name, persona: ct.persona || ``, kind: ct.kind || (isSamuCt(ct) ? `samu` : `medecin`), arm: ct.arm || `` });
     const STAGE_LBL = { arm: `ARM`, hold: `en attente`, reg: `médecin régulateur` };
 
@@ -5335,8 +5412,9 @@
           ${live ? `<button type="button" class="btn pri" onclick="samuResume()">▶ Reprendre en médecin régulateur</button>` : ``}</div>`;
       }
       if (!c) return `<div class="cs-empty">${samu ? `<b>Vous êtes le médecin régulateur.</b> ` : ``}Pas de fiche d'appel pour ${esc(ct.name)} ${st ? `dans la phase « ${esc(st.label)} »` : `à ce moment`}. Jouez librement : faites préciser la situation (SAED) et exigez la reformulation des prescriptions.</div>`;
+      const dc = samu ? null : withDoc(ct).doc;
       return `<div class="cs">
-        ${samu ? `<div class="cs-h">2. Vous êtes le médecin régulateur <small>« Médecin régulateur, je vous écoute »</small></div>` : ``}
+        ${samu ? `<div class="cs-h">2. Vous êtes le médecin régulateur <small>« Médecin régulateur, je vous écoute »</small></div>` : `<div class="cs-h">Vous êtes ${esc((dc && dc.name) || ct.name)} <small>décrochez par « Allô ? » sans vous présenter${dc && dc.persona ? ` · ${esc(dc.persona)}` : ``}</small></div>`}
         <div class="cs-h">Doit entendre <small>touchez quand c'est dit</small></div>
         <div class="cs-hear">${L(c.hear).map((h, i) => `<button type="button" class="${heard[i] ? `on` : ``}" ${live ? `onclick="markHeard(${i})"` : `disabled`}>${heard[i] ? `✓` : `○`} ${esc(h)}</button>`).join(``)}</div>
         ${L(c.ask).length ? `<div class="cs-h">S'il manque des éléments, demander</div><ul>${L(c.ask).map((x) => `<li>${esc(x)}</li>`).join(``)}</ul>` : ``}
@@ -5494,7 +5572,7 @@
     function endCall(why) {
       if (!call) return;
       const was = call;
-      clearTimeout(was.noAns); clearTimeout(was.holdT);
+      clearTimeout(was.noAns); clearTimeout(was.holdT); clearTimeout(was.hangT);
       stopTone();
       iaStop();
       rtcClose();
@@ -5608,7 +5686,7 @@
 
     /* ---------- IA : consignes, voix du téléphone (mode classique) ---------- */
     function iaPrompts(c, mode) {
-      const ct = fullCt(c.contact), cfg = phaseCall(ct.id, c.cfgStep), ctx = ctxNow();
+      const ct = withDoc(fullCt(c.contact)), cfg = phaseCall(ct.id, c.cfgStep), ctx = ctxNow();
       if (c.cb) return { main: buildCallbackPrompt(ctx, cfg, ct, mode) };
       return buildCallPrompts(ctx, cfg, ct, mode);
     }
@@ -5679,7 +5757,7 @@
       const P = iaPrompts(call, `json`);
       call.sys = call.stage === `arm` ? P.arm : P.main;
       const nm = call.contact.name.replace(/\s*\(.*\)\s*/, ``);
-      const hello = call.stage === `arm` ? `SAMU, centre 15, j'écoute.` : `Allô, ${nm.charAt(0).toLowerCase() + nm.slice(1)}, je vous écoute.`;
+      const hello = call.stage === `arm` ? `SAMU, centre 15, j'écoute.` : isSamuCt(fullCt(call.contact)) ? `Médecin régulateur, je vous écoute.` : `Allô ?`;
       call.hist = [{ role: `user`, parts: [{ text: `(Le téléphone sonne, tu décroches.)` }] }, { role: `model`, parts: [{ text: JSON.stringify({ dire: hello, elements: [] }) }] }];
       iaSay(hello);
     }
@@ -5763,8 +5841,8 @@
       }
       reply = reply || `Oui ?`;
       if (call.hist[call.hist.length - 1].role === `user`) call.hist.push({ role: `model`, parts: [{ text: JSON.stringify(Object.assign({}, r, { dire: reply })) }] });
-      const hang = !!r.raccrocher && call.stage !== `arm`;
-      iaSay(reply, transfer ? iaTransfer : hang ? () => { setTimeout(() => { if (call && call.cid === cid) endCall(`hangup-ia`); }, 500); } : iaListen);
+      const hang = !!r.raccrocher && call.stage !== `arm` && (call.cb || call.unlocked || call.urg || (call.turns || 0) >= 14);
+      iaSay(reply, transfer ? iaTransfer : hang ? () => { setTimeout(() => { if (call && call.cid === cid) endCall(`hangup-ia`); }, 1800); } : iaListen);
     }
     /* IA du 15 (classique) : l'ARM met en attente puis passe le médecin régulateur (autre voix) */
     function iaTransfer() {
@@ -5957,7 +6035,7 @@
         return;
       }
       const sc = m.serverContent; if (!sc) return;
-      if (sc.inputTranscription && sc.inputTranscription.text) L.inTxt += sc.inputTranscription.text;
+      if (sc.inputTranscription && sc.inputTranscription.text) { L.inTxt += sc.inputTranscription.text; if (call && call.hangT && sc.inputTranscription.text.trim()) { clearTimeout(call.hangT); call.hangT = null; } }
       if (sc.outputTranscription && sc.outputTranscription.text) { if (!L.test) liveFlushIn(L); L.outTxt += sc.outputTranscription.text; }
       if (sc.modelTurn && sc.modelTurn.parts) {
         for (const p of sc.modelTurn.parts) if (p.inlineData && p.inlineData.data) { L.turnDone = false; if (!L.test) liveFlushIn(L); livePlay(L, p.inlineData.data, p.inlineData.mimeType); }
@@ -5983,14 +6061,21 @@
         L.after = `transfer`;
         return { ok: true, consigne: `Ne dis plus rien : l'appel passe en attente.` };
       }
-      if (name === `raccrocher`) { L.after = `hangup`; return { ok: true }; }
+      if (name === `raccrocher`) {
+        if (!call.cb && !call.unlocked && !call.urg && (call.turns || 0) < 14) return { ok: false, consigne: `Ne raccroche pas : tu n'as pas encore donné ta décision. Continue l'appel et pose ta prochaine question.` };
+        L.after = `hangup`; return { ok: true, consigne: `D'accord. Ne dis plus rien.` };
+      }
       return { ok: false, erreur: `fonction inconnue` };
     }
     function liveAfter(L) {
       const a = L.after; L.after = null;
       if (!call || call.cid !== L.cid) return;
       if (a === `transfer`) { liveClose(L); iaTransfer(); }
-      else if (a === `hangup`) { const cid = call.cid; setTimeout(() => { if (call && call.cid === cid && call.state === `live`) endCall(`hangup-ia`); }, 700); }
+      else if (a === `hangup`) {
+        /* v10 : on laisse 2,5 s à l'apprenant ; s'il reprend la parole, l'appel continue */
+        const cid = call.cid; clearTimeout(call.hangT);
+        call.hangT = setTimeout(() => { call && (call.hangT = null); if (call && call.cid === cid && call.state === `live`) endCall(`hangup-ia`); }, 2500);
+      }
     }
     function liveFail(L, why) {
       const wasReady = L.ready;
@@ -6016,7 +6101,7 @@
       let sys, voice, tools, kick;
       if (call.cb) { sys = P.main; voice = samu ? LIVE_VOICES.reg : LIVE_VOICES.med; tools = [`raccrocher`]; kick = `(Tu rappelles le centre de dialyse. On décroche : « Allô ? »)`; }
       else if (call.stage === `arm`) { sys = P.arm; voice = LIVE_VOICES.arm; tools = [`noter_element`, `transferer_au_regulateur`]; kick = `(Le téléphone sonne, tu décroches. Dis seulement : « SAMU, centre 15, j'écoute. »)`; }
-      else { sys = P.main; voice = samu ? LIVE_VOICES.reg : LIVE_VOICES.med; tools = [`noter_element`, `verifier_decision`, `raccrocher`]; kick = samu ? `(L'ARM te passe l'appel. Décroche et présente-toi en une phrase.)` : `(Le téléphone sonne, tu décroches. Présente-toi en une phrase : « Allô, ${nm.charAt(0).toLowerCase() + nm.slice(1)}, je vous écoute. »)`; }
+      else { sys = P.main; voice = samu ? LIVE_VOICES.reg : LIVE_VOICES.med; tools = [`noter_element`, `verifier_decision`, `raccrocher`]; kick = samu ? `(L'ARM te passe l'appel. Décroche et présente-toi en une phrase.)` : `(Le téléphone sonne, tu décroches. Dis seulement : « Allô ? », puis tais-toi et écoute. Ne donne pas ton nom.)`; }
       if (call.txt.length) sys += `\n\nCONVERSATION JUSQU'ICI${samu && call.stage === `reg` ? ` (d'abord avec l'ARM, qui t'a passé l'appel)` : ``} :\n${iaTranscript()}`;
       const got = Object.keys((call.stage === `arm` ? call.arm : call.heard) || {}).map((i) => Number(i) + 1);
       if (got.length && !call.cb) sys += `\n\nÉLÉMENTS DÉJÀ NOTÉS : ${got.join(`, `)}.`;
