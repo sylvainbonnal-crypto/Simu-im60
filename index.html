@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <meta name="theme-color" content="#0c1214">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <title>Simulateur EDAN iM60 — Urgences en hémodialyse (v11)</title>
+  <title>Simulateur EDAN iM60 — Urgences en hémodialyse (v12)</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@400;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
@@ -808,6 +808,32 @@
     .db-crm b { display: block; color: #fff; } .db-crm small { color: #9fb0bf; font-size: 13.5px; }
     .db-mine { white-space: pre-wrap; color: #fff; font-size: 20px; padding: 10px 12px; border-left: 4px solid #3ddc84; background: #10171d; }
     .db-msgs div { color: #fff; font-size: 18px; padding: 4px 0; }
+    /* ===== v12 ===== */
+    @keyframes koBlink { 0%,100% { opacity: 1; } 50% { opacity: .25; } }
+    .ck-line.blink { animation: koBlink 1.1s ease-in-out infinite; cursor: pointer; text-decoration: underline dotted; }
+    .ko-t { color: var(--warn); } .ko-t.blink { animation: koBlink 1.1s ease-in-out infinite; }
+    .btn.blink { animation: duePulse 1.4s ease-in-out infinite; }
+    .stg-dev { display: inline-flex; align-items: center; gap: 8px; margin: 2px 12px 2px 0; }
+    .stg-dev.ok { color: #3ddc84; }
+    .stg-dev.ko { color: #ff6b5e; animation: koBlink 1s ease-in-out infinite; }
+    .m-btn.sm { min-height: 30px; padding: 2px 10px; font-size: 13px; }
+    .stg-qrpop { display: flex; gap: 12px; align-items: center; margin-top: 8px; padding: 8px; background: #fff; border-radius: 4px; color: #111; }
+    .stg-qrpop small { color: #333; font-size: 13px; }
+    .ph-ct.test { opacity: .85; border-style: dashed; }
+    /* fenêtre d'appel réduite en pastille en haut quand une fenêtre d'action est ouverte (DSA, choc…) */
+    #view-remote .callov.top { top: calc(60px + env(safe-area-inset-top)); bottom: auto; }
+    #view-remote .callov.top.ringtop { left: 8px; right: 8px; max-height: 18vh; }
+    .callov.top { z-index: 95; }
+    /* scope : alarme acquittée (message gardé, son coupé) */
+    .al-box.ack { opacity: .8; animation: none !important; }
+    .al-box.ack::after { content: " ✓"; }
+    .al-box { cursor: pointer; }
+    .trow.four { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 5px; }
+    .tb.dim { opacity: .55; }
+    .sheet-note { padding: 8px 10px; border-radius: 10px; border: 1px solid var(--warn); background: rgba(232,185,84,.12); font-size: 14px; animation: ring .45s ease-in-out 2; }
+    .db-crm small { display: block; margin-top: 3px; } .db-crm small.ko { color: #ff9a8f; }
+    .o2-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .o2-grid .btn.sel { outline: 2px solid var(--ok); }
   </style>
 </head>
 <body>
@@ -986,6 +1012,7 @@
           <select id="live-nibpfail" onchange="setTarget('nibpFail', this.value==='1')"><option value="0">Mesurable</option><option value="1">Non mesurable (signal faible)</option></select></div>
       </div></details>
       <details class="fold" id="d-acr"><summary>Raccourcis arrêt cardiaque</summary><div>
+        <div class="lbl">Passage en arrêt sur le scope</div><div class="seg-r" id="d-pre"></div>
         <div class="g2">
           <button type="button" class="btn red" onclick="quick('vf')">FV</button>
           <button type="button" class="btn red" onclick="quick('vt')">TV sans pouls</button>
@@ -999,6 +1026,7 @@
           <button type="button" class="btn" onclick="forcePni()">Forcer une PNI</button>
           <button type="button" class="btn" onclick="sendCmd('PAUSE')">Pause alarme</button>
         </div>
+        <div class="lbl">Bip de la FC (QRS) sur le scope <span class="muted">— la touche Silence ne le coupe pas</span></div><div class="seg-r" id="d-qrs"></div>
         <div class="lbl">Mode PNI du scope</div><div class="seg-r" id="d-nibp"></div>
         <div class="lbl">Côté du brassard (à corriger si l'apprenant le déplace)</div><div class="seg-r" id="d-side"></div>
         <button type="button" class="btn" onclick="sendCmd('RESET_SETTINGS')">Remettre les réglages usine du scope</button>
@@ -1011,6 +1039,8 @@
         <button type="button" class="btn" onclick="requestSync()">Resynchroniser</button>
         <div class="muted">Relais : <span class="dot" id="remote-sync-dot" style="display:inline-block"></span> <span id="remote-sync-label">Connexion…</span></div>
         <div class="muted">Télécommande : <span id="wake-lbl">—</span></div>
+        <div class="muted" id="vib-lbl"></div>
+        <div class="g2"><button type="button" class="btn" onclick="testVib()">📳 Tester la vibration</button><button type="button" class="btn" onclick="togglePopBeep()">🔔 Bip à chaque fenêtre</button></div>
         <div class="muted">Le QR code et le PIN s'affichent sur la tablette tant que la programmation n'est pas validée, ou Menu › Maintenance (code 5008).</div>
       </div></details>
       <details class="fold" id="d-note"><summary>Note écrite</summary><div>
@@ -1085,6 +1115,8 @@
       <div id="call-oncall"></div>
       <div id="call-dev" class="muted"></div>
       <div class="row"><button type="button" class="btn grow" onclick="showQrSheet('phone')">QR téléphone d'appel</button><button type="button" class="btn grow" onclick="showQrSheet('doctor')">QR poste médecin</button></div>
+      <button type="button" id="btn-testcall" class="btn pri" onclick="testCall()">📞 Tester l'appel (faire sonner le téléphone d'appel)</button>
+      <div class="muted">Avant le lancement, on peut aussi appeler depuis le téléphone d'appel : « 🔧 Appel test » en bas de la liste. Rien n'est noté pour la simulation.</div>
     </div>
 
     <div class="card">
@@ -1115,9 +1147,9 @@
     <div id="pb-acts" class="pb-acts"></div>
 
     <div class="sec-lbl"><span>Pose des dispositifs</span><span>touchez pour valider</span></div>
-    <div class="trow six" id="row-sensors"></div>
-    <div class="sec-lbl"><span>Actions</span></div>
-    <div class="trow six" id="row-actions"></div>
+    <div class="trow" id="row-sensors"></div>
+    <div class="sec-lbl"><span>Gestes techniques</span></div>
+    <div class="trow four" id="row-actions"></div>
 
     <div class="chk-card">
       <div class="seg-r" id="chk-seg"></div>
@@ -1135,6 +1167,7 @@
       <div class="card"><h2>Bilan de la séance</h2><div id="db-summary"></div><div id="db-stats" class="stats"></div></div>
       <div class="card"><h2>Monitorage</h2><div class="muted">Allumage du scope, puis heure de chaque pose (validée dans l'onglet Simulation).</div><div id="db-monit"></div></div>
       <div class="card"><h2>Délais clés</h2><div id="db-delays"></div></div>
+      <div class="card"><h2>Appels (médecin, SAMU)</h2><div class="muted">Qui a été appelé, quand, durée, grille SAED automatique. Touchez une ligne pour lire la transcription (formateur seulement).</div><div id="db-calls"></div></div>
       <div class="card"><h2>Tensions mesurées</h2><div id="db-nibp"></div></div>
     </div>
 
@@ -1305,7 +1338,7 @@
     const CRM_GRID = [
       { id: `lead`, t: `Leadership & organisation`, ok: `Le leader s'annonce dès l'aggravation, reste en retrait des gestes, délègue nominativement.`, ko: `Pas de leader : tout le monde se précipite sur le même geste.` },
       { id: `com`, t: `Communication en boucle fermée`, ok: `1. L'émetteur nomme le destinataire (« Julie, tu… »). 2. Message court et chiffré (produit, dose, voie). 3. Le destinataire répète. 4. L'émetteur confirme (« oui »). 5. Le destinataire annonce « fait » quand c'est fait. Chiffres et rythme annoncés à voix haute.`, ko: `Ordres lancés « en l'air » (« il faut du calcium », « appelez quelqu'un ») : pas de destinataire, pas de répétition, pas de « fait ».` },
-      { id: `sit`, t: `Conscience de la situation`, ok: `Recul aux tournants critiques, synthèse toutes les 2-3 min (sait / craint / fait), alarmes du scope prises en compte.`, ko: `Effet tunnel : machine de dialyse ou perfusion au détriment de l'état du patient.` },
+      { id: `sit`, t: `Conscience de la situation — tunnelisation`, ok: `Recul aux tournants critiques (pause de 10 s), synthèse toutes les 2-3 min (sait / craint / fait), alarmes du scope prises en compte, hypothèse remise en question quand un signe nouveau apparaît.`, ko: `Tunnelisation (effet tunnel) : fixé sur la machine de dialyse, une perfusion, un seul geste ou une seule hypothèse (biais d'ancrage), au détriment de l'état global du patient.` },
       { id: `res`, t: `Utilisation des ressources`, ok: `Aide demandée tôt (collègues, renfort, médecin, 15), tâches réparties selon les compétences (IDE / AS), chariot, DSA, i-STAT et ECG 12 dérivations rapprochés dès les premiers signes.`, ko: `Alerte retardée (sous-estimation, peur de déranger), tout le monde sur le même geste, chariot resté dans le couloir.` },
       { id: `outils`, t: `Connaissance des outils`, ok: `Scope : lancer une PNI, mettre l'alarme en pause, lire le rythme. DSA : pose des électrodes, analyse, sécurité avant le choc. Chariot : savoir ce qu'il contient et où. Téléphone : numéros et protocoles du service connus.`, ko: `Hésitations sur le matériel : on cherche le bouton PNI, les électrodes du DSA, le calcium dans le chariot, le numéro à appeler.` }
     ];
@@ -1315,10 +1348,10 @@
       syn: [`En deux phrases : quelle était la situation ? Qu'est-ce qui s'est passé ?`, `Le leader (ou un apprenant) fait la synthèse : ce qu'on savait, ce qu'on craignait, ce qu'on a fait.`],
       emo: [`Comment vous sentez-vous ?`, `Qu'est-ce qui vous a le plus marqué ?`, `Un mot pour résumer la séance ?`],
       ana: [`Reprenons la chronologie : qu'avez-vous vu, compris, décidé ?`, `À quel moment avez-vous perçu la gravité ?`, `Qu'est-ce qui vous a aidés ? Qu'est-ce qui vous a gênés ?`],
-      crm: [`Qui était le leader ? Comment l'équipe le savait-elle ?`, `Communication en boucle fermée : les demandes avaient-elles un destinataire ? Ont-elles été répétées, puis annoncées « fait » ?`, `Ressources : quand avez-vous appelé à l'aide ? Comment les tâches ont-elles été réparties entre IDE et AS ?`, `Outils : le scope, le DSA, le chariot, le téléphone… avez-vous su vous en servir ? Qu'avez-vous cherché ?`],
+      crm: [`Qui était le leader ? Comment l'équipe le savait-elle ?`, `Tunnelisation : à quel moment avez-vous été « fixés » sur un geste, la machine ou une seule hypothèse ? Qui a pris du recul, et comment ?`, `Communication en boucle fermée : les demandes avaient-elles un destinataire ? Ont-elles été répétées, puis annoncées « fait » ?`, `Ressources : quand avez-vous appelé à l'aide ? Comment les tâches ont-elles été réparties entre IDE et AS ?`, `Outils : le scope, le DSA, le chariot, le téléphone… avez-vous su vous en servir ? Qu'avez-vous cherché ?`],
       msg: [`Quels sont les 2 ou 3 messages que vous retenez pour votre pratique ?`, `Que referiez-vous de la même façon ? Différemment ?`]
     };
-    const GUIDE_PARTS = [[`syn`, `1. Synthèse rapide de la situation`, `Ce qui s'est passé, en quelques phrases…`], [`emo`, `2. Réactions, émotions`, `Ce que disent les apprenants…`], [`ana`, `3. Analyse des faits (chronologie)`, `Points forts, écarts, causes…`], [`crm`, `4. CRM : leadership, communication, ressources, outils`, `Ce qui a marché, ce qui est à renforcer…`], [`msg`, `Pour finir : messages à retenir`, `2 ou 3 messages clés pour la pratique…`]];
+    const GUIDE_PARTS = [[`syn`, `1. Synthèse rapide de la situation`, `Ce qui s'est passé, en quelques phrases…`], [`emo`, `2. Réactions, émotions`, `Ce que disent les apprenants…`], [`ana`, `3. Analyse des faits (chronologie)`, `Points forts, écarts, causes…`], [`crm`, `4. CRM : leadership, communication, tunnelisation, ressources, outils`, `Ce qui a marché, ce qui est à renforcer…`], [`msg`, `Pour finir : messages à retenir`, `2 ou 3 messages clés pour la pratique…`]];
 
     /* ===== Scénarios fournis par l'éditeur (format editeur.html) ===== */
     /* Scénarios fournis au départ : fiches PDF du Module 2 + version 5 du simulateur */
@@ -1495,28 +1528,29 @@
         objTech: [`Installer et oxygéner un patient en détresse respiratoire`, `Repérer un SCA sur le scope et l'ECG 12 dérivations`, `Gérer un arrêt cardiaque en cours de séance (arrêt machine, choc DAE)`],
         objCrm: [`Réévaluer et sortir du biais d'ancrage`, `Appel précoce du médecin et du SAMU`, `Gestion de l'entourage`],
         sensorsStart: { ecg: false, spo2: false, cuff: false, temp: false },
-        trainer: { roles: ROLES_DEFAUT.slice(), dsa: `FV (P5) : choc indiqué ; RACS après le 1er choc.`, notes: `` },
+        trainer: { roles: ROLES_DEFAUT.slice(), dsa: `FV (P5) : choc indiqué à chaque analyse. FV réfractaire : RACS après le 3e choc et l'adrénaline 1 mg (consigne du 15). RACS plus tôt possible (✋ sur la télécommande).`, notes: `` },
         briefing: { situation: `Mardi, ouverture de la salle. Un patient est assis dans le sas d'accueil, il respire mal. L'ambulancier vous appelle.`, points: BRIEF_POINTS_DEFAUT.slice() },
         steps: [
-          { id: `p1`, label: `Détresse respiratoire (OAP)`, cue: `Tachycardie sinusale, HVG. SpO2 88 % à l'air. Quand l'O2 est posé, touchez « Oxygène 4 L/min » : la SpO2 monte à 92 % en 1 min.`, hr: 100, spo2: 88, rr: 30, sys: 180, dia: 100, temp: 36.6, rhythm: `lvh`, resp: `shallow`, ectopy: `none`, nibpFail: false, rosc: false, trans: 0,
+          { id: `p1`, label: `Détresse respiratoire (OAP)`, cue: `Tachycardie sinusale, HVG. SpO2 88 % à l'air. Quand l'O2 est posé, touchez 🫁 O2 et choisissez le débit : 4 L/min → SpO2 ≈ 92 % en 1 min (15 L/min → ≈ 95 %).`, hr: 100, spo2: 88, rr: 30, sys: 180, dia: 100, temp: 36.6, rhythm: `lvh`, resp: `shallow`, ectopy: `none`, nibpFail: false, rosc: false, trans: 0,
             tech: [`Position assise`, `Oxygène`, `Appel médecin`], crm: [`Leader désigné`, `Proche pris en charge`],
-            actions: [{ label: `Oxygène 4 L/min`, times: 1, to: ``, delay: 0, set: { spo2: 92 }, setTrans: 60 }],
+            actions: [{ label: `Oxygène 4 L/min`, times: 1, to: ``, delay: 0 }],
             call: { on: true, who: `nephro`, hear: [`Identité de l'appelant et du patient`, `Détresse respiratoire : SpO2 88 % à l'air (92 % sous O2 si déjà posé)`, `PA 180/100, FC 100, FR 30`, `+5 kg au-dessus du poids sec, œdèmes, crépitants`, `BPCO`], ask: [`Il a pris combien par rapport à son poids sec ?`, `Il sature à combien ? Il est sous oxygène ?`, `Et la tension ?`], answer: `C'est un OAP de surcharge. Vous le laissez assis sous oxygène et vous le branchez tout de suite pour une ultrafiltration seule : 1,5 litre en 1 heure. Surveillance de la tension rapprochée pendant l'UF.`, presc: [`Position assise`, `Oxygène 4 L/min, objectif SpO2 88 à 92 % (BPCO)`, `Branchement en UF seule : 1,5 L en 1 h`, `Surveillance tensionnelle toutes les 15 min pendant l'UF`, `Rappeler si la SpO2 ne remonte pas ou si la tension baisse`], avoid: `Pour toi, c'est un OAP de surcharge et rien d'autre : ne parle pas de cause cardiaque ni de douleur thoracique, ne demande pas d'ECG. C'est une UF seule, pas une dialyse classique.` },
             next: [{ label: `Sous O2, UF seule 1,5 L / 1 h`, to: `p2` }] },
-          { id: `p2`, label: `Sous O2 4 L/min, UF seule`, cue: `Branché en UF seule, 1,5 L en 1 h. PNI toutes les 15 min.`, hr: 99, spo2: 92, rr: 30, sys: 177, dia: 100, temp: 36.7, rhythm: `lvh`, resp: `shallow`, ectopy: `none`, nibpFail: false, rosc: false, trans: 30,
+          { id: `p2`, label: `Sous O2 4 L/min, UF seule`, cue: `Branché en UF seule, 1,5 L en 1 h. PNI toutes les 15 min. SpO2 92 % sous 4 L/min (elle baisse si l'O2 est retiré).`, o2: 4, hr: 99, spo2: 92, rr: 30, sys: 177, dia: 100, temp: 36.7, rhythm: `lvh`, resp: `shallow`, ectopy: `none`, nibpFail: false, rosc: false, trans: 30,
             tech: [`Branchement en UF seule (1,5 L en 1 h)`, `Surveillance tensionnelle toutes les 15 min`], crm: [`Réévaluation régulière`],
             next: [{ label: `Douleur thoracique — ST+`, to: `p3` }] },
-          { id: `p3`, label: `Douleur thoracique — ST+`, cue: `Douleur rétrosternale constrictive, irradiant mâchoire et bras gauche. ST+ inférieur.`, hr: 99, spo2: 92, rr: 30, sys: 177, dia: 100, temp: 36.8, rhythm: `stemi`, resp: `shallow`, ectopy: `none`, nibpFail: false, rosc: false, trans: 60,
+          { id: `p3`, label: `Douleur thoracique — ST+`, cue: `Douleur rétrosternale constrictive, irradiant mâchoire et bras gauche. ST+ inférieur : l'alarme « ST-II HAUT » sonne sur le scope (5 dérivations posées) ; l'heure où l'apprenant l'acquitte est notée.`, o2: 4, hr: 99, spo2: 92, rr: 30, sys: 177, dia: 100, temp: 36.8, rhythm: `stemi`, resp: `shallow`, ectopy: `none`, nibpFail: false, rosc: false, trans: 60,
             tech: [`ECG 12D dès la douleur`, `Arrêt UF / clampage`, `Appel SAMU (15)`, `DAE posé`], crm: [`Sortie du biais d'ancrage`],
-            call: { on: true, who: `samu`, hear: [`Adresse et service`, `Douleur thoracique constrictive irradiant`, `Sus-décalage ST inférieur`, `Patient en dialyse, UF arrêtée`, `Constantes actuelles`], ask: [`Depuis quand la douleur ?`, `Vous avez un ECG ? Qu'est-ce qu'il montre ?`, `Le DSA est à côté ?`], answer: `Syndrome coronarien avec sus-décalage. Le SMUR part. Arrêtez l'ultrafiltration, électrodes du DSA posées, ne le laissez pas seul.`, presc: [`Arrêt de l'UF`, `Électrodes du DSA posées`, `Oxygène`, `Préparer l'ECG pour l'équipe`], avoid: `Ne pas prescrire d'anticoagulant ou d'antiagrégant par téléphone sans l'avis du néphrologue.` },
+            call: { on: true, who: `samu`, hear: [`Adresse et service`, `Douleur thoracique constrictive irradiant`, `Sus-décalage ST inférieur`, `Patient en dialyse, UF arrêtée`, `Constantes actuelles`], ask: [`Depuis quand la douleur ?`, `Vous avez un ECG ? Qu'est-ce qu'il montre ?`, `Le DSA est à côté ?`], answer: `Syndrome coronarien avec sus-décalage. Le SMUR part. Arrêtez l'ultrafiltration, électrodes du DSA posées, ne le laissez pas seul.`, presc: [`Arrêt de l'UF`, `Électrodes du DSA posées`, `Oxygène`, `Préparer l'ECG pour l'équipe`, `S'il fait un arrêt : massage, DSA, et si la FV persiste après les chocs (choc réfractaire) : adrénaline 1 mg IV`], avoid: `Ne pas prescrire d'anticoagulant ou d'antiagrégant par téléphone sans l'avis du néphrologue.` },
             next: [{ label: `ESV menaçantes`, to: `p4` }] },
-          { id: `p4`, label: `ESV menaçantes`, cue: `ESV fréquentes : électrodes DAE, chariot au lit.`, hr: 106, spo2: 92, rr: 30, sys: 150, dia: 90, temp: 36.8, rhythm: `stemi`, resp: `shallow`, ectopy: `freq`, nibpFail: false, rosc: false, trans: 15,
+          { id: `p4`, label: `ESV menaçantes`, cue: `ESV fréquentes : électrodes DAE, chariot au lit.`, o2: 4, hr: 106, spo2: 92, rr: 30, sys: 150, dia: 90, temp: 36.8, rhythm: `stemi`, resp: `shallow`, ectopy: `freq`, nibpFail: false, rosc: false, trans: 15,
             tech: [`Chariot au lit`], crm: [`Chariot + DAE rapprochés`],
             next: [{ label: `FV — arrêt cardiaque`, to: `p5` }] },
-          { id: `p5`, label: `FV — arrêt cardiaque`, cue: `Perte de connaissance brutale. Arrêt machine, restitution si possible sinon clampage, MCE, choc DAE sans délai.`, hr: 0, spo2: 92, rr: 0, sys: 0, dia: 0, temp: 36.8, rhythm: `vf`, resp: `agonal`, ectopy: `none`, nibpFail: false, rosc: false, trans: 0,
-            tech: [`Arrêt machine / restitution ou clampage`, `MCE débuté`, `Choc délivré sans délai`], crm: [`Leader en retrait des gestes`],
-            actions: [{ label: `Choc DSA délivré`, times: 1, to: `p6`, delay: 5 }],
-            next: [{ label: `RACS après choc`, to: `p6` }] },
+          { id: `p5`, label: `FV — arrêt cardiaque`, cue: `Perte de connaissance brutale. Arrêt machine, restitution si possible sinon clampage, MCE, choc DAE sans délai. FV réfractaire : RACS quand 3 chocs ont été délivrés ET l'adrénaline 1 mg faite (consigne du 15). Pour un RACS plus tôt : ✋ « RACS après le 1er choc ».`, hr: 0, spo2: 92, rr: 0, sys: 0, dia: 0, temp: 36.8, rhythm: `vf`, resp: `agonal`, ectopy: `none`, nibpFail: false, rosc: false, trans: 0,
+            tech: [`Arrêt machine / restitution ou clampage`, `MCE débuté`, `Choc délivré sans délai`, `Appel du 15 : arrêt cardiaque annoncé`, `Adrénaline 1 mg après le 3e choc (FV réfractaire)`], crm: [`Leader en retrait des gestes`, `Boucle fermée sur le choc et l'adrénaline`],
+            actions: [{ label: `Choc DSA délivré`, times: 3, to: `p6`, delay: 5, needs: [`Adrénaline 1 mg`] }, { label: `Adrénaline 1 mg`, times: 1, to: ``, delay: 0 }],
+            call: { on: true, who: `samu`, hear: [`Adresse et service`, `Arrêt cardiaque, heure de l'arrêt`, `FV au scope, chocs délivrés (combien)`, `Massage en cours`, `Contexte : douleur thoracique, ST+ inférieur`], ask: [`À quelle heure a eu lieu l'arrêt ?`, `Combien de chocs ont été délivrés ?`, `Le massage est commencé ?`], answer: `Le SMUR est en route. Massage sans interruption, relais toutes les 2 minutes, suivez le DSA. Si la fibrillation persiste après le troisième choc (choc réfractaire) : adrénaline 1 milligramme en intraveineuse, puis toutes les 3 à 5 minutes.`, presc: [`Massage cardiaque sans interruption, relais toutes les 2 min`, `Suivre les consignes du DSA`, `FV réfractaire (persiste après le 3e choc) : adrénaline 1 mg IV, puis toutes les 3 à 5 min`], avoid: `Ne pas faire arrêter le massage pour répondre au téléphone : demander qu'une autre personne garde le combiné. Ne pas parler d'amiodarone ni d'autre médicament.` },
+            next: [{ label: `RACS après le 1er choc`, to: `p6` }] },
           { id: `p6`, label: `RACS après choc`, cue: `Retour d'une activité circulatoire, ST+ résiduel. Transfert coronarographie.`, hr: 96, spo2: 94, rr: 20, sys: 102, dia: 64, temp: 36.8, rhythm: `stemi`, resp: `normal`, ectopy: `none`, nibpFail: false, rosc: true, trans: 15,
             tech: [`Transmissions au SAMU`], crm: [],
             next: [] }
@@ -1531,8 +1565,8 @@
           doctor: `Toujours faire reformuler les prescriptions.` },
         documents: [],
         debrief: {
-          questions: [`Comment l'équipe s'est-elle réorganisée quand l'OAP s'est enrichi d'une douleur thoracique ?`, `Quels éléments du scope ont permis d'identifier le SCA avant l'arrêt cardiaque ?`, `Comment avez-vous géré l'entourage en panique pendant la réanimation ?`],
-          messages: []
+          questions: [`Comment l'équipe s'est-elle réorganisée quand l'OAP s'est enrichi d'une douleur thoracique ?`, `Quels éléments du scope ont permis d'identifier le SCA avant l'arrêt cardiaque ? Qui a vu l'alarme ST, qui l'a acquittée, qu'en a-t-on fait ?`, `Quel débit d'oxygène, pour quel objectif de SpO2 chez ce patient BPCO ?`, `Comment avez-vous géré l'entourage en panique pendant la réanimation ?`],
+          messages: [`Une alarme ST qu'on acquitte doit déclencher une action : ECG 12 dérivations, appel.`, `FV réfractaire (après le 3e choc) : adrénaline 1 mg IV, sans interrompre le massage.`]
         }
       },
       {
@@ -1854,7 +1888,8 @@
         `Numéro de rappel : tu ne demandes pas le numéro (il s'affiche sur ton écran). Tu demandes seulement : « Est-ce que je peux vous rappeler sur ce numéro ? »`,
         T(ctx.prev) ? `L'équipe a déjà appelé le 15 pour ce patient pendant cette séance. Si l'appelant le dit, tu retrouves le dossier (« Oui, je vois le dossier »), tu vérifies juste l'adresse et ce qui a changé, puis tu passes le médecin sans tout redemander.` : ``,
         `Si l'appelant se lance dans les détails médicaux, recentre-le poliment (« D'accord, je note. Vous êtes où exactement ? ») : les détails sont pour le médecin.`,
-        `Si le patient ne répond pas et ne respire pas normalement : dis que tu engages tout de suite une équipe SMUR, demande de commencer le massage cardiaque et d'apporter le défibrillateur, puis passe le médecin sans attendre le reste.`,
+        /* v12 : « arrêt cardiaque » prononcé = passage immédiat au médecin régulateur, dans tous les scénarios */
+    `ARRÊT CARDIAQUE — RÈGLE PRIORITAIRE : dès que l'appelant dit « arrêt cardiaque » (ou « arrêt », « il ne respire plus », « il ne répond plus et ne respire pas »), tu ne poses plus AUCUNE question, même pas l'adresse. Tu dis seulement : « J'engage le SMUR tout de suite. Commencez le massage cardiaque. Je vous passe le médecin régulateur, ne quittez pas. » puis ${LV ? `tu appelles aussitôt la fonction transferer_au_regulateur` : `tu mets « transfert » à true`}.`,
         LV ? `Dès que tu as au moins l'adresse, l'accord pour rappeler sur ce numéro et le motif, dis : « Je vous passe le médecin régulateur, ne quittez pas. » puis appelle la fonction transferer_au_regulateur et tais-toi.`
           : `Dès que tu as au moins l'adresse, l'accord pour rappeler sur ce numéro et le motif, dis : « Je vous passe le médecin régulateur, ne quittez pas. » et mets « transfert » à true.`,
         T(ctx.address) ? `Adresse réelle du centre (vérifie que l'appelant la donne précisément, fais-la préciser sinon) : ${T(ctx.address)}` : ``
@@ -1870,7 +1905,8 @@
         `4. ${decide}`,
         `5. Annonce de la décision, dans cet ordre : le moyen engagé et le délai (par exemple « J'engage une équipe SMUR, elle sera chez vous dans une vingtaine de minutes »), puis les consignes d'attente une par une, puis « Répétez-moi ce que vous allez faire ». Tu corriges si la reformulation est fausse ou incomplète.`,
         `6. ${bye.replace(`(« Rappelez-moi si ça ne s'améliore pas ou si quelque chose change. »)`, `(« Vous restez près de lui, vous rappelez le 15 immédiatement si ça change. »)`)}`,
-        `À tout moment, si l'appelant décrit un arrêt cardiaque, tu engages le SMUR tout de suite, tu fais masser sans interruption et tu ${urg}.`
+        `À tout moment, si l'appelant décrit un arrêt cardiaque, tu engages le SMUR tout de suite, tu fais masser sans interruption et tu ${urg}.`,
+    `Si l'ARM t'a passé un arrêt cardiaque très vite, sans l'adresse : ta première question est l'adresse exacte (« Vous êtes où exactement ? »), puis tu continues.`
       ].concat(body, know, prev, common).join(`\n`);
       return { arm, main };
     }
@@ -1935,7 +1971,7 @@
         id: s.id, label: s.label || `Phase`, cue: s.cue || ``,
         hr: +s.hr || 0, spo2: +s.spo2 || 0, rr: +s.rr || 0, sys: +s.sys || 0, dia: +s.dia || 0, temp: s.temp === `` || s.temp == null ? 37 : +s.temp,
         rhythm: s.rhythm || `sinus`, resp: s.resp || `normal`, ectopy: s.ectopy || `none`, nibpFail: !!s.nibpFail, rosc: !!s.rosc, trans: +s.trans || 0,
-        silence: s.silence || ``,
+        silence: s.silence || ``, o2: s.o2 === `` || s.o2 == null ? null : +s.o2 || 0,
         actions: (s.actions || []).filter((a) => String(a.label || ``).trim()).map((a) => Object.assign({ label: String(a.label).trim(), times: Math.max(1, +a.times || 1), to: a.to || ``, delay: +a.delay || 0 }, a.kind === `call` ? { kind: `call`, who: a.who } : { needs: L(a.needs) }, actEffect(a))),
         next: (s.next || []).filter((n) => n.to).map((n) => ({ label: String(n.label || ``).trim() || `Phase suivante`, to: n.to })),
         calls: (s.calls || []).filter((c) => c && c.who)
@@ -2001,7 +2037,7 @@
       sameArm: false,
       nibpStart: { mode: `manual`, interval: 300 },
       patient: { bed: `LIT 04`, name: `PATIENT` },
-      brief: ``, briefIdx: 0, doc: -1, actCnt: {},
+      brief: ``, briefIdx: 0, doc: -1, actCnt: {}, o2: { flow: 0, at: 0 },
       team: { staff: {}, learners: [] },
       call: { mode: `remote`, tel: `` }
     };
@@ -2582,7 +2618,7 @@
       rTimes: [], pvcTimes: [], pulsePeaks: [], breathStarts: [], params: rhythmParams(`sinus`), morph: null, rhythmId: `sinus`,
       shockAt: -10, lastTrendAt: 0
     };
-    const disp = { hr: null, spo2: null, pr: null, rr: null, pi: null, st1: null, st2: null, spo2s: 98, jitter: 0, apnea: false, asys: false, wk: null, wkT: 0 };
+    const disp = { hr: null, spo2: null, pr: null, rr: null, pi: null, st1: null, st2: null, spo2s: 98, jitter: 0, apnea: false, asys: false, wk: null, wkT: 0, o2d: 0, o2n: 0 };
 
     /* ---------- Transitions des constantes cibles ---------- */
     function startTransition(durSec) {
@@ -2607,11 +2643,35 @@
       for (const key of Object.keys(m.to)) out[key] = lerp(m.from[key], m.to[key], k);
       return out;
     }
-    function setRhythm(id, durSec) {
+    /* v12 : passage en arrêt progressif (30 s par défaut) avec troubles du rythme précurseurs :
+       vers FV / TV : ESV de plus en plus fréquentes, bigéminisme, FC qui monte ; vers asystolie / AESP : bradycardie qui s'aggrave, pauses. */
+    const ARREST_RHY = new Set([`vf`, `vf_fine`, `vt`, `asystole`, `pea`]);
+    function preStart(to, dur) {
+      const kind = to === `asystole` || to === `pea` ? `brady` : `tachy`;
+      eng.pre = { to, t0: eng.t, dur, kind, hr0: Math.max(live.hr || 70, 30), sys0: live.sys, dia0: live.dia };
+      monEvent(`system`, `Troubles du rythme précurseurs (${Math.round(dur)} s) avant : ${(RHYTHMS[to] || {}).label || to}`);
+    }
+    function preTick() {
+      const P = eng.pre; if (!P) return;
+      const k = clamp((eng.t - P.t0) / P.dur, 0, 1);
+      if (P.kind === `brady`) { live.hr = P.hr0 * (1 - 0.6 * k); live.sys = P.sys0 * (1 - 0.45 * k); live.dia = P.dia0 * (1 - 0.45 * k); }
+      else { live.hr = P.hr0 * (1 + 0.25 * k); live.sys = P.sys0 * (1 - 0.25 * k); live.dia = P.dia0 * (1 - 0.25 * k); }
+      if (k >= 1) { eng.pre = null; setRhythm(P.to, 0); startTransition(0); monEvent(`system`, `Arrêt cardiaque au scope : ${(RHYTHMS[P.to] || {}).label || P.to}`); }
+    }
+    function preEctopy() {
+      const P = eng.pre; if (!P) return null;
+      const k = (eng.t - P.t0) / P.dur;
+      if (P.kind === `brady`) return k > 0.5 ? `pause` : `none`;
+      return k < 0.35 ? `freq` : k < 0.7 ? `bigem` : `salvo`;
+    }
+    function setRhythm(id, durSec, initial) {
       if (!RHYTHMS[id]) id = `sinus`;
       const prev = RHYTHMS[eng.rhythmId];
       const next = RHYTHMS[id];
       const target = rhythmParams(id);
+      /* v12 : RACS = retour progressif du pouls et de la SpO2 ; changements de morphologie sur 30 s par défaut */
+      if (!initial && !prev.pulse && next.pulse) { eng.roscAt = eng.t; disp.spo2s = Math.min(disp.spo2s, 72 + Math.random() * 8); }
+      if (!initial && prev.mode === `beats` && next.mode === `beats` && sim.rhyPre !== 0) durSec = Math.max(durSec || 0, 30);
       if (next.mode === `beats` && prev.mode === `beats` && durSec > 0) {
         eng.morph = { start: eng.t, dur: durSec, from: Object.assign({}, paramsAt(eng.t)), to: target };
       } else eng.morph = null;
@@ -2637,11 +2697,17 @@
         if (r.irregular) rr *= 0.62 + Math.random() * 0.76; else rr *= 1 + randn() * 0.012;
         const pulse = hasPulse();
         eng.beats.push({ t0, rr, p, pvc: false, pulse, amp: 1 });
-        const ect = sim.t.ectopy || `none`;
+        const ect = preEctopy() || sim.t.ectopy || `none`;
         const allowPvc = ![`vt`, `vt_pulse`, `pea`].includes(eng.rhythmId);
         let pvc = false;
+        if (ect === `pause` && Math.random() < 0.3) { eng.nextBeatT = t0 + rr * (2 + Math.random()); continue; }
+        if (ect === `salvo` && allowPvc && Math.random() < 0.35) {        // salves d'ESV (2 à 4)
+          const n = 2 + Math.floor(Math.random() * 3);
+          for (let j = 0; j < n; j++) eng.beats.push({ t0: t0 + rr * 0.55 + j * 0.36, rr: 0.36, p: Object.assign({}, PVC_P, { pr: p.pr }), pvc: true, pulse, amp: 0.25 });
+          eng.nextBeatT = t0 + rr * 0.55 + n * 0.36 + rr * 1.2; continue;
+        }
         if (allowPvc) {
-          if (ect === `bigem`) pvc = true;
+          if (ect === `bigem` || ect === `salvo`) pvc = true;
           else if (ect === `freq`) pvc = Math.random() < 0.2;
           else if (ect === `rare`) pvc = Math.random() < 0.05;
         }
@@ -2716,9 +2782,20 @@
       const ph = 2 * Math.PI * (4.7 * t + 0.35 * Math.sin(2 * Math.PI * 0.4 * t)) + li * 0.9;
       return A * lf * env * (0.55 * Math.sin(ph) + 0.25 * Math.sin(2.1 * ph + 0.8 * Math.sin(t * 1.7)) + 0.12 * Math.sin(3.3 * ph + 2));
     }
+    /* v12 : massage à 100-120/min avec variations (le rythme dérive, accélère avec la fatigue) ; relais = 2 à 3 s sans compression */
+    const cpr = { ph: 0, rate: 108, drift: 0, relayUntil: 0, relayAt: 0 };
+    function cprAdvance(dt) {
+      if (!sim.artifacts.cpr) { cpr.ph = 0; return; }
+      if ((sim.cprRelayAt || 0) !== cpr.relayAt) { cpr.relayAt = sim.cprRelayAt || 0; if (cpr.relayAt && Date.now() - cpr.relayAt < 8000) { cpr.relayUntil = eng.t + 2.2 + Math.random() * 1.2; cpr.rate = 102 + Math.random() * 8; } }
+      cpr.drift += (-cpr.drift / 6) * dt + 2.2 * Math.sqrt(Math.min(dt, 0.5)) * randn();
+      cpr.rate = clamp(cpr.rate + 0.25 * dt + 0.02 * cpr.drift, 96, 124);       // dérive lente vers le haut (fatigue)
+      if (eng.t >= cpr.relayUntil) cpr.ph += dt * (cpr.rate + 2 * cpr.drift) / 60;
+    }
+    const cprOn = () => sim.artifacts.cpr && eng.t >= cpr.relayUntil;
     function cprWave(t) {
-      const per = 60 / 110;
-      const u = (t % per) / per;
+      if (!cprOn()) return 0;
+      const ph = cpr.ph + (t - eng.t) * cpr.rate / 60;
+      const u = ph - Math.floor(ph);
       return 1.1 * gauss(u, 0.18, 0.07) - 0.35 * gauss(u, 0.45, 0.12);
     }
     const LEADS = [`I`, `II`, `III`, `aVR`, `aVL`, `aVF`, `V5`];
@@ -2754,7 +2831,9 @@
       if (ds >= 0 && ds < 2.2) v = ds < 0.06 ? 4 : v * clamp(ds / 2.2, 0, 1) - 1.4 * Math.exp(-(ds - 0.06) / 0.4);
       return v;
     }
-    function perfusion() { return clamp((live.sys - 35) / 85, 0, 1.15); }
+    /* v12 : après un RACS, la perfusion (courbe et SpO2) revient progressivement (≈ 40 s) */
+    const roscRamp = () => (eng.roscAt == null ? 1 : clamp((eng.t - eng.roscAt) / 40, 0, 1));
+    function perfusion() { return clamp((live.sys - 35) / 85, 0, 1.15) * roscRamp(); }
     function plethShape(u) { return gauss(u, 0.2, 0.075) + 0.38 * gauss(u, 0.5, 0.09) - 0.10 * gauss(u, 0.40, 0.03) + 0.12 * gauss(u, 0.68, 0.12); }
     function plethSample(t) {
       if (!sim.sensors.spo2) return 0;
@@ -2811,6 +2890,7 @@
         if (eng.nextPT < t) eng.nextPT = t + 0.2;
       }
       stepTransition();
+      const cph0 = cpr.ph; cprAdvance(dt); preTick();
       scheduleBeats(t + 0.4);
       schedulePWaves(t + 0.4);
       scheduleBreaths(t + 0.4);
@@ -2823,10 +2903,7 @@
           if (pk > prevT && pk <= t && sim.sensors.spo2 && !mon.occluded && perfusion() > 0.06) eng.pulsePeaks.push(pk);
         }
       }
-      if (sim.artifacts.cpr && sim.sensors.spo2) {
-        const per = 60 / 110;
-        if (Math.floor(t / per) !== Math.floor(prevT / per) && Math.random() < 0.5) eng.pulsePeaks.push(t);
-      }
+      if (cprOn() && sim.sensors.spo2 && Math.floor(cpr.ph) !== Math.floor(cph0) && Math.random() < 0.92) eng.pulsePeaks.push(t);
       for (const b of eng.breaths) if (b.t0 > prevT && b.t0 <= t) eng.breathStarts.push(b.t0);
 
       const old = t - 6;
@@ -2846,6 +2923,25 @@
       return s / (a.length - 1);
     }
 
+    /* ---------- v12 : oxygène → SpO2 ----------
+       La SpO2 de la phase est celle « à l'air » (ou sous le débit indiqué dans la phase : champ o2, ou « O2 4 L » dans son nom).
+       Gain = 62 % du déficit (100 − SpO2 à l'air) × (1 − e^(−débit / 4,5)) : rendement décroissant, plafond selon l'état du patient.
+       Ex. : 88 % à l'air → 4 L ≈ 92 %, 15 L ≈ 95 % ; 98 % à l'air → 99 % au mieux. Montée ≈ 1 min, descente ≈ 2 min. */
+    const O2F = (f) => 1 - Math.exp(-(+f || 0) / 4.5);
+    function stepO2(st) {
+      if (!st) return 0;
+      if (st.o2 != null && st.o2 !== ``) return +st.o2 || 0;
+      const m = /\bO2\b[^0-9]{0,12}(\d+(?:[.,]\d+)?)\s*L/i.exec(st.label || ``);
+      return m ? parseFloat(m[1].replace(`,`, `.`)) : 0;
+    }
+    function o2Gain(base, flow, inc) {
+      const fi = O2F(inc), air = (base - 62 * fi) / (1 - 0.62 * fi);
+      return 0.62 * Math.max(0, 100 - air) * (O2F(flow) - fi);
+    }
+    function o2Target() {
+      const st = (scenarioById(sim.scenarioId).steps || [])[sim.stepIdx];
+      return o2Gain(clamp(live.spo2, 40, 100), (sim.o2 || {}).flow || 0, stepO2(st));
+    }
     /* ---------- Valeurs numériques affichées (comme le ferait le moniteur) ---------- */
     function computeDisplay(dt) {
       const t = eng.t;
@@ -2861,23 +2957,42 @@
       // SpO2 / PR
       const lastPk = eng.pulsePeaks.length ? eng.pulsePeaks[eng.pulsePeaks.length - 1] : -99;
       const spo2Valid = sim.sensors.spo2 && t - lastPk < 5;
-      const k = 1 - Math.exp(-dt / 4);
+      const k = 1 - Math.exp(-dt / (roscRamp() < 1 || (eng.roscAt != null && eng.t - eng.roscAt < 90) ? 18 : 4));
       disp.spo2s += (live.spo2 - disp.spo2s) * k;
       disp.jitter -= dt;
       if (disp.jitter <= 0) { disp.jitter = 2.5 + Math.random() * 3; disp.jit = perfusion() < 0.4 ? Math.round(randn() * 1.2) : 0; }
-      if (spo2Valid) {
-        disp.spo2 = clamp(Math.round(disp.spo2s + (disp.jit || 0)), 0, 100);
+      /* v12 : effet de l'oxygène (progressif) + SpO2 qui fluctue toujours un peu (processus lent, ±1 à ±2 %) */
+      const o2t = o2Target();
+      disp.o2d += (o2t - disp.o2d) * (1 - Math.exp(-dt / (o2t > disp.o2d ? 22 : 38)));
+      const sd = disp.spo2s + disp.o2d >= 96 ? 0.5 : 0.8, tauN = 8;
+      disp.o2n += (-disp.o2n / tauN) * dt + sd * Math.sqrt(2 * Math.min(dt, 0.5) / tauN) * randn();
+      disp.o2n = clamp(disp.o2n, -2.5, 2.5);
+      if (spo2Valid && !hasPulse()) {
+        /* v12 : pendant le massage (pas de pouls propre) : valeur basse et instable, pouls = fréquence des compressions */
+        disp.cprT = (disp.cprT || 0) - dt;
+        if (disp.cprT <= 0) { disp.cprT = 1.5 + Math.random() * 2; disp.cprS = Math.random() < 0.25 ? null : clamp(Math.round(66 + randn() * 7), 50, 86); }
+        disp.spo2 = disp.cprS == null ? null : disp.cprS;
+        const mi = meanInterval(eng.pulsePeaks, 4);
+        disp.pr = mi ? Math.round(60 / mi) : null;
+        disp.pi = +(0.05 + Math.random() * 0.1).toFixed(2);
+      } else if (spo2Valid) {
+        disp.spo2 = clamp(Math.round(disp.spo2s + disp.o2d + disp.o2n + (disp.jit || 0)), 0, 100);
         const mi = meanInterval(eng.pulsePeaks, 4);
         disp.pr = mi ? Math.round(60 / mi) : null;
         disp.pi = +(0.15 + 4.5 * Math.pow(perfusion(), 1.4)).toFixed(perfusion() < 0.25 ? 2 : 1);
       } else { disp.spo2 = null; disp.pr = null; disp.pi = null; }
       disp.spo2NoPulse = sim.sensors.spo2 && !spo2Valid && t > 6;
       // Signal SpO2 faible : valeurs instables, parfois absentes, souvent fausses
-      if (sim.artifacts.weak && sim.sensors.spo2) {
+      if (sim.artifacts.weak && sim.sensors.spo2 && !hasPulse() && !cprOn()) {
+        /* v12 : signal faible + arrêt cardiaque sans massage : aucun pouls, aucune valeur */
+        disp.spo2 = null; disp.pr = null; disp.pi = null; disp.spo2NoPulse = t > 6; disp.wk = null;
+      } else if (sim.artifacts.weak && sim.sensors.spo2) {
         disp.wkT -= dt;
         if (disp.wkT <= 0 || !disp.wk) {
           disp.wkT = 1.2 + Math.random() * 1.6;
-          disp.wk = {
+          const arrest = !hasPulse();
+          if (arrest) disp.wk = { spo2: Math.random() < 0.45 ? null : clamp(Math.round(62 + Math.random() * 22), 50, 90), pr: Math.random() < 0.3 ? null : Math.round(cpr.rate + randn() * 6), pi: +(0.03 + Math.random() * 0.12).toFixed(2) };
+          else disp.wk = {
             spo2: Math.random() < 0.2 ? null : clamp(Math.round(live.spo2 - 5 + randn() * 5), 60, 100),
             pr: Math.random() < 0.2 ? null : Math.round(Math.max(30, (live.hr || 60) * (0.65 + Math.random() * 0.8))),
             pi: +(0.05 + Math.random() * 0.25).toFixed(2)
@@ -2971,6 +3086,11 @@
     /* Valeur « incohérente » imposée par le formateur : physiologiquement absurde */
     function absurdNibp() {
       const hr = disp.hr || Math.round(live.hr) || 60;
+      if (!hasPulse() || live.sys < 40) {
+        /* v12 : pendant un arrêt / un massage : valeur trompeuse mais plausible, créée par les compressions */
+        const sys0 = 78 + Math.round(Math.random() * 30), dia0 = sys0 - 26 - Math.round(Math.random() * 12);
+        return { sys: sys0, dia: dia0, map: Math.round((sys0 + 2 * dia0) / 3), pr: Math.round((sim.artifacts.cpr ? cpr.rate : 110) + randn() * 4), absurd: true };
+      }
       let type = Math.floor(Math.random() * 3);   // 0 : différentielle nulle, 1 : pouls PNI ≠ FC, 2 : les deux
       if (type === 1 && live.sys < 60) type = 2;
       let sys, dia, pr;
@@ -3105,7 +3225,7 @@
        ===================================================================== */
     const PRIO_RANK = { high: 3, med: 2, low: 1 };
     const prioMark = (p) => (p === `high` ? `***` : p === `med` ? `**` : `*`);
-    const alarmState = { active: [], pending: {}, lastTop: null, lastPlay: 0, rot: 0, rotAt: 0 };
+    const alarmState = { active: [], pending: {}, ack: {}, lastTop: null, lastPlay: 0, rot: 0, rotAt: 0 };
     const NO_LOG = new Set([`ecg_off`, `spo2_off`, `spo2_np`, `lowperf`, `artef`, `spo2_weak`]);
 
     function evalAlarms() {
@@ -3166,6 +3286,8 @@
       const now = Date.now();
       const ids = new Set(L.map((a) => a.id));
       for (const id of Object.keys(alarmState.pending)) if (!ids.has(id)) delete alarmState.pending[id];
+      alarmState.ack = alarmState.ack || {};
+      for (const id of Object.keys(alarmState.ack)) if (!ids.has(id)) delete alarmState.ack[id];
       const keep = [];
       for (const a of L) {
         if (!alarmState.pending[a.id]) alarmState.pending[a.id] = now;
@@ -3194,7 +3316,8 @@
         const a = list[alarmState.rot % list.length];
         el.textContent = `${prioMark(a.prio)} ${a.text}`;
         el.classList.add(a.prio);
-        if (a.prio === `high` && mon.pausedUntil < now) el.classList.add(`blink`);
+        if ((alarmState.ack || {})[a.id]) el.classList.add(`ack`);
+        else if (a.prio === `high` && mon.pausedUntil < now) el.classList.add(`blink`);
       };
       show($(`al-phys`), phys);
       show($(`al-tech`), tech);
@@ -3213,7 +3336,7 @@
       $(`tb-mute`).classList.toggle(`hidden`, settings.sound);
     }
     function alarmSound() {
-      const act = alarmState.active;
+      const act = alarmState.active.filter((a) => !(alarmState.ack || {})[a.id]);
       if (!act.length || mon.pausedUntil > Date.now()) { alarmState.lastTop = null; return; }
       const top = act[0].prio;
       const now = Date.now();
@@ -3228,8 +3351,19 @@
       if (mon.pausedUntil > Date.now()) { mon.pausedUntil = 0; monEvent(`learner`, `Pause alarme annulée`); }
       else {
         mon.pausedUntil = Date.now() + settings.pauseDur * 1000;
-        monEvent(fromTrainer === true ? `system` : `learner`, `Pause alarme ${settings.pauseDur / 60} min${fromTrainer === true ? ` (formateur)` : ``}`);
+        const al = alarmState.active.filter((a) => a.kind === `phys`).map((a) => a.text);
+        monEvent(fromTrainer === true ? `system` : `learner`, `Pause alarme ${settings.pauseDur / 60} min${fromTrainer === true ? ` (formateur)` : ``}`, al.length ? { detail: `Alarmes en cours : ${al.join(`, `)}` } : null);
       }
+      renderAlarms();
+    }
+    /* v12 : acquittement d'une alarme (ex. : ST-II HAUT) : le son s'arrête, le message reste ; l'heure est notée */
+    function ackAlarms() {
+      if (!mon.power || simFrozen()) return;
+      alarmState.ack = alarmState.ack || {};
+      const list = alarmState.active.filter((a) => a.kind === `phys` && !alarmState.ack[a.id]);
+      if (!list.length) return;
+      list.forEach((a) => { alarmState.ack[a.id] = Date.now(); });
+      monEvent(`learner`, `Alarme acquittée : ${list.map((a) => a.text).join(`, `)}`);
       renderAlarms();
     }
     function freezeKey() {
@@ -3519,16 +3653,19 @@
           <div class="m-row"><span>Gain</span>${seg([[0.5, `x0,5`], [1, `x1`], [2, `x2`]], E.gain, `setGain`)}</div>
           <div class="m-row"><span>Vitesse de défilement</span>${seg([[12.5, `12,5`], [25, `25`], [50, `50`]], E.speed, `setSpeed`)}</div>
           <div class="m-row"><span>Filtre</span>${seg([[`Moniteur`, `Moniteur`], [`Diagnostic`, `Diagnostic`], [`Chirurgie`, `Chirurgie`]], E.filter, `setFilter`)}</div>
-          <div class="m-row"><span>Analyse du segment ST</span><button type="button" class="tgl ${E.st ? `on` : ``}" onclick="toggleSt()">${E.st ? `ON` : `OFF`}</button></div>`;
+          <div class="m-row"><span>Analyse du segment ST</span><button type="button" class="tgl ${E.st ? `on` : ``}" onclick="toggleSt()">${E.st ? `ON` : `OFF`}</button></div>
+          <div class="m-row"><span>Volume QRS (bip de la FC)</span>${spin(`qrsVol`, settings.qrsVol || `OFF`)}</div>
+          <p class="m-note">0 = bip coupé. La touche Silence coupe les alarmes, pas le bip QRS.</p>`;
       } else if (sec === `spo2resp`) {
         h = `<div class="mw-h">SpO2</div>
           <div class="m-row"><span>Seuil de désaturation</span>${spin(`desat`, settings.desat + ` %`)}</div>
-          <div class="m-row"><span>Tonalité de pouls (hauteur selon SpO2)</span>${spin(`qrsVol`, settings.qrsVol)}</div>
+          <div class="m-row"><span>Tonalité de pouls (hauteur selon SpO2)</span>${spin(`qrsVol`, settings.qrsVol || `OFF`)}</div>
           <div class="mw-h">Respiration (impédance)</div>
           <div class="m-row"><span>Délai d'alarme apnée</span>${spin(`apnea`, settings.apnea + ` s`)}</div>`;
       } else if (sec === `sound`) {
         h = `<div class="m-row"><span>Volume des alarmes</span>${spin(`alarmVol`, settings.alarmVol)}</div>
-          <div class="m-row"><span>Volume pouls / QRS</span>${spin(`qrsVol`, settings.qrsVol)}</div>
+          <div class="m-row"><span>Volume pouls / QRS (bip de la FC)</span>${spin(`qrsVol`, settings.qrsVol || `OFF`)}</div>
+          <p class="m-note">La touche Silence met les alarmes en pause : elle ne coupe pas le bip QRS. Pour le couper, mettez le volume QRS à 0 (OFF).</p>
           <div class="m-row"><span>Durée de la pause alarme</span>${seg([[60, `1 min`], [120, `2 min`], [180, `3 min`]], settings.pauseDur, `setPauseDur`)}</div>
           <div class="m-row"><span>Son du moniteur</span><button type="button" class="tgl ${settings.sound ? `on` : ``}" onclick="toggleSound()">${settings.sound ? `ON` : `OFF`}</button></div>
           <div class="m-row"><span>Test du son</span><button type="button" class="m-btn ghost" onclick="ensureAudio();playAlarm('med')">Écouter</button></div>`;
@@ -3544,8 +3681,8 @@
         h = H.length ? `<table class="m-table"><tr><th>Heure</th><th>Sys/Dia</th><th>PAM</th><th>FC</th><th>Mode</th></tr>${H.map((m) => `<tr><td>${hhmmss(m.sts || m.ts)}</td><td>${m.ok ? `${m.sys}/${m.dia}` : `---/---`}</td><td>${m.ok ? m.map : `---`}</td><td>${m.ok && m.pr != null ? m.pr : `---`}</td><td>${m.ok ? esc(m.mode) : `<span style="color:#7fdcff">Mesure échouée (${esc(String(m.msg || ``).toLowerCase())})</span>`}</td></tr>`).join(``)}</table>` : `<p class="m-note">Aucune mesure PNI.</p>`;
         h += `<div style="margin-top:12px"><button type="button" class="m-btn ghost" onclick="closeMenu()">◀ Retour</button></div>`;
       } else if (sec === `alarm-review`) {
-        const H = mon.alarmHist;
-        h = H.length ? `<div class="m-list">${H.map((a) => `<div><span>${hhmmss(a.sts || a.ts)}</span><span class="${a.prio}">${prioMark(a.prio)} ${esc(a.text)}</span></div>`).join(``)}</div>` : `<p class="m-note">Aucune alarme enregistrée.</p>`;
+        const H = mon.alarmHist, toAck = alarmState.active.filter((a) => a.kind === `phys` && !alarmState.ack[a.id]);
+        h = (toAck.length ? `<div class="m-row"><span>Alarme en cours : <b>${esc(toAck.map((a) => a.text).join(` · `))}</b></span><button type="button" class="m-btn" onclick="ackAlarms();closeMenu()">✓ Acquitter</button></div><p class="m-note">Acquitter coupe le son de l'alarme ; le message reste affiché tant que le problème persiste.</p>` : ``) + (H.length ? `<div class="m-list">${H.map((a) => `<div><span>${hhmmss(a.sts || a.ts)}</span><span class="${a.prio}">${prioMark(a.prio)} ${esc(a.text)}</span></div>`).join(``)}</div>` : `<p class="m-note">Aucune alarme enregistrée.</p>`);
       } else if (sec === `patient`) {
         h = `<div class="m-row"><span>Lit</span><b>${esc(sim.patient.bed)}</b></div>
           <div class="m-row"><span>Patient</span><b>${esc(sim.patient.name)}</b></div>
@@ -3798,8 +3935,9 @@
       else if (st === `run` && !mon.power && /^(syn|learn|sleep)\|/.test(stageKey)) mode = `sleep`;
       else if (st === `pause`) mode = `pause`;
       else if (st === `end`) mode = mon.dbv && mon.dbv.sid === sim.sessionId && (mon.dbv.show || `syn`) !== `off` ? `debrief` : `end`;
-      const key = `${mode}|${mode === `syn` ? sim.rev : mode === `learn` ? `${sim.scenarioId}.${sim.briefIdx}.${sim.patient.bed}` : mode === `qr` ? maintQr : mode === `debrief` ? `${mon.dbv.k}.${dbvLocal}` : ``}|${appState.pin}`;
+      const key = `${mode}|${mode === `syn` ? `${sim.rev}.${devKey()}.${briefQr}` : mode === `learn` ? `${sim.scenarioId}.${sim.briefIdx}.${sim.patient.bed}` : mode === `qr` ? maintQr : mode === `debrief` ? `${mon.dbv.k}.${dbvLocal}` : ``}|${appState.pin}`;
       if (key === stageKey) return;
+      if (mode !== `syn`) briefQr = ``;
       stageKey = key;
       const el = $(`stage`);
       el.classList.toggle(`hidden`, !mode);
@@ -4093,8 +4231,35 @@
     function renderCallDevs() {
       const el = $(`call-dev`); if (!el) return;
       const on = (k) => Date.now() - (devSeen[k] || 0) < 12000;
-      el.innerHTML = `Téléphone d'appel : <b class="${on(`phone`) ? `ok-t` : ``}">${on(`phone`) ? `connecté ✓` : `pas connecté`}</b>` +
-        (callCfg().mode === `doctor` || callCfg().mode === `ia` ? ` · Poste médecin : <b class="${on(`doctor`) ? `ok-t` : ``}">${on(`doctor`) ? `connecté ✓` : `pas connecté`}</b>` : ``);
+      el.innerHTML = `Téléphone d'appel : <b class="${on(`phone`) ? `ok-t` : `ko-t blink`}">${on(`phone`) ? `connecté ✓` : `pas connecté`}</b>` +
+        (callCfg().mode === `doctor` || callCfg().mode === `ia` ? ` · Poste médecin : <b class="${on(`doctor`) ? `ok-t` : callCfg().mode === `doctor` ? `ko-t blink` : ``}">${on(`doctor`) ? `connecté ✓` : `pas connecté`}</b>` : ``) +
+        (devTest.txt ? `<br>Appel test : <b class="${devTest.ok ? `ok-t` : ``}">${esc(devTest.txt)}</b>` : ``);
+      const tb = $(`btn-testcall`); if (tb) tb.classList.toggle(`blink`, !devTest.ok && on(`phone`) && sim.stage === `prep`);
+      renderPrepChecks();
+    }
+    /* v12 : appel test avant la simulation (fait sonner le téléphone d'appel selon le réglage des appels) */
+    const devTest = { ok: false, txt: `` };
+    function testCall() {
+      const on = Date.now() - (devSeen.phone || 0) < 12000, C = callCfg();
+      if (!on) { toast(`Téléphone d'appel non connecté : scannez d'abord son QR code`); showQrSheet(`phone`); return; }
+      if (call && call.state !== `ended`) { toast(`Un appel est déjà en cours`); return; }
+      devTest.ok = false; devTest.txt = `sonnerie envoyée…`; renderCallDevs();
+      if (C.mode === `ia`) { pub({ type: `CALL_CB`, cid: uid(), contact: ctBrief(TEST_CT), mode: `ia`, step: -1, sid: sim.sessionId }); toast(`📞 Le téléphone d'appel va sonner : décrochez, l'IA fait le test`); }
+      else if (C.mode === `remote`) { dialCallback(TEST_CT.id, -1); toast(`📞 Vous appelez le téléphone d'appel : décrochez-le et parlez`); }
+      else if (C.mode === `doctor`) { publishSyncMessage({ type: `CALL_CB_DUE`, contact: ctBrief(TEST_CT), step: -1 }); toast(`Le poste médecin va proposer d'appeler (test)`); }
+      else { devTest.txt = `mode vrai numéro : sur le téléphone d'appel, touchez « 🔧 Appel test »`; renderCallDevs(); toast(`Mode vrai numéro : sur le téléphone d'appel, touchez « 🔧 Appel test »`); }
+    }
+    function testSeen(m, c) {
+      if (role !== `remote` || !c.contact || !isTestCt(c.contact)) return false;
+      if (m.type === `CALL_RING`) { devTest.txt = `le téléphone appelle…`; toast(`🔧 Appel test reçu du téléphone d'appel`); }
+      else if (m.type === `CALL_ANSWER`) { devTest.ok = true; devTest.txt = `décroché ✓ — vérifiez le son`; toast(`🔧 Appel test : décroché ✓`); }
+      else if (m.type === `CALL_END`) {
+        const why = { declined: `refusé`, 'declined-learner': `refusé sur le téléphone`, noanswer: `sans réponse`, 'noanswer-learner': `pas décroché`, busy: `ligne occupée`, 'no-key': `IA sans clé : réglages du téléphone (appui long 3 s sur l'heure)`, 'no-number': `aucun numéro programmé` }[m.why];
+        devTest.txt = why ? `échec — ${why}` : devTest.ok ? `terminé ✓ (${fmtDur(m.dur || 0)})` : `terminé`;
+        toast(`🔧 Appel test : ${devTest.txt}`);
+      }
+      renderCallDevs();
+      return true;
     }
     function setCallMode(k) {
       if (!CALL_MODES[k]) return;
@@ -4171,10 +4336,12 @@
       sim.actCnt = sim.actCnt || {};
       const n = (sim.actCnt[k] || 0) + 1;
       sim.actCnt[k] = n;
+      const isO2 = a.kind !== `call` && /^oxyg[eè]ne/i.test(a.label);
       if (a.kind === `call`) remEvent(`action`, `☎ ${a.label}${auto ? ` — appel passé` : ` — noté par le formateur`}`, { act: a.label });
-      else if (/choc/i.test(a.label)) { sendCmd(`SHOCK`, null, true); remEvent(`action`, `⚡ Choc électrique délivré (${a.label})`, { act: a.label }); }
+      else if (isO2) { const m = /(\d+(?:[.,]\d+)?)\s*L/i.exec(a.label), fl = m ? parseFloat(m[1].replace(`,`, `.`)) : 0; if (fl && fl !== (sim.o2 || {}).flow) setO2(fl, a.label); else openO2Sheet(fl); }
+      else if (/choc/i.test(a.label)) { sendCmd(`SHOCK`, null, true); remEvent(`action`, `⚡ Choc électrique délivré (${a.label})${a.times > 1 ? ` — ${n}/${a.times}` : n > 1 ? ` — ${n}e` : ``}`, { act: a.label }); autoTick(/_choc$/); }
       else remEvent(`action`, `💉 ${a.label}${a.times > 1 ? ` (${n}/${a.times})` : n > 1 ? ` (${n}e)` : ``}`, { act: a.label });
-      if (a.set && n === a.times) {
+      if (a.set && n === a.times && !(isO2 && a.set.spo2 != null && Object.keys(a.set).length === 1)) {
         const txt = [];
         EFF_KEYS.forEach(([k, l]) => { if (a.set[k] != null) { txt.push(`${l} ${sim.t[k]} → ${a.set[k]}`); sim.t[k] = a.set[k]; } });
         sim.transition = +a.setTrans || 0;
@@ -4195,7 +4362,7 @@
         const lbl = trig === a ? a.label : `${trig.label} + ${a.label}`;
         if (idx >= 0) {
           if (!trig.delay) goStep(idx, lbl);
-          else { pendGo = { idx, at: Date.now() + trig.delay * 1000, label: lbl }; toast(`${lbl} → ${sc.steps[idx].label} dans ${trig.delay} s`); }
+          else { pendGo = { idx, at: Date.now() + trig.delay * 1000, label: lbl }; toast(`${lbl} → ${sc.steps[idx].label} dans ${trig.delay} s`); if (sheetOpen()) sheetNotice(`⏳ ${esc(lbl)} → <b>${esc(sc.steps[idx].label)}</b> dans ${trig.delay} s`, trig.delay * 1000 + 500); }
         }
       }
       if (sim.trap && sim.trap.to && a.kind !== `call` && /insuline|salbutamol|a[ée]rosol/i.test(a.label)) toast(`🔕 Piège armé : au prochain silence d'alarme, la télécommande proposera « ${sim.trap.label} »`);
@@ -4228,11 +4395,25 @@
       closeSheet(); renderActs();
     }
     function clearTrap() { if (!sim.trap) return; remEvent(`system`, `🔕 Piège désarmé (${sim.trap.label})`); sim.trap = null; pushSim(); renderActs(); }
+    /* v12 : alarme ST sur le scope (SCA) : le formateur est prévenu, l'acquittement par l'apprenant est noté */
+    const stSeen = new Set();
+    const isStAlarm = (e) => e && e.cat === `alarm` && /\bST-[A-Za-z0-9]+ (HAUT|BAS)/.test(e.text);
+    const isAck = (e) => e && e.src === `mon` && e.cat === `learner` && (/^Alarme acquittée/.test(e.text) || /^Pause alarme \d/.test(e.text));
+    function stAlarmCheck(ev) {
+      if (role !== `remote` || sim.stage !== `run` || !ev || stSeen.has(ev.id) || Date.now() - ev.ts > 20000) return;
+      if (isStAlarm(ev)) { stSeen.add(ev.id); toast(`📈 ${ev.text.replace(/^\S+\s/, ``)} sur le scope : l'apprenant doit l'acquitter`); buzz(); popBeep(); }
+      else if (isAck(ev)) {
+        const st = events.filter((e) => isStAlarm(e) && e.ts <= ev.ts).pop();
+        const prevAck = st && events.some((e) => e !== ev && isAck(e) && e.ts >= st.ts && e.ts < ev.ts);
+        if (st && !prevAck && ev.ts - st.ts < 600000) { stSeen.add(ev.id); remEvent(`system`, `📈 Alarme ST acquittée par l'apprenant après ${fmtDur(ev.ts - st.ts)}`); toast(`✓ Alarme ST acquittée (${fmtDur(ev.ts - st.ts)})`); }
+      }
+    }
     function trapCheck(ev) {
       if (role !== `remote` || !sim.trap || sim.stage !== `run` || !ev || ev.src !== `mon` || ev.cat !== `learner`) return;
       if (!/^Pause alarme \d/.test(ev.text) || trapSeen.has(ev.id) || Date.now() - ev.ts > 20000) return;
       trapSeen.add(ev.id);
-      openTrapSheet(true);
+      if (sheetOpen() && sheetKind !== `trap`) queueSheet(() => openTrapSheet(true), `🔕 l'apprenant a coupé l'alarme — piège « ${sim.trap.label} »`);
+      else openTrapSheet(true);
     }
     function openTrapSheet(fromScope) {
       const t = sim.trap; if (!t) return;
@@ -4297,6 +4478,19 @@
         return `<b class="stg-who">${esc(r.label)}${n ? ` — ${esc(n)}` : ``}</b>${r.task ? ` : ${esc(r.task)}` : ``}${nt ? `<i class="stg-note">✎ ${esc(nt)}</i>` : ``}`;
       });
     }
+    /* v12 : état des appareils dans le briefing formateur (clignote si un appareil manque) */
+    const devOn = (k) => Date.now() - (devSeen[k] || 0) < 12000;
+    const devNeed = () => [[`remote`, `Télécommande`], [`phone`, `Téléphone d'appel`]].concat(callCfg().mode === `doctor` ? [[`doctor`, `Poste médecin`]] : []);
+    const devState = (k) => (k === `remote` ? Date.now() - mon.remoteAt < 12000 : devOn(k));
+    const devKey = () => devNeed().map(([k]) => (devState(k) ? 1 : 0)).join(``);
+    let briefQr = ``;
+    function monShowQr(k) { briefQr = briefQr === k ? `` : k; stageKey = ``; renderStage(); }
+    function devHtml() {
+      const rows = devNeed().map(([k, l]) => { const ok = devState(k);
+        return `<span class="stg-dev ${ok ? `ok` : `ko`}">${ok ? `✓` : `✗`} ${l}${ok ? `` : ` : pas connecté`}${ok || k === `remote` ? `` : ` <button type="button" class="m-btn ghost sm" onclick="event.stopPropagation();monShowQr('${k}')">QR</button>`}</span>`; }).join(``);
+      const Q = briefQr && MAINT_QR[briefQr];
+      return `<div><span>Appareils</span><b>${rows}${Q ? `<span class="stg-qrpop"><span class="bp-qr">${createQrSvg(getPairingUrl(briefQr), 170)}</span><small>${esc(Q[0])} · PIN ${appState.pin}<br>Scannez avec l'appareil photo du téléphone.</small></span>` : ``}</b></div>`;
+    }
     function trainerHtml() {
       const sc = scenarioById(sim.scenarioId), tr = sc.trainer || {};
       return `<div class="stg-syn">
@@ -4308,7 +4502,8 @@
           ${sc.hidden ? `<div><span>Caché / à obtenir</span><b>${esc(sc.hidden)}</b></div>` : ``}
           <div><span>Qui fait quoi</span><b>${staffLines(sc).join(`<br>`)}</b></div>
           <div><span>Apprenants</span><b>${learnersTxt().length ? learnersTxt().map(esc).join(`<br>`) : `<i class="dim">Non renseignés (télécommande › Préparation › Équipe)</i>`}</b></div>
-          <div><span>Téléphone d'appel</span><b>${esc(callModeLbl())}${callCfg().mode === `tel` && callCfg().tel ? ` : ${esc(callCfg().tel)}` : ``}</b></div>
+          <div><span>Téléphone d'appel</span><b>${esc(callModeLbl())}${callCfg().mode === `tel` && callCfg().tel ? ` : ${esc(callCfg().tel)}` : ``} <small class="dim">· test : télécommande › Préparation › « 📞 Tester l'appel »</small></b></div>
+          ${devHtml()}
           ${tr.dsa ? `<div><span>Programmation du DSA</span><b>${esc(tr.dsa)}</b></div>` : ``}
           ${tr.notes ? `<div><span>Entre nous</span><b>${esc(tr.notes)}</b></div>` : ``}
         </div>
@@ -4333,13 +4528,17 @@
       </div>`;
     }
     /* v11 : le briefing des apprenants défile depuis la tablette, et la simulation se lance depuis la tablette */
+    /* v12 : la tablette dit toujours « briefing apprenants » (learn) et garde la main tant que la télécommande
+       n'a pas confirmé : un message perdu ne fait plus retomber sur le briefing formateur */
+    let monBriefPend = null;
+    function monBriefSend() { if (monBriefPend) publishSyncMessage({ type: `MON_BRIEF`, idx: monBriefPend.idx, learn: true }); }
     function monBrief(d) {
       const n = learnSlides(scenarioById(sim.scenarioId)).length;
       const i = Math.max(0, Math.min(n - 1, (sim.briefIdx || 0) + d));
-      sim.briefIdx = i; stageKey = ``; renderStage();
-      publishSyncMessage({ type: `MON_BRIEF`, idx: i });
+      sim.brief = `learn`; sim.briefIdx = i; stageKey = ``; renderStage();
+      monBriefPend = { idx: i, at: Date.now() }; monBriefSend();
     }
-    function monToLearners() { sim.brief = `learn`; sim.briefIdx = 0; stageKey = ``; renderStage(); publishSyncMessage({ type: `MON_BRIEF`, idx: 0, learn: true }); }
+    function monToLearners() { sim.brief = `learn`; sim.briefIdx = 0; stageKey = ``; renderStage(); monBriefPend = { idx: 0, at: Date.now() }; monBriefSend(); }
     let monLaunchArm = 0;
     function monLaunch(btn) {
       if (Date.now() - monLaunchArm > 3500) { monLaunchArm = Date.now(); btn.textContent = `Toucher encore pour lancer`; return; }
@@ -4434,7 +4633,7 @@
         hr: disp.hr, spo2: disp.spo2, pr: disp.pr, rr: disp.rr, st1: disp.st1, lead1: settings.ecg.lead1,
         nibp: N.last, cycling: N.cycling, cuff: N.cuff, mode: nibpModeLabel(), nextAt: N.nextAt,
         alarms: alarmState.active.slice(0, 4).map((a) => ({ t: a.text, p: a.prio, k: a.kind })),
-        paused: mon.pausedUntil > Date.now(), frozen: mon.frozen, sound: settings.sound,
+        paused: mon.pausedUntil > Date.now(), frozen: mon.frozen, sound: settings.sound, qrsVol: settings.qrsVol,
         evLast: (() => { const l = mon.events.filter((e) => e.sid === sim.sessionId); return l.length ? l[l.length - 1].id : ``; })()
       };
     }
@@ -4453,6 +4652,13 @@
     }
     function applySimOnMonitor(ns, initial) {
       const old = sim;
+      /* v12 : une ancienne séance (télécommande en retard ou mal réveillée) ne doit pas éteindre le scope en cours */
+      if (!initial && staleSession(ns, old)) { publishSyncMessage({ type: `SIM_STATE`, sim: old }); return; }
+      if (!initial && monBriefPend && (ns.stage || `prep`) === `prep`) {
+        if (ns.brief === `learn` && ns.briefIdx === monBriefPend.idx) monBriefPend = null;
+        else if (Date.now() - monBriefPend.at < 8000) { ns.brief = `learn`; ns.briefIdx = monBriefPend.idx; monBriefSend(); }
+        else monBriefPend = null;
+      }
       sim = ns;
       if (!sim.stage) sim.stage = sim.running ? `run` : `prep`;
       const os = old.stage || `prep`, st = sim.stage;
@@ -4464,8 +4670,16 @@
         if (st === `prep` && mon.power) powerOffSilent();
       }
       const keys = [`hr`, `spo2`, `rr`, `sys`, `dia`, `temp`];
-      if (initial || keys.some((k) => old.t[k] !== ns.t[k])) startTransition(initial ? 0 : ns.transition || 0);
-      if (ns.t.rhythm !== eng.rhythmId) setRhythm(ns.t.rhythm, initial ? 0 : ns.transition || 0);
+      const preDur = ns.rhyPre == null ? 30 : +ns.rhyPre || 0;
+      if (eng.pre && (eng.pre.to !== ns.t.rhythm || initial)) eng.pre = null;            // cible changée : on abandonne les précurseurs
+      const toArrest = !initial && !eng.pre && ns.t.rhythm !== eng.rhythmId && ARREST_RHY.has(ns.t.rhythm) && curRhythm().pulse && curRhythm().mode === `beats` && preDur > 0 && mon.power;
+      if (toArrest) preStart(ns.t.rhythm, preDur);
+      else if (!eng.pre) {
+        const rosc = !initial && !curRhythm().pulse && (RHYTHMS[ns.t.rhythm] || {}).pulse;
+        if (initial || rosc || keys.some((k) => old.t[k] !== ns.t[k])) startTransition(initial ? 0 : rosc ? Math.max(ns.transition || 0, 45) : ns.transition || 0);
+        if (rosc && trans) { trans.from.hr = ns.t.hr; live.hr = ns.t.hr; }            // RACS : la FC revient d'emblée, PA et SpO2 progressivement
+        if (ns.t.rhythm !== eng.rhythmId) setRhythm(ns.t.rhythm, initial ? 0 : ns.transition || 0, initial);
+      }
       if (!ns.sensors.cuff && mon.nibp.cycling) mon.nibp.failCuff = true;
       if (ns.sensors.cuff && mon.nibp.cycling && mon.nibp.failCuff && eng.t - mon.nibp.t0 < 4.5) mon.nibp.failCuff = false;   // brassard validé pendant le gonflage
       if (!(forceQr && (sim.rev || 0) <= forceQrRev)) forceQr = false;
@@ -4476,6 +4690,11 @@
       saveMonitor();
       sendMonStatus();
     }
+    const sidTime = (sid) => { const m = /^s([0-9a-z]+)$/.exec(sid || ``); return m ? parseInt(m[1], 36) : 0; };
+    function staleSession(ns, old) {
+      const a = sidTime(old.sessionId), b = sidTime(ns.sessionId);
+      return (old.stage === `run` || old.stage === `pause`) && mon.power && a && (ns.sessionId ? b < a : (ns.rev || 0) < (old.rev || 0));
+    }
     function newSessionMonitor(sid) {
       mon.sessionId = sid;
       const snd = settings.sound;
@@ -4485,7 +4704,7 @@
       mon.trends = []; mon.alarmHist = []; mon.events = [];
       mon.pausedUntil = 0; mon.frozen = false; mon.pauseAt = 0;
       applyNibpStart(sim.nibpStart, false);
-      alarmState.active = []; alarmState.pending = {};
+      alarmState.active = []; alarmState.pending = {}; alarmState.ack = {};
       $(`tb-freeze`).classList.add(`hidden`);
       powerOffSilent();
       renderLabels(); renderAll();
@@ -4504,6 +4723,7 @@
       else if (cmd === `NIBP_MODE`) applyNibpStart(opts, true);
       else if (cmd === `PAUSE`) alarmPauseKey(true);
       else if (cmd === `SHOCK`) eng.shockAt = eng.t;
+      else if (cmd === `QRS_VOL` && opts) { settings.qrsVol = clamp(Math.round(+opts.v || 0), 0, 10); monEvent(`system`, `Bip QRS du scope réglé par le formateur : ${settings.qrsVol || `coupé`}`); saveMonitor(); renderMenu(); sendMonStatus(); }
       else if (cmd === `RESET_SETTINGS`) {
         const snd = settings.sound;
         settings = deep(SETTINGS_DEFAULT); settings.sound = snd;
@@ -4653,6 +4873,15 @@
 
     /* ---------- Vibration du téléphone à chaque fenêtre (l'écran reste lisible) ---------- */
     function buzz() { try { if (navigator.vibrate) navigator.vibrate([180, 90, 180, 90, 180]); } catch (_) {} }
+    /* v12 : l'iPhone ne sait pas vibrer depuis une page web : option « bip à chaque fenêtre » (☰ › Connexion) */
+    const popBeepOn = () => { try { return localStorage.getItem(`im60_popbeep`) === `1`; } catch (_) { return false; } };
+    function popBeep() { if (role === `remote` && popBeepOn() && typeof ctBeep === `function`) ctBeep([1320], 0.09, 0.05); }
+    function togglePopBeep() { try { localStorage.setItem(`im60_popbeep`, popBeepOn() ? `0` : `1`); } catch (_) {} renderVib(); if (popBeepOn()) { toneAudio(); popBeep(); } }
+    function testVib() { buzz(); popBeep(); toast(`navigator.vibrate` in navigator ? `Vibration envoyée : l'avez-vous sentie ?` : `Ce téléphone ne vibre pas depuis une page web (iPhone) : activez le bip`); }
+    function renderVib() {
+      const el = $(`vib-lbl`); if (!el) return;
+      el.innerHTML = `${`vibrate` in navigator ? `Vibration à chaque fenêtre : oui` : `<span class="ko-t">Vibration impossible sur ce téléphone (iPhone)</span>`} · Bip : <b>${popBeepOn() ? `activé` : `non`}</b>`;
+    }
 
     /* ---------- Journal ---------- */
     function remEvent(cat, text, extra) {
@@ -4671,7 +4900,7 @@
         if (!ev || !ev.id || have.has(ev.id)) continue;
         if (!sim.sessionId || ev.sid !== sim.sessionId) continue;
         events.push(ev); have.add(ev.id); added++;
-        trapCheck(ev);
+        trapCheck(ev); stAlarmCheck(ev);
       }
       if (added) { events.sort((a, b) => a.ts - b.ts); saveRemote(); renderLogs(); if (curTab === `debrief` && dbTab === `bilan`) renderDebrief(); }
     }
@@ -4771,13 +5000,16 @@
       if (!box) return;
       const on = scopeOnline();
       const sc = scenarioById(sim.scenarioId);
+      const dOn = (k) => Date.now() - (devSeen[k] || 0) < 12000, cm = callCfg().mode;
       const items = [
         [on, on ? `Tablette connectée (PIN ${appState.pin}) : elle affiche la synthèse` : `Tablette non connectée : scannez son QR code (PIN ${appState.pin})`],
+        [dOn(`phone`), dOn(`phone`) ? `Téléphone d'appel connecté${devTest.ok ? ` · appel testé ✓` : ` · pensez à « 📞 Tester l'appel »`}` : `Téléphone d'appel non connecté : touchez ici pour son QR code`, dOn(`phone`) ? `` : `showQrSheet('phone')`],
         [true, `Scénario : ${sc.short}`],
         [!!prep.clock, prep.clock ? `Heure de départ : ${prep.clock.replace(`:`, ` h `)}` : `Heure de départ à saisir`],
         [true, `PNI ${NIBP_START[prep.nibp][2].toLowerCase()} · aucun dispositif posé au départ`]
       ];
-      const html = items.map(([ok, t]) => `<div class="ck-line ${ok ? `ok` : `ko`}"><span>${ok ? `✓` : `!`}</span>${esc(t)}</div>`).join(``);
+      if (cm === `doctor`) items.splice(2, 0, [dOn(`doctor`), dOn(`doctor`) ? `Poste médecin connecté` : `Poste médecin non connecté : touchez ici pour son QR code`, dOn(`doctor`) ? `` : `showQrSheet('doctor')`]);
+      const html = items.map(([ok, t, go]) => `<div class="ck-line ${ok ? `ok` : `ko blink`}"${go ? ` onclick="${go}"` : ``}><span>${ok ? `✓` : `!`}</span>${esc(t)}</div>`).join(``);
       if (box.dataset.h !== html) { box.dataset.h = html; box.innerHTML = html; }
       const btn = $(`btn-launch`);
       if (btn.dataset.armed !== `1`) {
@@ -4816,7 +5048,7 @@
       sim.nibpStart = nibpStartOf(prep.nibp);
       rcpCycleAt = 0; cueOpen = false;
       sim.actCnt = {}; sim.doc = -1; sim.brief = ``; sim.briefIdx = 0; pendGo = null;
-      sim.sensorAt = {}; sim.ecg12At = 0; sim.trap = null; sim.dbShow = `syn`;
+      sim.sensorAt = {}; sim.ecg12At = 0; sim.trap = null; sim.dbShow = `syn`; sim.o2 = { flow: 0, at: 0 }; sim.cprRelays = 0; sim.cprRelayAt = 0;
       if (RAW_SCN[sc.id]) shareScenario(sc.id);
       remEvent(`system`, `Programmation validée — ${sc.title}`, { detail: `Heure simulée de départ ${sim.clockStart.replace(`:`, ` h `)} · scope éteint, en attente d'allumage par l'apprenant` });
       applyStep(0);
@@ -4860,7 +5092,7 @@
       sim.running = false; sim.startedAt = 0; sim.endedAt = 0; sim.stepIdx = -1; sim.sessionId = ``;
       sim.stage = `prep`; sim.pauseTotal = 0; sim.pauseAt = 0; sim.cuffSide = null; sim.sameArm = false;
       sim.actCnt = {}; sim.doc = -1; sim.brief = ``; sim.briefIdx = 0; pendGo = null;
-      sim.sensorAt = {}; sim.ecg12At = 0; sim.trap = null;
+      sim.sensorAt = {}; sim.ecg12At = 0; sim.trap = null; sim.o2 = { flow: 0, at: 0 };
       sim.artifacts = { cpr: false, motion: false, weak: false };
       selectScenario(sim.scenarioId, true);
       showTab(`prep`);
@@ -4902,6 +5134,7 @@
       const sc = scenarioById(sim.scenarioId);
       const st = sc.steps[idx];
       if (!st) return;
+      const prevRhy = sim.t && sim.t.rhythm;
       sim.stepIdx = idx;
       sim.stepStartedAt = Date.now();
       sim.t = stepTargets(st);
@@ -4909,7 +5142,13 @@
       if (RHYTHMS[st.rhythm] && RHYTHMS[st.rhythm].pulse && sim.artifacts.cpr) sim.artifacts.cpr = false;
       const tj = st.silence ? stepIdxById(sc, st.silence) : -1;
       sim.trap = tj >= 0 ? { to: st.silence, label: sc.steps[tj].label, auto: true } : null;
+      if (st.rosc && sim.running) sim.transition = Math.max(sim.transition, 45);          // v12 : RACS progressif
       pushSim();
+      if (sim.running && sheetOpen() && [`an`, `shock`, `drug`].includes(sheetKind)) {
+        if (st.rosc) { closeSheet(); toast(`RACS : la fenêtre DSA / drogue est fermée (le scénario est passé à « ${st.label} »)`); }
+        else sheetNotice(`▶ Le scénario passe à <b>P${idx + 1} — ${esc(st.label)}</b>`, 8000);
+      }
+      if (sim.running && ARREST_RHY.has(st.rhythm) && (sim.rhyPre == null || sim.rhyPre > 0) && (RHYTHMS[prevRhy] || {}).pulse) toast(`Arrêt sur le scope dans ${sim.rhyPre == null ? 30 : sim.rhyPre} s (troubles du rythme précurseurs)`);
       if (sim.running) remEvent(`step`, `Étape ${idx + 1} — ${st.label}`, { detail: `Cible : FC ${st.hr} · PA ${st.sys ? `${st.sys}/${st.dia}` : `imprenable`} · SpO2 ${st.spo2} · FR ${st.rr} · ${(RHYTHMS[st.rhythm] || {}).label || st.rhythm}${st.trans ? ` · transition ${st.trans} s` : ``}` });
       renderLive(); renderDrop(); renderHeader();
     }
@@ -4954,6 +5193,7 @@
         <button type="button" onclick="bump('${d.k}',1)" aria-label="Plus">+</button></div></div>`).join(``);
     }
     function toggleSensor(k) {
+      if (!sim.running) { toast(`La simulation n'est pas lancée sur cette télécommande (☰ › Connexion › Resynchroniser)`); publishSyncMessage({ type: `SYNC_REQ` }); return; }
       sim.sensors[k] = !sim.sensors[k];
       sim.transition = parseInt($(`live-trans`).value, 10) || 0;
       sim.sensorAt = sim.sensorAt || {};
@@ -4963,6 +5203,35 @@
       renderRows();
       // SpO2 validée APRÈS une prise de tension : on demande maintenant le côté du brassard
       if (k === `spo2` && sim.sensors.spo2 && sim.running && sim.cuffSide == null && events.some((e) => e.cat === `nibp` && e.src === `mon`)) openSideSheet();
+    }
+    /* v12 : agitation et SpO2 faible regroupés (la place libérée sert au bouton O2) */
+    function openArtSheet() {
+      const A = sim.artifacts;
+      openSheet(`art`, shHead(`〰️ Artefacts`, `Ce que voit l'apprenant sur le scope`) +
+        `<button type="button" class="btn big ${A.motion ? `amb` : ``}" onclick="toggleArtifact('motion');closeSheet()">🌀 Agitation du patient (ECG parasité) : ${A.motion ? `EN COURS — arrêter` : `démarrer`}</button>
+         <button type="button" class="btn big ${A.weak ? `amb` : ``}" onclick="toggleArtifact('weak');closeSheet()">〰️ Signal SpO2 faible (capteur mal posé) : ${A.weak ? `EN COURS — arrêter` : `démarrer`}</button>`);
+    }
+    /* v12 : oxygène — le débit choisi fait monter (ou baisser) la SpO2 du scope, qui reste fluctuante */
+    const O2_FLOWS = [1, 2, 3, 4, 6, 9, 12, 15];
+    function openO2Sheet(pre) {
+      if (!sim.running) { toast(`Validez d'abord la programmation`); return; }
+      const f = (sim.o2 || {}).flow || 0;
+      openSheet(`o2`, shHead(`🫁 Oxygène`, f ? `En cours : ${f} L/min depuis ${tPlus(sim.o2.at)}` : `Pas d'oxygène pour l'instant`) +
+        `<div class="o2-grid">${O2_FLOWS.map((v) => `<button type="button" class="btn ${v === f ? `sel grn` : v === pre ? `pri` : ``}" onclick="setO2(${v})"><b>${v} L/min</b><small>${v <= 6 ? `lunettes / masque simple` : v < 15 ? `masque` : `masque haute concentration`}</small></button>`).join(``)}
+         <button type="button" class="btn ${f ? `red` : ``}" onclick="setO2(0)" ${f ? `` : `disabled`}><b>Retirer</b><small>air ambiant</small></button></div>
+         <div class="muted">La SpO2 du scope monte en 1 min environ, d'autant plus que le débit est fort, avec un plafond selon l'état du patient (ex. : 88 % à l'air → ≈ 92 % sous 4 L, ≈ 95 % sous 15 L). Retiré : elle redescend en 1 à 2 min. Elle fluctue toujours un peu.</div>`);
+    }
+    function setO2(v, act) {
+      if (!sim.running) { toast(`Validez d'abord la programmation`); return; }
+      const prev = (sim.o2 || {}).flow || 0;
+      closeSheet();
+      if (v === prev) { toast(v ? `Oxygène déjà à ${v} L/min` : `Pas d'oxygène`); return; }
+      sim.o2 = { flow: v, at: Date.now() };
+      pushSim();
+      remEvent(`action`, v ? `🫁 Oxygène ${v} L/min${prev ? ` (avant : ${prev} L/min)` : ``}` : `🫁 Oxygène retiré (était à ${prev} L/min)`, { act: act || `Oxygène` });
+      if (v) autoTick(/./, (it) => it.ph === sim.stepIdx && /oxyg|\bO2\b/i.test(it.t));
+      renderRows(); renderChecklists();
+      toast(v ? `🫁 O2 ${v} L/min : la SpO2 va monter` : `🫁 O2 retiré : la SpO2 va baisser`);
     }
     function toggleArtifact(k) {
       sim.artifacts[k] = !sim.artifacts[k];
@@ -4997,7 +5266,7 @@
         const idx = sc.steps.findIndex((s) => s.rosc || /RACS/i.test(s.label));
         if (idx >= 0) { applyStep(idx); return; }
         Object.assign(T, { rhythm: `sinus`, hr: 104, sys: 98, dia: 58, rr: 16, spo2: 92, respPattern: `normal`, ectopy: `none` });
-        sim.transition = 15;
+        sim.transition = 45;
         pushSim();
         if (sim.running) remEvent(`step`, `RACS — retour d'une activité circulatoire`);
       } else {
@@ -5023,17 +5292,20 @@
     }
     function renderRows() {
       const SA = sim.sensorAt || {};
+      const O = sim.o2 || {};
+      const A = sim.artifacts, nArt = (A.weak ? 1 : 0) + (A.motion ? 1 : 0);
+      /* v12 : la PNI n'est plus un bouton (elle se lance sur le scope ; « Forcer une PNI » reste dans ☰ › Scope) ;
+         l'ECG 12 dérivations, l'O2 et le relais du massage rejoignent les gestes techniques */
       $(`row-sensors`).innerHTML = Object.keys(SENSOR_SHORT).map((k) => tbtn(sim.sensors[k] ? `on` : ``, SENSOR_SHORT[k][1], SENSOR_SHORT[k][0], sim.sensors[k] ? (SA[k] ? `✓ ${tPlus(SA[k])}` : `validé`) : `à valider`, `toggleSensor('${k}')`)).join(``) +
-        tbtn(``, `🩺`, `PNI`, pniSubText(), `forcePni()`, `pni-sub`) +
-        tbtn(sim.artifacts.weak ? `act` : ``, `〰️`, `SpO2 faible`, sim.artifacts.weak ? `en cours` : `non`, `toggleArtifact('weak')`);
-      const A = sim.artifacts;
+        tbtn(nArt ? `act` : ``, `〰️`, `Artefacts`, nArt ? [A.motion ? `agitation` : ``, A.weak ? `SpO2 faible` : ``].filter(Boolean).join(` + `) : `non`, `openArtSheet()`);
       $(`row-actions`).innerHTML =
         tbtn(A.cpr ? `act` : ``, `🤲`, `RCP`, A.cpr ? rcpTxt() : `démarrer`, `toggleRcp()`, `rcp-sub`) +
+        tbtn(A.cpr ? `` : `dim`, `🔁`, `Relais`, sim.cprRelays ? `${sim.cprRelays} relais` : `massage`, `cprRelay()`) +
         tbtn(``, `📈`, `Analyse`, `DSA`, `openAnalysis()`) +
         tbtn(`red`, `⚡`, `Choc`, `délivrer`, `doShock()`) +
-        tbtn(``, `💉`, `Drogue`, `injection`, `openDrugSheet()`) +
+        tbtn(O.flow ? `on` : ``, `🫁`, `O2`, O.flow ? `${String(O.flow).replace(`.`, `,`)} L/min` : `débit ?`, `openO2Sheet()`) +
         tbtn(sim.ecg12At ? `on` : ``, `📋`, `ECG 12 dériv.`, sim.ecg12At ? `✓ ${tPlus(sim.ecg12At)}` : `réalisé ?`, `doEcg12()`) +
-        tbtn(A.motion ? `act` : ``, `🌀`, `Agitation`, A.motion ? `en cours` : `non`, `toggleArtifact('motion')`);
+        tbtn(``, `💉`, `Drogue`, `injection`, `openDrugSheet()`);
       updateLiveTimers();
     }
     function updateLiveTimers() {
@@ -5078,6 +5350,17 @@
       autoTick(/_mce$/);
       renderRows();
     }
+    /* v12 : relais du massage (nouveau masseur) — noté, cycle remis à zéro, 2 à 3 s sans compression sur le scope */
+    function cprRelay() {
+      if (!sim.running) { toast(`Validez d'abord la programmation`); return; }
+      if (!sim.artifacts.cpr) { toast(`Pas de massage en cours : touchez d'abord 🤲 RCP`); return; }
+      const d = rcpTxt();
+      sim.cprRelays = (sim.cprRelays || 0) + 1; sim.cprRelayAt = Date.now(); rcpCycleAt = Date.now();
+      pushSim();
+      remEvent(`action`, `🔁 Relais du massage n° ${sim.cprRelays} (après ${d})`);
+      autoTick(/./, (it) => it.ph === sim.stepIdx && /relais/i.test(it.t));
+      renderRows(); toast(`🔁 Relais du massage noté`);
+    }
     function toggleRcp() {
       if (!sim.artifacts.cpr) { startRcp(`RCP : début du massage cardiaque`); return; }
       const d = rcpTxt();
@@ -5096,9 +5379,28 @@
       b.innerHTML = html;
       b.classList.remove(`ring`); void b.offsetWidth; b.classList.add(`ring`);
       $(`sheet`).classList.remove(`hidden`);
-      buzz();
+      buzz(); popBeep();
+      if (call || Object.keys(callsSeen).length) renderCallUi();
     }
-    function closeSheet() { clearTimeout(sheetTimer); clearInterval(pniTimer); sheetKind = ``; pni = null; $(`sheet`).classList.add(`hidden`); }
+    function closeSheet() {
+      clearTimeout(sheetTimer); clearInterval(pniTimer); sheetKind = ``; pni = null; $(`sheet`).classList.add(`hidden`);
+      if (call || Object.keys(callsSeen).length) renderCallUi();
+      if (sheetQ.length) { const f = sheetQ.shift(); setTimeout(() => { if (!sheetKind) f(); else sheetQ.unshift(f); }, 300); }
+    }
+    /* v12 : une fenêtre ne doit jamais en cacher une autre.
+       Évènement automatique pendant une fenêtre ouverte : bandeau en haut de la fenêtre (PNI, phase qui change),
+       ou mise en file d'attente (piège au silence), affichée dès la fermeture. */
+    const sheetQ = [];
+    const sheetOpen = () => !!sheetKind && !$(`sheet`).classList.contains(`hidden`);
+    function sheetNotice(html, ms) {
+      const b = $(`sheet-box`); if (!b) return;
+      let n = $(`sheet-note`);
+      if (!n) { n = document.createElement(`div`); n.id = `sheet-note`; n.className = `sheet-note`; b.insertBefore(n, b.firstChild); }
+      n.innerHTML = html; buzz(); popBeep();
+      clearTimeout(n._t); if (ms) n._t = setTimeout(() => { if (n.parentNode) n.remove(); }, ms);
+    }
+    function queueSheet(f, label) { sheetQ.push(f); sheetNotice(`⏳ En attente : <b>${esc(label)}</b> — s'affichera à la fermeture de cette fenêtre`, 0); }
+    function pniQuick(k) { sendCmd(`NIBP_OPT`, { result: k }, true); remEvent(`nibp`, `Formateur : PNI → ${PNI_RES_LBL[k]}`); const n = $(`sheet-note`); if (n) n.remove(); }
     const setSheet = (html) => { $(`sheet-box`).innerHTML = html; };
     const shHead = (title, sub) => `<div class="sh-head"><div><h3>${title}</h3>${sub ? `<div class="muted">${sub}</div>` : ``}</div><button type="button" class="hd-btn" onclick="closeSheet()" aria-label="Fermer">✕</button></div>`;
 
@@ -5129,9 +5431,11 @@
     function anNoShock() { an.shock = `none`; remEvent(`action`, `DSA : choc non indiqué`); setSheet(anHtml()); }
     function anResume() { closeSheet(); startRcp(`Reprise du massage cardiaque`); }
     function deliverShock(src) {
-      sendCmd(`SHOCK`, null, true);
-      remEvent(`action`, `⚡ Choc électrique délivré${src ? ` (${src})` : ``}`);
-      autoTick(/_choc$/);
+      /* v12 : le choc compte pour l'action « Choc … » du scénario (passage de phase, condition) */
+      const st = scenarioById(sim.scenarioId).steps[sim.stepIdx];
+      const j = st ? (st.actions || []).findIndex((a) => a.kind !== `call` && /choc/i.test(a.label)) : -1;
+      if (j >= 0) pressAction(j);
+      else { sendCmd(`SHOCK`, null, true); remEvent(`action`, `⚡ Choc électrique délivré${src ? ` (${src})` : ``}`); autoTick(/_choc$/); }
       toast(`⚡ Choc envoyé au scope`);
     }
     function doShock() {
@@ -5160,9 +5464,19 @@
         (nx ? `<button type="button" class="btn pri big" onclick="closeSheet();nextPhase()">Étape suivante : ${esc(nx.label)}</button>` : ``) +
         `<button type="button" class="btn big" onclick="closeSheet()">Pas d'effet pour l'instant</button>`;
     }
+    /* v12 : un produit donné depuis 💉 compte aussi pour l'action du scénario (ex. : adrénaline → condition calcium + adrénaline) */
+    const DRUG_KEYS = [`adrenaline`, `calcium`, `insuline`, `salbutamol`, `bicarbonate`, `remplissage`, `amiodarone`, `atropine`];
+    function drugAction(lbl) {
+      const st = scenarioById(sim.scenarioId).steps[sim.stepIdx], nl = norm(lbl);
+      const k = DRUG_KEYS.find((w) => nl.includes(w));
+      return k && st ? (st.actions || []).findIndex((a) => a.kind !== `call` && norm(a.label).includes(k)) : -1;
+    }
     function giveDrug(i) {
       const lbl = i >= 0 ? DRUGS[i][0] : (($(`drug-other`) || {}).value || ``).trim();
       if (!lbl) { toast(`Précisez le produit`); return; }
+      if (/^oxyg/i.test(lbl)) { openO2Sheet(); return; }
+      const j = drugAction(lbl);
+      if (j >= 0) { drugGiven = lbl; const was = sim.stepIdx; pressAction(j); if (sim.stepIdx !== was || pendGo) { closeSheet(); return; } setSheet(drugHtml()); return; }
       drugGiven = lbl;
       remEvent(`action`, `💉 ${lbl}`);
       if (i >= 0 && DRUGS[i][1]) autoTick(DRUGS[i][1]);
@@ -5176,6 +5490,10 @@
     function pniLeft() { return pni ? Math.max(0, 10 - Math.floor((Date.now() - pni.t0) / 1000)) : 0; }
     function openPniSheet(src) {
       if (sheetKind === `pni`) return;
+      if (sheetOpen()) {
+        sheetNotice(`🩺 <b>PNI en cours sur le scope</b> (${esc(PNI_SRC[src] || `scope`)}) — sans réponse : selon le scénario<div class="row" style="margin-top:6px"><button type="button" class="btn sm grn" onclick="pniQuick('ok')">OK</button><button type="button" class="btn sm amb" onclick="pniQuick('fail')">Non mesurable</button><button type="button" class="btn sm red" onclick="pniQuick('absurd')">Incohérente</button></div>`, 10000);
+        return;
+      }
       openSheet(`pni`, ``);
       pni = { src, res: null, side: null, sideAsk: sim.cuffSide == null && !!sim.sensors.spo2, t0: Date.now() };
       setSheet(pniHtml());
@@ -5194,6 +5512,7 @@
       const R = (k, cls, lbl) => `<button type="button" class="btn ${cls} big ${pni.res === k ? `chosen` : ``}" onclick="pniRes('${k}')">${lbl}</button>`;
       let h = shHead(`🩺 Prise de tension en cours`, `${esc(PNI_SRC[pni.src] || `Scope`)} · sans réponse : mesure selon le scénario dans <b id="pni-cd">${pniLeft()} s</b>`);
       if (!sim.sensors.cuff) h += `<div class="info warn">Brassard non validé : la mesure échouera (« brassard lâche »).<div style="margin-top:6px"><button type="button" class="btn sm" onclick="toggleSensor('cuff');setSheet(pniHtml())">Valider le brassard</button></div></div>`;
+      if (!(RHYTHMS[sim.t.rhythm] || {}).pulse) h += `<div class="info warn">Patient en arrêt${sim.artifacts.cpr ? `, massage en cours` : ``} : « OK » affichera « mesure impossible ». « Incohérente » affichera une valeur trompeuse créée par les compressions (ex. 92/60, FC ${Math.round(sim.artifacts.cpr ? 110 : 110)}).</div>`;
       h += `<div class="lbl">Résultat affiché sur le scope</div><div class="pni-res">
         ${R(`ok`, `grn`, `✓ OK — valeur proche du scénario`)}
         ${R(`fail`, `amb`, `Non mesurable (---/---)`)}
@@ -5269,6 +5588,7 @@
     }
     function renderDrop() {
       if (!dropOpen) return;
+      renderVib(); renderQrsCtl(); renderPreCtl();
       const sc = scenarioById(sim.scenarioId);
       $(`d-steps-sum`).textContent = sim.stepIdx >= 0 ? `${sim.stepIdx + 1}/${sc.steps.length}` : ``;
       $(`phases`).innerHTML = sc.steps.map((s, i) => `<button type="button" class="ph-btn ${i === sim.stepIdx ? `cur` : i < sim.stepIdx ? `done` : ``}" onclick="applyStep(${i})"><span class="n">${i + 1}</span><span>${esc(s.label)}</span><span class="v">${s.hr} · ${s.sys ? `${s.sys}/${s.dia}` : `—`} · ${s.spo2}%</span></button>`).join(``);
@@ -5285,6 +5605,18 @@
       $(`d-nibp`).innerHTML = Object.entries(NIBP_START).map(([k, v]) => `<button type="button" class="${curMode === v[2] ? `sel` : ``}" onclick="setScopeNibp('${k}')">${v[2]}</button>`).join(``);
       $(`d-side`).innerHTML = [[`same`, `Côté SpO2`], [`other`, `Opposé SpO2`], [null, `Non défini`]].map(([v, l]) => `<button type="button" class="${sim.cuffSide === v ? `sel` : ``}" onclick="setCuffSide(${v ? `'${v}'` : `null`})">${l}</button>`).join(``);
     }
+    function renderPreCtl() {
+      const el = $(`d-pre`); if (!el) return;
+      const v = sim.rhyPre == null ? 30 : sim.rhyPre;
+      el.innerHTML = [[30, `Progressif 30 s (précurseurs)`], [15, `15 s`], [0, `Immédiat`]].map(([k, l]) => `<button type="button" class="${v === k ? `sel` : ``}" onclick="sim.rhyPre=${k};pushSim();renderPreCtl()">${l}</button>`).join(``);
+    }
+    function renderQrsCtl() {
+      const el = $(`d-qrs`); if (!el) return;
+      const cur = scopeOnline() ? monView.qrsVol : null;
+      el.innerHTML = [[0, `Coupé`], [2, `2`], [4, `4`], [6, `6`], [8, `8`], [10, `10`]].map(([v, l]) => `<button type="button" class="${cur === v ? `sel` : ``}" onclick="setQrsVol(${v})">${l}</button>`).join(``);
+    }
+    function setQrsVol(v) { sendCmd(`QRS_VOL`, { v }, true); toast(v ? `Bip FC du scope : volume ${v}` : `Bip FC du scope coupé`); setTimeout(renderQrsCtl, 1500); }
+    CMD_MSG.QRS_VOL = `Volume du bip FC envoyé au scope`;
     function setScopeNibp(k) {
       sendCmd(`NIBP_MODE`, nibpStartOf(k));
       if (sim.running) remEvent(`step`, `Mode PNI réglé par le formateur : ${NIBP_START[k][2]}`);
@@ -5421,6 +5753,9 @@
       add(`1er massage cardiaque`, first((e) => e.cat === `action` && /^(RCP : début|Reprise du massage)/.test(e.text)));
       add(`1er choc`, first((e) => e.cat === `action` && /^⚡ Choc/.test(e.text)));
       add(`1re pause d'alarme`, first((e) => e.cat === `learner` && /Pause alarme \d/.test(e.text)));
+      const st1 = first(isStAlarm);
+      if (st1) { add(`Alarme ST (scope)`, st1); add(`Alarme ST acquittée`, events.find((e) => isAck(e) && e.ts >= st1.ts)); }
+      add(`Oxygène posé`, first((e) => e.cat === `action` && /^🫁 Oxygène \d/.test(e.text)));
       const scA = scenarioById(sim.scenarioId), seenA = new Set();
       (scA.steps || []).forEach((s) => (s.actions || []).forEach((a) => { if (seenA.has(a.label)) return; seenA.add(a.label); add(`1er « ${a.label} »`, first((e) => e.cat === `action` && e.act === a.label)); }));
       add(`1er appel (médecin / SAMU)`, first((e) => (e.cat === `action` || e.cat === `call`) && /^☎/.test(e.text)));
@@ -5429,6 +5764,25 @@
       return rows;
     }
     const evClock = (e) => hhmm(e.sts || e.ts);
+    /* v12 : les appels au débriefing (reconstitués d'après le journal) */
+    function callRows() {
+      const out = []; let cur = null;
+      for (const e of events) {
+        if (e.cat !== `call`) continue;
+        let m = /^☎ Appel de l'apprenant vers (.+?) \(/.exec(e.text) || /^📞 (.+?) rappelle les apprenants/.exec(e.text);
+        if (m) { cur = { at: e.ts, who: m[1] + (/^📞/.test(e.text) ? ` (rappel)` : ``), ans: ``, dur: ``, saed: ``, txt: `` }; out.push(cur); continue; }
+        if (!cur) continue;
+        if ((m = /^(?:Appel|Rappel) décroché.*?après (\d\d:\d\d)/.exec(e.text))) cur.ans = `après ${m[1]}`;
+        else if (/^Fin (d'appel|du rappel)/.test(e.text)) { const d = /durée ≈? ?(\d\d:\d\d)/.exec(e.text); cur.dur = d ? d[1] : ``; if (!cur.ans && /sans réponse|refus|pas décroché/.test(e.text)) cur.ans = e.text.replace(/^Fin [^—]+— /, ``); cur.txt = e.detail || ``; }
+        else if (/^Grille SAED/.test(e.text)) cur.saed = e.text.replace(/^Grille SAED[^:]*: /, ``);
+      }
+      return out;
+    }
+    function callsTableHtml() {
+      const R = callRows();
+      if (!R.length) return `<div class="muted">Aucun appel pendant la séance.</div>`;
+      return R.map((c) => `<details class="fold"><summary><b>${c.at ? tPlus(c.at) : ``}</b> · ${esc(c.who)}${c.ans ? ` · décroché ${esc(c.ans)}` : ``}${c.dur ? ` · ${esc(c.dur)}` : ``}${c.saed ? `<br><small>SAED : ${esc(c.saed)}</small>` : ``}</summary><div style="white-space:pre-wrap;font-size:13px">${c.txt ? esc(c.txt) : `<i class="muted">Pas de transcription (appel joué par un formateur ou vrai numéro).</i>`}</div></details>`).join(``);
+    }
     function nibpTableHtml() {
       const list = events.filter(isNibpResult);
       if (!list.length) return `<div class="muted">Aucune tension mesurée pour l'instant.</div>`;
@@ -5444,7 +5798,7 @@
     }
 
     /* ---------- v11 : écran de la tablette pendant le débriefing ---------- */
-    const DBV_SECS = [[`syn`, `Synthèse`], [`emo`, `Réactions`], [`chrono`, `Chronologie`], [`monit`, `Monitorage & délais`], [`att`, `Attendus`], [`crm`, `CRM`], [`msg`, `À retenir`], [`off`, `Masquer`]];
+    const DBV_SECS = [[`syn`, `Synthèse`], [`emo`, `Réactions`], [`chrono`, `Chronologie`], [`monit`, `Monitorage, délais, appels`], [`att`, `Attendus`], [`crm`, `CRM`], [`msg`, `À retenir`], [`off`, `Masquer`]];
     const hashStr = (s) => { let h = 5381; for (let i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) | 0; return (h >>> 0).toString(36); };
     function dbvData() {
       const s = computeStats(), sc = s.sc;
@@ -5458,7 +5812,8 @@
         nibp: events.filter(isNibpResult).map((e) => [evClock(e), e.text.replace(/ — valeur INCOHÉRENTE.*| \(non mesurable, imposé.*\)/, ``)]),
         tech: sc.tech.map((i) => [i.t, debrief.done[i.id] ? tPlus(debrief.done[i.id].ts) : ``, i.ph]),
         crmc: crmOf(sc).map((i) => [i.t, debrief.done[i.id] ? tPlus(debrief.done[i.id].ts) : ``]),
-        crm: CRM_GRID.map((c) => [c.t, c.ok]),
+        crm: CRM_GRID.map((c) => [c.t, c.ok, c.ko]),
+        calls: callRows().map((c) => [c.at ? tPlus(c.at) : ``, c.who, c.ans, c.dur, c.saed]),
         qs: { syn: GUIDE_GENERAL.syn, emo: GUIDE_GENERAL.emo, ana: GUIDE_GENERAL.ana.concat(sc.questions || []), crm: GUIDE_GENERAL.crm, msg: GUIDE_GENERAL.msg },
         msgs: sc.messages || [], mine: String(debrief.guide.msg || ``).trim(), stepsN: sc.steps.length
       };
@@ -5493,9 +5848,10 @@
       else if (show === `chrono`) body = `<h3>3. Analyse des faits — chronologie</h3>${L(d.qs.ana)}<table class="db-tl">${d.ev.map((r) => `<tr class="c-${esc(r[2])}"><td>${esc(r[0])}</td><td>${esc(r[1])}</td><td>${esc(r[3])}</td></tr>`).join(``)}</table>`;
       else if (show === `monit`) body = `<h3>Monitorage</h3><table><tr><th>Pose</th><th>T+</th><th>Après allumage</th></tr>${d.monit.map((r) => `<tr><td>${esc(r[0])}</td><td>${r[1] ? esc(r[1]) : `<i class="dim">non noté</i>`}</td><td>${r[2] ? `+${esc(r[2])}` : ``}</td></tr>`).join(``)}</table>
         ${d.delays.length ? `<h3>Délais clés</h3><table><tr><th>Repère</th><th>T+</th><th>Dans la phase</th></tr>${d.delays.map((r) => `<tr><td>${esc(r[0])}</td><td>${esc(r[1])}</td><td>${esc(r[2])}</td></tr>`).join(``)}</table>` : ``}
-        ${d.nibp.length ? `<h3>Tensions mesurées</h3><table>${d.nibp.map((r) => `<tr><td>${esc(r[0])}</td><td>${esc(r[1])}</td></tr>`).join(``)}</table>` : ``}`;
+        ${d.nibp.length ? `<h3>Tensions mesurées</h3><table>${d.nibp.map((r) => `<tr><td>${esc(r[0])}</td><td>${esc(r[1])}</td></tr>`).join(``)}</table>` : ``}
+        ${(d.calls || []).length ? `<h3>Appels</h3><table><tr><th>T+</th><th>Vers</th><th>Décroché</th><th>Durée</th><th>Grille SAED</th></tr>${d.calls.map((r) => `<tr><td>${esc(r[0])}</td><td>${esc(r[1])}</td><td>${esc(r[2])}</td><td>${esc(r[3])}</td><td>${esc(r[4])}</td></tr>`).join(``)}</table>` : ``}`;
       else if (show === `att`) body = `<h3>Gestes attendus</h3><div class="db-att">${d.tech.map((r) => `<div class="${r[1] ? `ok` : ``}"><span>${r[1] ? `✓` : `○`}</span>${r[2] != null ? `<em>P${r[2] + 1}</em> ` : ``}${esc(r[0])}${r[1] ? `<time>${esc(r[1])}</time>` : ``}</div>`).join(``) || `<i class="dim">Aucun.</i>`}</div>`;
-      else if (show === `crm`) body = `<h3>4. CRM</h3>${L(d.qs.crm)}<div class="db-crm">${d.crm.map((r) => `<div><b>${esc(r[0])}</b><small>${esc(r[1])}</small></div>`).join(``)}</div>
+      else if (show === `crm`) body = `<h3>4. CRM</h3>${L(d.qs.crm)}<div class="db-crm">${d.crm.map((r) => `<div><b>${esc(r[0])}</b><small>✓ ${esc(r[1])}</small>${r[2] ? `<small class="ko">✗ ${esc(r[2])}</small>` : ``}</div>`).join(``)}</div>
         ${d.crmc.length ? `<h3>Attendus CRM</h3><div class="db-att">${d.crmc.map((r) => `<div class="${r[1] ? `ok` : ``}"><span>${r[1] ? `✓` : `○`}</span>${esc(r[0])}${r[1] ? `<time>${esc(r[1])}</time>` : ``}</div>`).join(``)}</div>` : ``}`;
       else if (show === `msg`) body = `<h3>Messages à retenir</h3>${L(d.qs.msg)}${d.mine ? `<div class="db-mine">${esc(d.mine)}</div>` : ``}${d.msgs.length ? `<div class="db-msgs">${d.msgs.map((m) => `<div>★ ${esc(m)}</div>`).join(``)}</div>` : ``}`;
       return `<div class="stg-syn stg-db"><div class="stg-h"><span>Débriefing · ${esc(d.title)}</span><small>Durée ${esc(d.dur)}</small></div><div class="db-tabs">${tabs}</div><div class="db-body">${body}</div></div>`;
@@ -5541,6 +5897,7 @@
         $(`db-delays`).innerHTML = (doneRows.length ? `<table class="ptable"><tr><th>Repère</th><th>T+</th><th>Dans l'étape</th></tr>${doneRows.map((r) => `<tr><td>${esc(r.label)}</td><td class="num">${tPlus(r.ev.ts)}</td><td class="num">${stepTxt(r)}</td></tr>`).join(``)}</table>` : `<div class="muted">Aucun repère horodaté pour l'instant.</div>`) +
           (miss.length && sim.startedAt ? `<h3>Non observés</h3><div class="chips">${miss.map((r) => `<span class="chip warnc">${esc(r.label)}</span>`).join(``)}</div>` : ``);
         $(`db-nibp`).innerHTML = nibpTableHtml();
+        $(`db-calls`).innerHTML = callsTableHtml();
       }
       if (dbTab === `chrono`) renderTimeline();
       if (dbTab === `guide`) {
@@ -5680,6 +6037,7 @@ ${r.miss.length ? `<p><b>Non observés :</b> ${r.miss.map(esc).join(` · `)}</p>
       for (const i of s.items) L.push(`  ${debrief.done[i.id] ? `[x] ${i.t} (T+${tPlus(debrief.done[i.id].ts)})` : `[ ] ${i.t}`}`);
       L.push(``, `PNI prises : ${s.nibpN} — Alarmes : ${s.alarmN} (${s.alarmHigh} hautes) — Pauses : ${s.pauses} — Notes : ${s.notes}`, ``, `Tensions :`);
       for (const e of events.filter(isNibpResult)) L.push(`  ${evClock(e)}  ${e.text}`);
+      const CR = callRows(); if (CR.length) { L.push(``, `Appels :`); CR.forEach((c) => L.push(`  T+${c.at ? fmtDur(c.at - sim.startedAt) : `?`} ${c.who}${c.ans ? ` — décroché ${c.ans}` : ``}${c.dur ? ` — ${c.dur}` : ``}${c.saed ? ` — SAED ${c.saed}` : ``}`)); }
       L.push(``, `Grille CRM :`);
       for (const c of CRM_GRID) { const v = debrief.crm[c.id] || {}; L.push(`  ${c.t} : ${RATE_LBL[v.rate] || `—`}${v.note ? ` — ${v.note}` : ``}`); }
       GUIDE_PARTS.forEach(([k, t]) => { if (debrief.guide[k]) L.push(``, `${t} :`, debrief.guide[k]); });
@@ -5705,6 +6063,7 @@ ${r.miss.length ? `<p><b>Non observés :</b> ${r.miss.map(esc).join(` · `)}</p>
 <h2>Monitorage</h2><table><tr><th>Pose</th><th>T+</th><th>Après allumage du scope</th></tr>${monitRows().map((r) => `<tr><td>${esc(r.label)}</td><td>${r.ev ? fmtDur(r.ev.ts - sim.startedAt) : `<span class="ko">non noté</span>`}</td><td>${r.after ? `+${r.after}` : ``}</td></tr>`).join(``)}</table>
 <h2>Délais clés</h2><table><tr><th>Repère</th><th>T+</th><th>Dans l'étape</th></tr>${rows.map((r) => `<tr><td>${esc(r.label)}</td><td>${r.ev ? fmtDur(r.ev.ts - sim.startedAt) : `<span class="ko">non observé</span>`}</td><td>${r.ev && r.step ? `${esc(r.step.text.replace(/ — .*/, ``))} +${fmtDur(r.ev.ts - r.step.ts)}` : ``}</td></tr>`).join(``)}</table>
 <h2>Tensions mesurées</h2>${nb ? `<table><tr><th>Heure</th><th>Mesure</th></tr>${nb}</table>` : `<p class="muted">Aucune.</p>`}
+<h2>Appels</h2>${callRows().length ? `<table><tr><th>T+</th><th>Vers</th><th>Décroché</th><th>Durée</th><th>SAED</th></tr>${callRows().map((c) => `<tr><td>${c.at ? fmtDur(c.at - sim.startedAt) : ``}</td><td>${esc(c.who)}</td><td>${esc(c.ans)}</td><td>${esc(c.dur)}</td><td>${esc(c.saed)}</td></tr>${c.txt ? `<tr><td></td><td colspan="4" class="muted" style="white-space:pre-wrap">${esc(c.txt)}</td></tr>` : ``}`).join(``)}</table>` : `<p class="muted">Aucun appel.</p>`}
 <h2>Grille CRM</h2><table><tr><th>Dimension</th><th>Évaluation</th><th>Observation</th></tr>${CRM_GRID.map((c) => { const v = debrief.crm[c.id] || {}; return `<tr><td>${esc(c.t)}</td><td class="${v.rate === `ok` ? `ok` : v.rate === `ko` ? `ko` : ``}">${RATE_LBL[v.rate] || `—`}</td><td>${esc(v.note || ``)}</td></tr>`; }).join(``)}</table>
 <h2>Débriefing</h2>${GUIDE_PARTS.map(([k, t]) => `<h3>${esc(t)}</h3><div class="box">${esc(g[k] || ``)}</div>`).join(``)}
 <h2>Notes pour les évolutions futures</h2>${s.sc.evo ? `<p>${esc(s.sc.evo)}</p>` : ``}<div class="box">${esc(g.evo || ``)}</div>
@@ -5838,6 +6197,7 @@ ${r.miss.length ? `<p><b>Non observés :</b> ${r.miss.map(esc).join(` · `)}</p>
       if (now - lastPing > 4000) { lastPing = now; publishSyncMessage({ type: `PING` }); }
       if (monView && now - monViewAt < 6000) {
         if (sim.rev && monView.simRev !== sim.rev && now - lastSimSend > 3000) { lastSimSend = now; publishSyncMessage({ type: `SIM`, sim }); }
+        if (monView.sid && monView.sid !== sim.sessionId && monView.power && now - lastSyncReq > 5000) { lastSyncReq = now; publishSyncMessage({ type: `SYNC_REQ` }); }
         if (monView.evLast && monView.sid === sim.sessionId && !events.some((e) => e.id === monView.evLast) && now - lastSyncReq > 6000) { lastSyncReq = now; publishSyncMessage({ type: `SYNC_REQ` }); }
       }
     }
@@ -5866,6 +6226,16 @@ ${r.miss.length ? `<p><b>Non observés :</b> ${r.miss.map(esc).join(` · `)}</p>
     const fullCt = (ct) => (ct && phoneContacts().find((x) => x.id === ct.id)) || ct || { name: `médecin` };
     /* v10 : médecin d'astreinte choisi par le formateur au briefing (sim.oncall[idContact] = numéro dans la liste) */
     const oncallIdx = (id) => { const o = sim.oncall || {}; return Number.isInteger(o[id]) ? o[id] : 0; };
+    /* v12 : appel test (avant la simulation) — vérifie la sonnerie et le son dans les deux sens */
+    const TEST_CT = { id: `__test`, name: `Appel test`, kind: `medecin`, persona: ``, arm: `` };
+    const isTestCt = (ct) => !!ct && ct.id === TEST_CT.id;
+    function testPrompt(c, mode) {
+      const hang = mode === `json` ? `mets « raccrocher » à true` : `appelle la fonction raccrocher`;
+      return [`Tu es l'assistant technique du simulateur de formation. C'est un APPEL TEST, avant la simulation, pour vérifier la sonnerie et le son dans les deux sens. Tu parles français, en phrases très courtes. Tu ne joues aucun rôle médical.`,
+        c && c.cb ? `C'est toi qui appelles. Dès qu'on décroche, dis : « Bonjour, ici l'appel test du simulateur. Est-ce que vous m'entendez bien ? »` : `On t'appelle. Décroche en disant : « Allô, ici l'appel test du simulateur. Est-ce que vous m'entendez bien ? »`,
+        `Ensuite : si on te répond, dis « Parfait, je vous entends aussi. Dites-moi une phrase pour tester le micro. » Après cette phrase, répète-la en quelques mots (« J'ai bien entendu : … »), puis dis « Le téléphone d'appel fonctionne. Au revoir. » et ${hang}.`,
+        `Si tu n'entends rien de clair, dis une seule fois « Je vous entends mal, vérifiez le micro et parlez plus près du téléphone. »`].join(`\n`);
+    }
     function withDoc(ct) { const pool = docPool(ct); return pool.length ? Object.assign({}, ct, { doc: pool[oncallIdx(ct.id)] || pool[0] }) : ct; }
     const ctBrief = (ct) => ({ id: ct.id, name: ct.name, persona: ct.persona || ``, kind: ct.kind || (isSamuCt(ct) ? `samu` : `medecin`), arm: ct.arm || `` });
     const STAGE_LBL = { arm: `ARM`, hold: `en attente`, reg: `médecin régulateur` };
@@ -5967,6 +6337,7 @@ ${r.miss.length ? `<p><b>Non observés :</b> ${r.miss.map(esc).join(` · `)}</p>
       /* info : { contact, stage, cb, cfgStep } ; live : fiche interactive (appel en cours sur cet appareil) */
       const sc = scenarioById(sim.scenarioId);
       const ct = fullCt(info.contact), samu = isSamuCt(ct);
+      if (isTestCt(ct)) return `<div class="cs"><div class="cs-h">🔧 Appel test</div><div class="muted">Vérifiez que vous vous entendez dans les deux sens (demandez une phrase), puis raccrochez. Rien n'est noté pour la simulation.</div></div>`;
       const stepIdx = info.cfgStep == null ? sim.stepIdx : info.cfgStep, st = sc.steps[stepIdx];
       const c = phaseCall(ct.id, stepIdx);
       const L = (arr) => (arr || []).filter(Boolean);
@@ -6041,9 +6412,10 @@ ${r.miss.length ? `<p><b>Non observés :</b> ${r.miss.map(esc).join(` · `)}</p>
       if (call && call.state !== `ended`) return;
       toneAudio();
       requestWakeLock();
-      const ct = phoneContacts()[i]; if (!ct) return;
+      const ct = i === -1 ? TEST_CT : phoneContacts()[i]; if (!ct) return;
       const C = callCfg();
       call = { cid: uid(), contact: ctBrief(ct), mode: C.mode, state: `calling`, t0: Date.now(), liveAt: 0, txt: [], cfgStep: sim.stepIdx, stage: isSamuCt(ct) ? `arm` : `` };
+      if (isTestCt(ct)) call.unlocked = true;
       publishSyncMessage({ type: `CALL_RING`, cid: call.cid, contact: call.contact, mode: C.mode, sid: sim.sessionId, step: sim.stepIdx });
       if (C.mode === `tel`) {
         if (!C.tel) { publishSyncMessage({ type: `CALL_END`, cid: call.cid, why: `no-number` }); phoneEnded(`Numéro non attribué`); return; }
@@ -6129,6 +6501,7 @@ ${r.miss.length ? `<p><b>Non observés :</b> ${r.miss.map(esc).join(` · `)}</p>
       if (call && call.state !== `ended`) { publishSyncMessage({ type: `CALL_END`, cid: m.cid, why: `busy` }); return; }
       toneAudio();
       call = { cid: m.cid, contact: m.contact, mode: m.mode, state: `incoming`, cb: true, from: m.from || ``, cfgStep: m.step, t0: Date.now(), liveAt: 0, txt: [], stage: `` };
+      if (isTestCt(m.contact)) call.unlocked = true;
       ringIncoming(); renderPhone();
       const cid = m.cid;
       call.noAns = setTimeout(() => { if (call && call.cid === cid && call.state === `incoming`) { publishSyncMessage({ type: `CALL_END`, cid, why: `noanswer` }); stopTone(); call = null; renderPhone(); } }, 40000);
@@ -6181,7 +6554,8 @@ ${r.miss.length ? `<p><b>Non observés :</b> ${r.miss.map(esc).join(` · `)}</p>
       const ok = !!sim.rev;
       if (!call) {
         el.innerHTML = `<div class="ph-title">Appel médecin</div>
-          <div class="ph-list">${phoneContacts().map((c, i) => `<button type="button" class="ph-ct" onclick="placeCall(${i})"><span class="ph-av">${esc((c.name || `?`).slice(0, 1))}</span><span class="grow"><b>${esc(c.name)}</b><small>Toucher pour appeler</small></span><span class="ph-go">📞</span></button>`).join(``)}</div>
+          <div class="ph-list">${phoneContacts().map((c, i) => `<button type="button" class="ph-ct" onclick="placeCall(${i})"><span class="ph-av">${esc((c.name || `?`).slice(0, 1))}</span><span class="grow"><b>${esc(c.name)}</b><small>Toucher pour appeler</small></span><span class="ph-go">📞</span></button>`).join(``)}
+            ${(sim.stage || `prep`) === `prep` ? `<button type="button" class="ph-ct test" onclick="placeCall(-1)"><span class="ph-av">🔧</span><span class="grow"><b>Appel test</b><small>Avant la simulation : vérifier le son (disparaît au lancement)</small></span><span class="ph-go">📞</span></button>` : ``}</div>
           ${ok ? `` : `<div class="ph-net">Recherche du réseau…</div>`}
           <div class="ph-wake ${wakeOk() ? `ok` : ``}" onclick="requestWakeLock();setTimeout(renderPhone,600)">${wakeOk() ? `` : `☾ Touchez ici pour empêcher la mise en veille`}</div>`;
         return;
@@ -6291,6 +6665,7 @@ ${r.miss.length ? `<p><b>Non observés :</b> ${r.miss.map(esc).join(` · `)}</p>
       }).join(`\n\n`);
     }
     function iaPrompts(c, mode) {
+      if (isTestCt(c.contact)) return { main: testPrompt(c, mode) };
       const ct = withDoc(fullCt(c.contact)), cfg = phaseCall(ct.id, c.cfgStep), ctx = ctxNow();
       ctx.prev = memTxt(ct.id);
       if (c.cb) return { main: buildCallbackPrompt(ctx, cfg, ct, mode) };
@@ -6363,7 +6738,7 @@ ${r.miss.length ? `<p><b>Non observés :</b> ${r.miss.map(esc).join(` · `)}</p>
       const P = iaPrompts(call, `json`);
       call.sys = call.stage === `arm` ? P.arm : P.main;
       const nm = call.contact.name.replace(/\s*\(.*\)\s*/, ``);
-      const hello = call.stage === `arm` ? `SAMU, centre 15, j'écoute.` : isSamuCt(fullCt(call.contact)) ? `Médecin régulateur, je vous écoute.` : `Allô ?`;
+      const hello = isTestCt(call.contact) ? `Allô, ici l'appel test du simulateur. Est-ce que vous m'entendez bien ?` : call.stage === `arm` ? `SAMU, centre 15, j'écoute.` : isSamuCt(fullCt(call.contact)) ? `Médecin régulateur, je vous écoute.` : `Allô ?`;
       call.hist = [{ role: `user`, parts: [{ text: `(Le téléphone sonne, tu décroches.)` }] }, { role: `model`, parts: [{ text: JSON.stringify({ dire: hello, elements: [] }) }] }];
       iaSay(hello);
     }
@@ -6442,6 +6817,7 @@ ${r.miss.length ? `<p><b>Non observés :</b> ${r.miss.map(esc).join(` · `)}</p>
       if (call.stage === `arm`) {
         call.armTurns = (call.armTurns || 0) + 1;
         if (r.transfert) transfer = true;
+        else if (ACR_RE.test(norm(said))) { transfer = true; call.urg = true; reply = ARM_ACR_TXT; callLog(`ARM (IA) : arrêt cardiaque annoncé → passage immédiat au médecin régulateur`); }
         else if (call.armTurns >= 8) { transfer = true; reply += ` Je vous passe le médecin régulateur, ne quittez pas.`; }
         reply = reply || `Je vous passe le médecin régulateur, ne quittez pas.`;
       }
@@ -6450,6 +6826,9 @@ ${r.miss.length ? `<p><b>Non observés :</b> ${r.miss.map(esc).join(` · `)}</p>
       const hang = !!r.raccrocher && call.stage !== `arm` && (call.cb || call.unlocked || call.urg || (call.turns || 0) >= 14);
       iaSay(reply, transfer ? iaTransfer : hang ? () => { setTimeout(() => { if (call && call.cid === cid) endCall(`hangup-ia`); }, 1800); } : iaListen);
     }
+    /* v12 : dans tous les scénarios, « arrêt cardiaque » dit à l'ARM = passage immédiat au médecin régulateur */
+    const ACR_RE = /\barr[eê]t (cardi|respi)|\bacr\b|ne respire plus|ne respire pas du tout|en arr[eê]t\b/;
+    const ARM_ACR_TXT = `J'engage le SMUR tout de suite. Commencez le massage cardiaque. Je vous passe le médecin régulateur, ne quittez pas.`;
     /* IA du 15 (classique) : l'ARM met en attente puis passe le médecin régulateur (autre voix) */
     function iaTransfer() {
       if (!call) return;
@@ -6467,7 +6846,7 @@ ${r.miss.length ? `<p><b>Non observés :</b> ${r.miss.map(esc).join(` · `)}</p>
         const hello = `Médecin régulateur du SAMU, bonjour. Je vous écoute, faites-moi votre bilan.`;
         call.hist = [{ role: `user`, parts: [{ text: `(L'ARM te passe l'appel, tu décroches.)` }] }, { role: `model`, parts: [{ text: JSON.stringify({ dire: hello, elements: [] }) }] }];
         iaSay(hello);
-      }, 4500 + Math.random() * 3500);
+      }, call.urg ? 2200 + Math.random() * 1200 : 4500 + Math.random() * 3500);
     }
     const iaTranscript = () => (call ? call.txt.map((l) => `${l.who.replace(` (IA)`, ``)} : ${l.text}`).join(`\n`) : ``);
     /* Bascule vers le mode classique en cours d'appel (Live injoignable) */
@@ -6576,6 +6955,7 @@ ${r.miss.length ? `<p><b>Non observés :</b> ${r.miss.map(esc).join(` · `)}</p>
       if (!t || !call) return;
       iaLine(`Apprenant`, t);
       call.turns = (call.turns || 0) + 1;
+      if (call.stage === `arm` && !L.acr && ACR_RE.test(norm(t))) { L.acr = true; call.urg = true; callLog(`ARM (IA) : arrêt cardiaque annoncé → passage immédiat au médecin régulateur`); }
     }
     function liveFlushOut(L, suffix) {
       const t = L.outTxt.replace(/\s+/g, ` `).trim(); L.outTxt = ``;
@@ -6650,6 +7030,7 @@ ${r.miss.length ? `<p><b>Non observés :</b> ${r.miss.map(esc).join(` · `)}</p>
       if (sc.turnComplete) {
         L.turnDone = true;
         if (L.test) { if (L.onTest) L.onTest(L.outTxt.trim()); return; }
+        if (L.acr && !L.after && call && call.stage === `arm`) L.after = `transfer`;     // v12 : l'ARM passe le régulateur même s'il oublie la fonction
         liveFlushOut(L);
         if (!L.srcs.length) liveIdle(L);
       }
@@ -6705,7 +7086,8 @@ ${r.miss.length ? `<p><b>Non observés :</b> ${r.miss.map(esc).join(` · `)}</p>
       const P = iaPrompts(call, `live`);
       const nm = call.contact.name.replace(/\s*\(.*\)\s*/, ``);
       let sys, voice, tools, kick;
-      if (call.cb) { sys = P.main; voice = samu ? LIVE_VOICES.reg : LIVE_VOICES.med; tools = [`raccrocher`]; kick = `(Tu rappelles le centre de dialyse. On décroche : « Allô ? »)`; }
+      if (isTestCt(call.contact)) { sys = P.main; voice = LIVE_VOICES.arm; tools = [`raccrocher`]; kick = call.cb ? `(Tu appelles. On décroche : « Allô ? »)` : `(Le téléphone sonne, tu décroches.)`; }
+      else if (call.cb) { sys = P.main; voice = samu ? LIVE_VOICES.reg : LIVE_VOICES.med; tools = [`raccrocher`]; kick = `(Tu rappelles le centre de dialyse. On décroche : « Allô ? »)`; }
       else if (call.stage === `arm`) { sys = P.arm; voice = LIVE_VOICES.arm; tools = [`noter_element`, `transferer_au_regulateur`]; kick = `(Le téléphone sonne, tu décroches. Dis seulement : « SAMU, centre 15, j'écoute. »)`; }
       else { sys = P.main; voice = samu ? LIVE_VOICES.reg : LIVE_VOICES.med; tools = [`noter_element`, `verifier_decision`, `raccrocher`]; kick = samu ? `(L'ARM te passe l'appel. Décroche et présente-toi en une phrase.)` : `(Le téléphone sonne, tu décroches. Dis seulement : « Allô ? », puis tais-toi et écoute. Ne donne pas ton nom.)`; }
       if (call.txt.length) sys += `\n\nCONVERSATION JUSQU'ICI${samu && call.stage === `reg` ? ` (d'abord avec l'ARM, qui t'a passé l'appel)` : ``} :\n${iaTranscript()}`;
@@ -6793,7 +7175,7 @@ ${r.miss.length ? `<p><b>Non observés :</b> ${r.miss.map(esc).join(` · `)}</p>
     /* Rappel des apprenants par le formateur (télécommande ou poste médecin) */
     function dialCallback(ctId, step) {
       if (call && call.state !== `ended`) { toast(`Un appel est déjà en cours`); return; }
-      const ct = phoneContacts().find((x) => x.id === ctId); if (!ct) return;
+      const ct = ctId === TEST_CT.id ? TEST_CT : phoneContacts().find((x) => x.id === ctId); if (!ct) return;
       toneAudio(); requestWakeLock();
       cbDue = null;
       const cid = uid();
@@ -6860,11 +7242,16 @@ ${r.miss.length ? `<p><b>Non observés :</b> ${r.miss.map(esc).join(` · `)}</p>
       const curCid = call ? call.cid : sup ? sup.cid : ``;
       if (role === `remote` && curCid !== coMinCid) { coMinCid = curCid; coMin = false; }
       const ringing = call && (call.state === `ringing` || call.state === `dialing`);
-      el.classList.toggle(`mini`, role === `remote` && coMin && !ringing);
-      el.classList.toggle(`big`, role === `remote` && csOpen && !coMin);
-      if (role === `remote` && coMin && !ringing) {
+      /* v12 : une fenêtre d'action est ouverte (DSA, choc, drogue…) : l'appel passe en pastille en haut, sans rien cacher */
+      const shOn = role === `remote` && !$(`sheet`).classList.contains(`hidden`);
+      const pill = role === `remote` && (coMin || shOn) && !ringing;
+      el.classList.toggle(`mini`, pill);
+      el.classList.toggle(`top`, shOn);
+      el.classList.toggle(`ringtop`, shOn && !!ringing);
+      el.classList.toggle(`big`, role === `remote` && csOpen && !coMin && !shOn);
+      if (pill) {
         const t0 = call ? call.liveAt : sup.live;
-        el.innerHTML = `<button type="button" class="co-pill" onclick="coMin=false;renderCallUi()">☎ <b id="co-time" data-t0="${t0 || Date.now()}">${fmtDur(Date.now() - (t0 || Date.now()))}</b></button>`;
+        el.innerHTML = `<button type="button" class="co-pill" onclick="${shOn ? `toast('Fermez la fenêtre en cours pour voir l\\'appel')` : `coMin=false;renderCallUi()`}">☎ <b id="co-time" data-t0="${t0 || Date.now()}">${fmtDur(Date.now() - (t0 || Date.now()))}</b>${shOn ? ` <small>appel</small>` : ``}</button>`;
         return;
       }
       const minBtn = role === `remote` ? `<button type="button" class="btn sm" onclick="coMin=true;renderCallUi()" aria-label="Réduire">▁</button>` : ``;
@@ -6901,8 +7288,9 @@ ${r.miss.length ? `<p><b>Non observés :</b> ${r.miss.map(esc).join(` · `)}</p>
     const CALL_MODE_SHORT = { remote: `télécommande`, doctor: `poste médecin`, tel: `vrai numéro`, ia: `IA` };
     function callSeen(m) {
       if (role !== `remote` && role !== `doctor`) return;
-      const LOG = role === `remote`;
+      let LOG = role === `remote`;
       const c = callsSeen[m.cid] || (callsSeen[m.cid] = { txt: [] });
+      if ((m.contact && isTestCt(m.contact)) || (c.contact && isTestCt(c.contact))) { if (!c.contact) c.contact = m.contact; if (m.type === `CALL_RING` || m.type === `CALL_CB`) { if (c.ring) return; c.ring = Date.now(); c.mode = m.mode; c.cb = m.type === `CALL_CB`; } if (m.type === `CALL_ANSWER`) c.live = Date.now(); if (m.type === `CALL_END`) c.end = Date.now(); if (m.type === `CALL_TXT`) c.txt.push({ who: m.who, text: m.text }); testSeen(m, c); renderCallUi(); return; }
       if (m.type === `CALL_RING`) {
         if (c.ring) return;
         c.ring = Date.now(); c.contact = m.contact; c.mode = m.mode; c.cfgStep = m.step; c.stage = isSamuCt(fullCt(m.contact)) ? `arm` : ``;
@@ -7095,13 +7483,18 @@ ${r.miss.length ? `<p><b>Non observés :</b> ${r.miss.map(esc).join(` · `)}</p>
         else if (msg.type === `DBV` && msg.d) { if (!mon.dbv || mon.dbv.k !== msg.d.k) { mon.dbv = msg.d; renderStage(); saveMonitor(); } }
       } else {
         if (msg.type === `MON` && msg.mon) { monView = msg.mon; monViewAt = Date.now(); renderScopeStatus(); }
-        else if (msg.type === `SIM_STATE` && msg.sim && msg.sim.rev > sim.rev) { sim = Object.assign(deep(SIM_DEFAULT), msg.sim); saveRemote(); renderRemoteAll(); }
+        else if (msg.type === `SIM_STATE` && msg.sim && (msg.sim.rev > sim.rev || (msg.sim.running && sidTime(msg.sim.sessionId) > sidTime(sim.sessionId)))) {
+          const behind = msg.sim.rev <= sim.rev;
+          sim = Object.assign(deep(SIM_DEFAULT), msg.sim); if (behind) sim.rev = Math.max(Date.now(), sim.rev + 1);
+          saveRemote(); renderRemoteAll();
+          if (behind) { toast(`Télécommande remise à jour depuis la tablette`); showTab(`live`); }
+        }
         else if (msg.type === `EVT` && msg.ev) mergeEvents([msg.ev]);
         else if (msg.type === `EVTS` && Array.isArray(msg.events)) mergeEvents(msg.events);
         else if (msg.type === `NIBP_START`) { if (sim.stage === `run` && msg.sid === sim.sessionId) openPniSheet(msg.src); }
         else if (msg.type === `MON_BRIEF`) {
           if (sim.stage !== `prep`) return;
-          if (msg.learn) sim.brief = `learn`;
+          sim.brief = `learn`;
           const n = learnSlides(scenarioById(sim.scenarioId)).length;
           sim.briefIdx = Math.max(0, Math.min(n - 1, msg.idx || 0)); pushSim(); renderBriefCtl();
         }

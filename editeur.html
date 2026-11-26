@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Éditeur de scénarios — Simulateur iM60 (v11)</title>
+<title>Éditeur de scénarios — Simulateur iM60 (v12)</title>
 <style>
   :root {
     --bg: #f4f5f7; --card: #ffffff; --ink: #1b1f24; --ink-2: #5a636e; --line: #dde1e6;
@@ -390,28 +390,29 @@ const SCENARIOS_DEFAUT = [
     objTech: [`Installer et oxygéner un patient en détresse respiratoire`, `Repérer un SCA sur le scope et l'ECG 12 dérivations`, `Gérer un arrêt cardiaque en cours de séance (arrêt machine, choc DAE)`],
     objCrm: [`Réévaluer et sortir du biais d'ancrage`, `Appel précoce du médecin et du SAMU`, `Gestion de l'entourage`],
     sensorsStart: { ecg: false, spo2: false, cuff: false, temp: false },
-    trainer: { roles: ROLES_DEFAUT.slice(), dsa: `FV (P5) : choc indiqué ; RACS après le 1er choc.`, notes: `` },
+    trainer: { roles: ROLES_DEFAUT.slice(), dsa: `FV (P5) : choc indiqué à chaque analyse. FV réfractaire : RACS après le 3e choc et l'adrénaline 1 mg (consigne du 15). RACS plus tôt possible (✋ sur la télécommande).`, notes: `` },
     briefing: { situation: `Mardi, ouverture de la salle. Un patient est assis dans le sas d'accueil, il respire mal. L'ambulancier vous appelle.`, points: BRIEF_POINTS_DEFAUT.slice() },
     steps: [
-      { id: `p1`, label: `Détresse respiratoire (OAP)`, cue: `Tachycardie sinusale, HVG. SpO2 88 % à l'air. Quand l'O2 est posé, touchez « Oxygène 4 L/min » : la SpO2 monte à 92 % en 1 min.`, hr: 100, spo2: 88, rr: 30, sys: 180, dia: 100, temp: 36.6, rhythm: `lvh`, resp: `shallow`, ectopy: `none`, nibpFail: false, rosc: false, trans: 0,
+      { id: `p1`, label: `Détresse respiratoire (OAP)`, cue: `Tachycardie sinusale, HVG. SpO2 88 % à l'air. Quand l'O2 est posé, touchez 🫁 O2 et choisissez le débit : 4 L/min → SpO2 ≈ 92 % en 1 min (15 L/min → ≈ 95 %).`, hr: 100, spo2: 88, rr: 30, sys: 180, dia: 100, temp: 36.6, rhythm: `lvh`, resp: `shallow`, ectopy: `none`, nibpFail: false, rosc: false, trans: 0,
         tech: [`Position assise`, `Oxygène`, `Appel médecin`], crm: [`Leader désigné`, `Proche pris en charge`],
-        actions: [{ label: `Oxygène 4 L/min`, times: 1, to: ``, delay: 0, set: { spo2: 92 }, setTrans: 60 }],
+        actions: [{ label: `Oxygène 4 L/min`, times: 1, to: ``, delay: 0 }],
         call: { on: true, who: `nephro`, hear: [`Identité de l'appelant et du patient`, `Détresse respiratoire : SpO2 88 % à l'air (92 % sous O2 si déjà posé)`, `PA 180/100, FC 100, FR 30`, `+5 kg au-dessus du poids sec, œdèmes, crépitants`, `BPCO`], ask: [`Il a pris combien par rapport à son poids sec ?`, `Il sature à combien ? Il est sous oxygène ?`, `Et la tension ?`], answer: `C'est un OAP de surcharge. Vous le laissez assis sous oxygène et vous le branchez tout de suite pour une ultrafiltration seule : 1,5 litre en 1 heure. Surveillance de la tension rapprochée pendant l'UF.`, presc: [`Position assise`, `Oxygène 4 L/min, objectif SpO2 88 à 92 % (BPCO)`, `Branchement en UF seule : 1,5 L en 1 h`, `Surveillance tensionnelle toutes les 15 min pendant l'UF`, `Rappeler si la SpO2 ne remonte pas ou si la tension baisse`], avoid: `Pour toi, c'est un OAP de surcharge et rien d'autre : ne parle pas de cause cardiaque ni de douleur thoracique, ne demande pas d'ECG. C'est une UF seule, pas une dialyse classique.` },
         next: [{ label: `Sous O2, UF seule 1,5 L / 1 h`, to: `p2` }] },
-      { id: `p2`, label: `Sous O2 4 L/min, UF seule`, cue: `Branché en UF seule, 1,5 L en 1 h. PNI toutes les 15 min.`, hr: 99, spo2: 92, rr: 30, sys: 177, dia: 100, temp: 36.7, rhythm: `lvh`, resp: `shallow`, ectopy: `none`, nibpFail: false, rosc: false, trans: 30,
+      { id: `p2`, label: `Sous O2 4 L/min, UF seule`, cue: `Branché en UF seule, 1,5 L en 1 h. PNI toutes les 15 min. SpO2 92 % sous 4 L/min (elle baisse si l'O2 est retiré).`, o2: 4, hr: 99, spo2: 92, rr: 30, sys: 177, dia: 100, temp: 36.7, rhythm: `lvh`, resp: `shallow`, ectopy: `none`, nibpFail: false, rosc: false, trans: 30,
         tech: [`Branchement en UF seule (1,5 L en 1 h)`, `Surveillance tensionnelle toutes les 15 min`], crm: [`Réévaluation régulière`],
         next: [{ label: `Douleur thoracique — ST+`, to: `p3` }] },
-      { id: `p3`, label: `Douleur thoracique — ST+`, cue: `Douleur rétrosternale constrictive, irradiant mâchoire et bras gauche. ST+ inférieur.`, hr: 99, spo2: 92, rr: 30, sys: 177, dia: 100, temp: 36.8, rhythm: `stemi`, resp: `shallow`, ectopy: `none`, nibpFail: false, rosc: false, trans: 60,
+      { id: `p3`, label: `Douleur thoracique — ST+`, cue: `Douleur rétrosternale constrictive, irradiant mâchoire et bras gauche. ST+ inférieur : l'alarme « ST-II HAUT » sonne sur le scope (5 dérivations posées) ; l'heure où l'apprenant l'acquitte est notée.`, o2: 4, hr: 99, spo2: 92, rr: 30, sys: 177, dia: 100, temp: 36.8, rhythm: `stemi`, resp: `shallow`, ectopy: `none`, nibpFail: false, rosc: false, trans: 60,
         tech: [`ECG 12D dès la douleur`, `Arrêt UF / clampage`, `Appel SAMU (15)`, `DAE posé`], crm: [`Sortie du biais d'ancrage`],
-        call: { on: true, who: `samu`, hear: [`Adresse et service`, `Douleur thoracique constrictive irradiant`, `Sus-décalage ST inférieur`, `Patient en dialyse, UF arrêtée`, `Constantes actuelles`], ask: [`Depuis quand la douleur ?`, `Vous avez un ECG ? Qu'est-ce qu'il montre ?`, `Le DSA est à côté ?`], answer: `Syndrome coronarien avec sus-décalage. Le SMUR part. Arrêtez l'ultrafiltration, électrodes du DSA posées, ne le laissez pas seul.`, presc: [`Arrêt de l'UF`, `Électrodes du DSA posées`, `Oxygène`, `Préparer l'ECG pour l'équipe`], avoid: `Ne pas prescrire d'anticoagulant ou d'antiagrégant par téléphone sans l'avis du néphrologue.` },
+        call: { on: true, who: `samu`, hear: [`Adresse et service`, `Douleur thoracique constrictive irradiant`, `Sus-décalage ST inférieur`, `Patient en dialyse, UF arrêtée`, `Constantes actuelles`], ask: [`Depuis quand la douleur ?`, `Vous avez un ECG ? Qu'est-ce qu'il montre ?`, `Le DSA est à côté ?`], answer: `Syndrome coronarien avec sus-décalage. Le SMUR part. Arrêtez l'ultrafiltration, électrodes du DSA posées, ne le laissez pas seul.`, presc: [`Arrêt de l'UF`, `Électrodes du DSA posées`, `Oxygène`, `Préparer l'ECG pour l'équipe`, `S'il fait un arrêt : massage, DSA, et si la FV persiste après les chocs (choc réfractaire) : adrénaline 1 mg IV`], avoid: `Ne pas prescrire d'anticoagulant ou d'antiagrégant par téléphone sans l'avis du néphrologue.` },
         next: [{ label: `ESV menaçantes`, to: `p4` }] },
-      { id: `p4`, label: `ESV menaçantes`, cue: `ESV fréquentes : électrodes DAE, chariot au lit.`, hr: 106, spo2: 92, rr: 30, sys: 150, dia: 90, temp: 36.8, rhythm: `stemi`, resp: `shallow`, ectopy: `freq`, nibpFail: false, rosc: false, trans: 15,
+      { id: `p4`, label: `ESV menaçantes`, cue: `ESV fréquentes : électrodes DAE, chariot au lit.`, o2: 4, hr: 106, spo2: 92, rr: 30, sys: 150, dia: 90, temp: 36.8, rhythm: `stemi`, resp: `shallow`, ectopy: `freq`, nibpFail: false, rosc: false, trans: 15,
         tech: [`Chariot au lit`], crm: [`Chariot + DAE rapprochés`],
         next: [{ label: `FV — arrêt cardiaque`, to: `p5` }] },
-      { id: `p5`, label: `FV — arrêt cardiaque`, cue: `Perte de connaissance brutale. Arrêt machine, restitution si possible sinon clampage, MCE, choc DAE sans délai.`, hr: 0, spo2: 92, rr: 0, sys: 0, dia: 0, temp: 36.8, rhythm: `vf`, resp: `agonal`, ectopy: `none`, nibpFail: false, rosc: false, trans: 0,
-        tech: [`Arrêt machine / restitution ou clampage`, `MCE débuté`, `Choc délivré sans délai`], crm: [`Leader en retrait des gestes`],
-        actions: [{ label: `Choc DSA délivré`, times: 1, to: `p6`, delay: 5 }],
-        next: [{ label: `RACS après choc`, to: `p6` }] },
+      { id: `p5`, label: `FV — arrêt cardiaque`, cue: `Perte de connaissance brutale. Arrêt machine, restitution si possible sinon clampage, MCE, choc DAE sans délai. FV réfractaire : RACS quand 3 chocs ont été délivrés ET l'adrénaline 1 mg faite (consigne du 15). Pour un RACS plus tôt : ✋ « RACS après le 1er choc ».`, hr: 0, spo2: 92, rr: 0, sys: 0, dia: 0, temp: 36.8, rhythm: `vf`, resp: `agonal`, ectopy: `none`, nibpFail: false, rosc: false, trans: 0,
+        tech: [`Arrêt machine / restitution ou clampage`, `MCE débuté`, `Choc délivré sans délai`, `Appel du 15 : arrêt cardiaque annoncé`, `Adrénaline 1 mg après le 3e choc (FV réfractaire)`], crm: [`Leader en retrait des gestes`, `Boucle fermée sur le choc et l'adrénaline`],
+        actions: [{ label: `Choc DSA délivré`, times: 3, to: `p6`, delay: 5, needs: [`Adrénaline 1 mg`] }, { label: `Adrénaline 1 mg`, times: 1, to: ``, delay: 0 }],
+        call: { on: true, who: `samu`, hear: [`Adresse et service`, `Arrêt cardiaque, heure de l'arrêt`, `FV au scope, chocs délivrés (combien)`, `Massage en cours`, `Contexte : douleur thoracique, ST+ inférieur`], ask: [`À quelle heure a eu lieu l'arrêt ?`, `Combien de chocs ont été délivrés ?`, `Le massage est commencé ?`], answer: `Le SMUR est en route. Massage sans interruption, relais toutes les 2 minutes, suivez le DSA. Si la fibrillation persiste après le troisième choc (choc réfractaire) : adrénaline 1 milligramme en intraveineuse, puis toutes les 3 à 5 minutes.`, presc: [`Massage cardiaque sans interruption, relais toutes les 2 min`, `Suivre les consignes du DSA`, `FV réfractaire (persiste après le 3e choc) : adrénaline 1 mg IV, puis toutes les 3 à 5 min`], avoid: `Ne pas faire arrêter le massage pour répondre au téléphone : demander qu'une autre personne garde le combiné. Ne pas parler d'amiodarone ni d'autre médicament.` },
+        next: [{ label: `RACS après le 1er choc`, to: `p6` }] },
       { id: `p6`, label: `RACS après choc`, cue: `Retour d'une activité circulatoire, ST+ résiduel. Transfert coronarographie.`, hr: 96, spo2: 94, rr: 20, sys: 102, dia: 64, temp: 36.8, rhythm: `stemi`, resp: `normal`, ectopy: `none`, nibpFail: false, rosc: true, trans: 15,
         tech: [`Transmissions au SAMU`], crm: [],
         next: [] }
@@ -426,8 +427,8 @@ const SCENARIOS_DEFAUT = [
       doctor: `Toujours faire reformuler les prescriptions.` },
     documents: [],
     debrief: {
-      questions: [`Comment l'équipe s'est-elle réorganisée quand l'OAP s'est enrichi d'une douleur thoracique ?`, `Quels éléments du scope ont permis d'identifier le SCA avant l'arrêt cardiaque ?`, `Comment avez-vous géré l'entourage en panique pendant la réanimation ?`],
-      messages: []
+      questions: [`Comment l'équipe s'est-elle réorganisée quand l'OAP s'est enrichi d'une douleur thoracique ?`, `Quels éléments du scope ont permis d'identifier le SCA avant l'arrêt cardiaque ? Qui a vu l'alarme ST, qui l'a acquittée, qu'en a-t-on fait ?`, `Quel débit d'oxygène, pour quel objectif de SpO2 chez ce patient BPCO ?`, `Comment avez-vous géré l'entourage en panique pendant la réanimation ?`],
+      messages: [`Une alarme ST qu'on acquitte doit déclencher une action : ECG 12 dérivations, appel.`, `FV réfractaire (après le 3e choc) : adrénaline 1 mg IV, sans interrompre le massage.`]
     }
   },
   {
@@ -600,7 +601,8 @@ function buildCallPrompts(ctx, c, ct, mode) {
     `Numéro de rappel : tu ne demandes pas le numéro (il s'affiche sur ton écran). Tu demandes seulement : « Est-ce que je peux vous rappeler sur ce numéro ? »`,
     T(ctx.prev) ? `L'équipe a déjà appelé le 15 pour ce patient pendant cette séance. Si l'appelant le dit, tu retrouves le dossier (« Oui, je vois le dossier »), tu vérifies juste l'adresse et ce qui a changé, puis tu passes le médecin sans tout redemander.` : ``,
     `Si l'appelant se lance dans les détails médicaux, recentre-le poliment (« D'accord, je note. Vous êtes où exactement ? ») : les détails sont pour le médecin.`,
-    `Si le patient ne répond pas et ne respire pas normalement : dis que tu engages tout de suite une équipe SMUR, demande de commencer le massage cardiaque et d'apporter le défibrillateur, puis passe le médecin sans attendre le reste.`,
+    /* v12 : « arrêt cardiaque » prononcé = passage immédiat au médecin régulateur, dans tous les scénarios */
+`ARRÊT CARDIAQUE — RÈGLE PRIORITAIRE : dès que l'appelant dit « arrêt cardiaque » (ou « arrêt », « il ne respire plus », « il ne répond plus et ne respire pas »), tu ne poses plus AUCUNE question, même pas l'adresse. Tu dis seulement : « J'engage le SMUR tout de suite. Commencez le massage cardiaque. Je vous passe le médecin régulateur, ne quittez pas. » puis ${LV ? `tu appelles aussitôt la fonction transferer_au_regulateur` : `tu mets « transfert » à true`}.`,
     LV ? `Dès que tu as au moins l'adresse, l'accord pour rappeler sur ce numéro et le motif, dis : « Je vous passe le médecin régulateur, ne quittez pas. » puis appelle la fonction transferer_au_regulateur et tais-toi.`
       : `Dès que tu as au moins l'adresse, l'accord pour rappeler sur ce numéro et le motif, dis : « Je vous passe le médecin régulateur, ne quittez pas. » et mets « transfert » à true.`,
     T(ctx.address) ? `Adresse réelle du centre (vérifie que l'appelant la donne précisément, fais-la préciser sinon) : ${T(ctx.address)}` : ``
@@ -616,7 +618,8 @@ function buildCallPrompts(ctx, c, ct, mode) {
     `4. ${decide}`,
     `5. Annonce de la décision, dans cet ordre : le moyen engagé et le délai (par exemple « J'engage une équipe SMUR, elle sera chez vous dans une vingtaine de minutes »), puis les consignes d'attente une par une, puis « Répétez-moi ce que vous allez faire ». Tu corriges si la reformulation est fausse ou incomplète.`,
     `6. ${bye.replace(`(« Rappelez-moi si ça ne s'améliore pas ou si quelque chose change. »)`, `(« Vous restez près de lui, vous rappelez le 15 immédiatement si ça change. »)`)}`,
-    `À tout moment, si l'appelant décrit un arrêt cardiaque, tu engages le SMUR tout de suite, tu fais masser sans interruption et tu ${urg}.`
+    `À tout moment, si l'appelant décrit un arrêt cardiaque, tu engages le SMUR tout de suite, tu fais masser sans interruption et tu ${urg}.`,
+`Si l'ARM t'a passé un arrêt cardiaque très vite, sans l'adresse : ta première question est l'adresse exacte (« Vous êtes où exactement ? »), puis tu continues.`
   ].concat(body, know, prev, common).join(`\n`);
   return { arm, main };
 }
@@ -667,7 +670,6 @@ function buildCallbackPrompt(ctx, c, ct, mode) {
 }
 const CB_DELAYS = [[0, `à la main seulement`], [60, `1 min après l'appel`], [120, `2 min après`], [180, `3 min après`], [300, `5 min après`], [600, `10 min après`]];
 
-
 const RHYTHMS = [
   [`sinus`, `Sinusal`], [`lvh`, `Sinusal + HVG (surcharge)`], [`af`, `Fibrillation atriale`], [`bav3`, `BAV complet (III) + échappement`],
   [`hyperk1`, `HyperK stade 1 — T amples pointues`], [`hyperk2`, `HyperK stade 2 — P aplaties, QRS ≥ 120 ms`], [`hyperk3`, `HyperK stade 3 — sans P, QRS très larges`], [`hyperk_sine`, `HyperK pré-ACR — aspect sinusoïdal`],
@@ -686,6 +688,8 @@ const KINDS = [[`medecin`, `Médecin (astreinte, néphrologue…)`], [`samu`, `S
 /* v10 : constantes qu'une action peut modifier sans changer de phase */
 const EFF_KEYS = [[`spo2`, `SpO2`], [`hr`, `FC`], [`rr`, `FR`], [`sys`, `PAS`], [`dia`, `PAD`]];
 const EFF_TRANS = [[0, `aussitôt`], [15, `en 15 s`], [30, `en 30 s`], [60, `en 1 min`], [120, `en 2 min`], [300, `en 5 min`]];
+/* v12 : débit d'oxygène déjà compris dans la SpO2 de la phase */
+const O2_INC = [[``, `aucun (SpO2 à l'air)`], [1, `1 L/min`], [2, `2 L/min`], [3, `3 L/min`], [4, `4 L/min`], [6, `6 L/min`], [9, `9 L/min`], [12, `12 L/min`], [15, `15 L/min`]];
 
 const $ = (id) => document.getElementById(id);
 const DEFAULT_MAIL = `sbonnal@atir.asso.nc`;
@@ -718,7 +722,7 @@ function save() {
 function blankCb() { return { on: false, delay: 180, ask: [], note: `` }; }
 function blankCall(who) { return { who: who || ``, hear: [], ask: [], answer: ``, presc: [], avoid: ``, cb: blankCb() }; }
 function blankStep(n) {
-  return { id: uid(`p`), label: `Phase ${n}`, cue: ``, hr: 80, spo2: 98, rr: 16, sys: 130, dia: 80, temp: 37.0, rhythm: `sinus`, resp: `normal`, ectopy: `none`, nibpFail: false, rosc: false, trans: 30, silence: ``, tech: [], crm: [], actions: [], next: [], calls: [] };
+  return { id: uid(`p`), label: `Phase ${n}`, cue: ``, hr: 80, spo2: 98, rr: 16, sys: 130, dia: 80, temp: 37.0, rhythm: `sinus`, resp: `normal`, ectopy: `none`, nibpFail: false, rosc: false, trans: 30, silence: ``, o2: ``, tech: [], crm: [], actions: [], next: [], calls: [] };
 }
 function defaultContacts() {
   return [{ id: `nephro`, kind: `medecin`, name: `Néphrologue d'astreinte`, persona: ``, doctors: DOCS_DEFAUT.slice() },
@@ -822,6 +826,7 @@ function actRowHtml(sc, i, j) {
   const on = Object.keys(effOf(a)).length > 0;
   const others = clean((st.actions || []).filter((x, n) => n !== j && x.kind !== `call`).map((x) => x.label));
   const need = (a.needs || [])[0] || ``;
+  const o2 = /^oxyg[eè]ne/i.test(String(a.label || ``).trim());
   return `<div class="act-box"><div class="next-row act-row">
     <input type="text" value="${esc(a.label)}" placeholder="Ex. : Insuline + G10 %" oninput="upd('${p}.actions.${j}.label', this); refreshFlow()">
     <label class="hint" style="display:flex;align-items:center;gap:4px">à la <input type="number" min="1" max="9" style="width:58px" value="${esc(a.times)}" oninput="upd('${p}.actions.${j}.times', this, 'num'); refreshFlow()">ᵉ fois</label>
@@ -830,6 +835,7 @@ function actRowHtml(sc, i, j) {
     <button class="btn sm ghost danger" type="button" onclick="delAction(${i},${j})">Retirer</button></div>
     ${a.to ? `<div class="eff ${need ? `on` : ``}"><b>Condition</b> <span>passe à la phase seulement si a aussi été fait :</span>
       <select class="need" onchange="setNeed(${i},${j},this)">${[[``, `— pas de condition —`]].concat(others.map((l) => [l, l])).map(([k, l]) => `<option value="${esc(k)}"${k === need ? ` selected` : ``}>${esc(l)}</option>`).join(``)}</select></div>` : ``}
+    ${o2 ? `<div class="eff on"><b>Oxygène</b> <span>sur la télécommande, ce bouton règle le débit (ex. « Oxygène 4 L/min » = 4 L/min) : la SpO2 du scope suit automatiquement la règle de l'oxygène. Inutile de mettre un effet SpO2.</span></div>` : ``}
     <div class="eff ${on ? `on` : ``}"><b>Effet sur le scope</b> <span>(laisser vide = pas de changement)</span>
       ${EFF_KEYS.map(([k, l]) => `<label>${l} <input type="number" inputmode="numeric" value="${set[k] == null ? `` : esc(set[k])}" placeholder="—" oninput="setEff(${i},${j},'${k}',this)"></label>`).join(``)}
       <select onchange="setEffTrans(${i},${j},this)" title="Vitesse du changement">${EFF_TRANS.map(([k, l]) => `<option value="${k}"${Number(a.setTrans == null ? 60 : a.setTrans) === k ? ` selected` : ``}>${l}</option>`).join(``)}</select></div></div>`;
@@ -853,7 +859,7 @@ function renderLib() {
 function resetToDefault() {
   const d = SCENARIOS_DEFAUT.find((s) => s.id === curId);
   if (!d) return toast(`Ce scénario n'a pas de version d'origine (il a été créé ici).`);
-  if (!confirm(`Remplacer « ${cur().short} » par sa version d'origine (v11) ? Vos modifications de ce scénario seront perdues. Pensez à « Enregistrer le fichier » avant si vous voulez les garder.`)) return;
+  if (!confirm(`Remplacer « ${cur().short} » par sa version d'origine (v12) ? Vos modifications de ce scénario seront perdues. Pensez à « Enregistrer le fichier » avant si vous voulez les garder.`)) return;
   const i = lib.findIndex((s) => s.id === curId);
   lib[i] = normalize(deep(d)); save(); render(); toast(`Version d'origine reprise : pensez à l'envoyer au simulateur`);
 }
@@ -884,7 +890,7 @@ function callBoxHtml(sc, i, j) {
   const p = `steps.${i}.calls.${k}`, c = st.calls[k];
   const presets = (CALL_PRESETS[samu ? `samu` : `medecin`] || []).map(([l], n) => `<button class="btn sm" type="button" onclick="applyPreset(${i},${k},${n})">${esc(l)}</button>`).join(``);
   return `<div class="callbox">${head}<div class="callbox-b">
-    ${samu ? `<div class="samu-note"><b>Circuit réel du 15 :</b> l'<b>ARM</b> décroche (« SAMU, centre 15, j'écoute »), demande l'adresse exacte, « Je peux vous rappeler sur ce numéro ? », qui appelle, le patient et le motif, pose deux questions de gravité, puis met en attente et <b>passe le médecin régulateur</b>. Arrêt cardiaque : l'ARM engage le SMUR tout de suite et fait masser. Les consignes ci-dessous sont celles du <b>médecin régulateur</b>.</div>` : `<div class="samu-note">Le médecin décroche par « Allô ? » sans se présenter. Il ne connaît que ce qu'on lui dit et ce qui s'est dit aux appels précédents de la séance : il ne sait ni ce qui se passe ni la suite du scénario. Il ne prescrit et ne demande que ce qui est écrit ci-dessous : <b>tout ce que vous ne voulez pas entendre ne doit pas y figurer</b>.</div>`}
+    ${samu ? `<div class="samu-note"><b>Circuit réel du 15 :</b> l'<b>ARM</b> décroche (« SAMU, centre 15, j'écoute »), demande l'adresse exacte, « Je peux vous rappeler sur ce numéro ? », qui appelle, le patient et le motif, pose deux questions de gravité, puis met en attente et <b>passe le médecin régulateur</b>. <b>Dès que « arrêt cardiaque » est prononcé</b> (dans tous les scénarios), l'ARM engage le SMUR, fait masser et passe aussitôt le médecin régulateur. Les consignes ci-dessous sont celles du <b>médecin régulateur</b>.</div>` : `<div class="samu-note">Le médecin décroche par « Allô ? » sans se présenter. Il ne connaît que ce qu'on lui dit et ce qui s'est dit aux appels précédents de la séance : il ne sait ni ce qui se passe ni la suite du scénario. Il ne prescrit et ne demande que ce qui est écrit ci-dessous : <b>tout ce que vous ne voulez pas entendre ne doit pas y figurer</b>.</div>`}
     <div class="presets"><span class="hint">Réponse toute prête :</span>${presets}</div>
     <div class="grid two">
       ${inp(`${p}.hear`, samu ? `Ce que le régulateur doit entendre` : `Ce que le médecin doit entendre`, { list: true, ph: `Ex. : FC 41\nECG : T pointues, QRS larges` })}
@@ -961,7 +967,7 @@ const VIEWS = {
   steps() {
     const sc = cur();
     const opts = () => [[``, `— choisir —`]].concat(sc.steps.map((s, i) => [s.id, `P${i + 1} — ${s.label}`]));
-    return `<div class="card"><h3>Enchaînement des phases</h3><p class="sub">⚡ = action qui déclenche la phase suivante (ex. : un médicament ; « + » = il faut aussi l'autre action) · ☎ = appel (déclenche à la fin de l'appel) · 🔕 = proposé au formateur quand l'apprenant coupe l'alarme · ✋ = bouton manuel du formateur, toujours disponible en secours · ↗ = action qui change une constante sans changer de phase (ex. : oxygène → SpO2).</p>
+    return `<div class="card"><h3>Enchaînement des phases</h3><p class="sub">⚡ = action qui déclenche la phase suivante (ex. : un médicament ; « + » = il faut aussi l'autre action) · ☎ = appel (déclenche à la fin de l'appel) · 🔕 = proposé au formateur quand l'apprenant coupe l'alarme · ✋ = bouton manuel du formateur, toujours disponible en secours · ↗ = action qui change une constante sans changer de phase. L'oxygène suit une règle automatique (débit choisi sur la télécommande) : la SpO2 de chaque phase est celle à l'air, sauf si vous indiquez le débit déjà compris.</p>
       <div class="flow">${flowHtml(sc)}</div></div>
       ${sc.steps.map((st, i) => { const p = `steps.${i}`; return `<section class="phase">
         <div class="phase-head"><div class="phase-num">P${i + 1}</div>
@@ -980,7 +986,9 @@ const VIEWS = {
             ${sel(`${p}.resp`, `Respiration`, RESP)}
             ${sel(`${p}.ectopy`, `Extrasystoles`, ECTOPY)}
             ${sel(`${p}.trans`, `Passage des constantes`, TRANS)}
+            ${sel(`${p}.o2`, `O2 déjà compris dans la SpO2 de la phase`, O2_INC)}
           </div>
+          <div class="hint">Passage en arrêt (FV, TV, asystolie, AESP) : le scope fait 30 s de troubles du rythme précurseurs (réglable sur la télécommande, ☰ › Raccourcis arrêt cardiaque). RACS : la FC revient d'emblée, la PA et la SpO2 en 45 s environ.</div>
           <div class="checks">
             <label><input type="checkbox" ${st.nibpFail ? `checked` : ``} onchange="upd('${p}.nibpFail', this)"> PNI non mesurable (TA imprenable)</label>
             <label><input type="checkbox" ${st.rosc ? `checked` : ``} onchange="upd('${p}.rosc', this)"> Reprise d'activité (RACS)</label>
@@ -1025,7 +1033,7 @@ const VIEWS = {
           ${inp(`contacts.${i}.persona`, c.kind === `samu` ? `Médecin régulateur : nom, ton, attitude` : `Ton commun à tous ces médecins <em>(facultatif, ex. : vouvoie l'infirmier)</em>`)}
           ${c.kind === `samu` ? inp(`contacts.${i}.arm`, `ARM (qui décroche) : ton, attitude`) : ``}
         </div>
-        ${c.kind === `samu` ? `<div class="samu-flow"><span>1. ARM décroche</span>→<span>adresse, « je peux vous rappeler sur ce numéro ? », qui appelle, patient, motif</span>→<span>conscient ? respire ?</span>→<span>⏸ attente</span>→<span>2. médecin régulateur</span>→<span>décision : conseil / ambulance / SMUR</span></div>` : `<div class="hint">Au téléphone, le médecin décroche par « Allô ? » et ne donne son nom que si l'infirmier le demande.</div>`}
+        ${c.kind === `samu` ? `<div class="samu-flow"><span>1. ARM décroche</span>→<span>adresse, « je peux vous rappeler sur ce numéro ? », qui appelle, patient, motif</span>→<span>conscient ? respire ?</span>→<span>⏸ attente</span>→<span>2. médecin régulateur</span>→<span>décision : conseil / ambulance / SMUR</span></div><div class="hint">« Arrêt cardiaque » prononcé : l'ARM passe aussitôt le médecin régulateur (dans tous les scénarios).</div>` : `<div class="hint">Au téléphone, le médecin décroche par « Allô ? » et ne donne son nom que si l'infirmier le demande.</div>`}
       </div>`).join(``)}
       <button class="btn sm" type="button" onclick="addContact()">+ Ajouter un interlocuteur</button>
       <div class="grid two" style="margin-top:12px">
@@ -1090,7 +1098,7 @@ function flowHtml(sc) {
     const man = (s.next || []).filter((n) => n.to).map((n) => `<span class="go man">✋ ${esc(n.label || `bouton`)} → ${P(n.to)}</span>`);
     const noted = clean(acts.filter((a) => !a.to && a.kind !== `call` && !effTxt(a)).map((a) => a.label));
     const calls = acts.filter((a) => a.kind === `call`).map((a) => { const c = (s.calls || []).find((x) => x.who === a.who); return `<span class="tl-call">☎ ${esc((ctOf(sc, a.who) || {}).name || a.label)}${c && c.cb && c.cb.on ? ` · 📞 rappel` : ``}</span>`; }).join(``);
-    const vit = s.hr === 0 && s.sys === 0 ? `pas de pouls` : `FC ${s.hr} · TA ${s.nibpFail ? `imprenable` : `${s.sys}/${s.dia}`} · SpO2 ${s.spo2}`;
+    const vit = s.hr === 0 && s.sys === 0 ? `pas de pouls` : `FC ${s.hr} · TA ${s.nibpFail ? `imprenable` : `${s.sys}/${s.dia}`} · SpO2 ${s.spo2}${s.o2 !== `` && s.o2 != null && Number(s.o2) ? ` (sous O2 ${s.o2} L/min)` : ``}`;
     return `<div class="tl-row"><div class="tl-p">P${i + 1}</div><div class="tl-c">
       <div><b>${esc(s.label)}</b> <span class="tl-v">${vit}</span>${calls}</div>
       ${clean(s.tech).length ? `<div class="tl-a"><span>Attendus</span> ${short(s.tech, 4)}</div>` : ``}
@@ -1102,7 +1110,7 @@ function flowHtml(sc) {
 function refreshFlow() { document.querySelectorAll(`.flow`).forEach((f) => { f.innerHTML = flowHtml(cur()); }); }
 
 /* ---------- Actions sur les phases ---------- */
-function addStep() { const sc = cur(); const st = blankStep(sc.steps.length + 1); const prev = sc.steps[sc.steps.length - 1]; if (prev) { Object.assign(st, { hr: prev.hr, spo2: prev.spo2, rr: prev.rr, sys: prev.sys, dia: prev.dia, temp: prev.temp, rhythm: prev.rhythm }); if (!(prev.next || []).length) prev.next = [{ label: st.label, to: st.id }]; } sc.steps.push(st); save(); render(); }
+function addStep() { const sc = cur(); const st = blankStep(sc.steps.length + 1); const prev = sc.steps[sc.steps.length - 1]; if (prev) { Object.assign(st, { hr: prev.hr, spo2: prev.spo2, rr: prev.rr, sys: prev.sys, dia: prev.dia, temp: prev.temp, rhythm: prev.rhythm, o2: prev.o2 == null ? `` : prev.o2 }); if (!(prev.next || []).length) prev.next = [{ label: st.label, to: st.id }]; } sc.steps.push(st); save(); render(); }
 function dupStep(i) { const sc = cur(); const c = deep(sc.steps[i]); c.id = uid(`p`); c.label += ` (copie)`; c.next = []; sc.steps.splice(i + 1, 0, c); save(); render(); }
 function delStep(i) { const sc = cur(); if (sc.steps.length < 2) return toast(`Il faut au moins une phase.`); if (!confirm(`Supprimer la phase P${i + 1} « ${sc.steps[i].label} » ?`)) return; const id = sc.steps[i].id; sc.steps.splice(i, 1); sc.steps.forEach((s) => { s.next = (s.next || []).filter((n) => n.to !== id); if (s.silence === id) s.silence = ``; }); save(); render(); }
 function moveStep(i, d) { const sc = cur(), j = i + d; if (j < 0 || j >= sc.steps.length) return; [sc.steps[i], sc.steps[j]] = [sc.steps[j], sc.steps[i]]; save(); render(); }
@@ -1210,6 +1218,7 @@ function issues(sc) {
         clean(a.needs).forEach((l) => { if (!labels.includes(l)) E(`${P} : l'action « ${a.label} » attend « ${l} », qui n'existe plus dans la phase.`); });
         const set = effOf(a);
         for (const [k, v] of Object.entries(set)) { const [lo, hi] = LIMITS[k]; if (v < lo || v > hi) E(`${P} : l'effet de « ${a.label} » met ${k.toUpperCase()} à ${v}, hors limites (${lo} à ${hi}).`); }
+        if (/^oxyg[eè]ne/i.test(String(a.label).trim()) && set.spo2 != null) W(`${P} : « ${a.label} » a un effet SpO2 : il est ignoré, l'oxygène suit la règle automatique (débit). Retirez l'effet SpO2.`);
       }
     });
     (s.next || []).forEach((n, j) => { if (!n.to || !ids.includes(n.to)) E(`${P} : le bouton « ${n.label || j + 1} » ne mène à aucune phase.`); if (!String(n.label).trim()) W(`${P} : un bouton de passage n'a pas de texte.`); });
@@ -1240,6 +1249,7 @@ function exportScenario(sc) {
   s.steps.forEach((st) => {
     st.tech = clean(st.tech); st.crm = clean(st.crm);
     st.silence = st.silence || ``;
+    st.o2 = st.o2 === `` || st.o2 == null ? `` : Number(st.o2) || 0;
     st.actions = (st.actions || []).filter((a) => String(a.label).trim()).map((a) => {
       const o = { label: String(a.label).trim(), times: Math.max(1, Number(a.times) || 1), to: a.to || ``, delay: Number(a.delay) || 0 };
       if (a.kind === `call`) return Object.assign(o, { kind: `call`, who: a.who });
@@ -1348,6 +1358,7 @@ document.addEventListener(`input`, () => { clearTimeout(window._rt); window._rt 
 load();
 $(`mail`).value = getMail();
 render();
+
 </script>
 </body>
 </html>
