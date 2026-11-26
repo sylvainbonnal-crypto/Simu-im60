@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <meta name="theme-color" content="#0c1214">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <title>Simulateur EDAN iM60 — Urgences en hémodialyse (v7)</title>
+  <title>Simulateur EDAN iM60 — Urgences en hémodialyse (v11)</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@400;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
@@ -646,7 +646,8 @@
     .docview img { flex: 1; min-height: 0; width: 100%; object-fit: contain; background: #fff; }
     .dv-empty { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #fff; font-size: 24px; gap: 8px; }
     .dv-empty small { font-size: 14px; color: #8a9aa8; }
-    .pb-acts { display: flex; flex-direction: column; gap: 6px; flex: none; }
+    .pb-acts { display: flex; flex-direction: column; gap: 6px; flex: none; max-height: 44vh; overflow-y: auto; }
+    #tab-live { padding-bottom: calc(8px + var(--coh, 0px)); }
     .pb-acts .acts { display: flex; flex-wrap: wrap; gap: 6px; }
     .pb-acts .act { flex: 1 1 calc(50% - 6px); min-width: 130px; display: flex; flex-direction: column; align-items: flex-start; gap: 1px; padding: 8px 10px; border-radius: 12px; border: 1px solid var(--line-strong); background: var(--surf-3); color: inherit; text-align: left; cursor: pointer; font-size: 14px; }
     .pb-acts .act small { font-size: 11.5px; opacity: .75; }
@@ -750,6 +751,63 @@
     @keyframes phring { 50% { transform: scale(1.08); box-shadow: 0 0 0 14px rgba(31,143,78,.25); } }
     .cb-due { padding: 12px; border-radius: 14px; border: 2px solid var(--warn); background: rgba(255,170,0,.12); flex-wrap: wrap; }
     .co-bar .btn.grn { font-weight: 700; }
+    /* ===== V11 ===== */
+    .team-r.col { flex-direction: column; align-items: stretch; gap: 4px; padding: 6px; border: 1px solid var(--line); border-radius: 10px; }
+    .team-r.col.off { opacity: .6; }
+    .team-r.col > .team-r { gap: 6px; }
+    .team-r input.note-in { font-size: 13px; }
+    .team-r em.opt { font-style: normal; font-size: 11px; font-weight: 600; color: var(--warn); margin-left: 4px; }
+    .pro-seg { display: inline-flex; flex: none; border: 1px solid var(--line-strong); border-radius: 9px; overflow: hidden; }
+    .pro-seg button { min-height: 34px; min-width: 42px; padding: 0 8px; border: 0; background: var(--surf-2); color: var(--ink-2); font-weight: 700; font-size: 13px; cursor: pointer; }
+    .pro-seg button + button { border-left: 1px solid var(--line-strong); }
+    .pro-seg button.sel { background: var(--primary); color: #fff; }
+    .seg-r.wrap { flex-wrap: wrap; }
+    .seg-r.wrap button { flex: 1 1 auto; }
+    .pb-acts .pend.trap { background: #3a2a55; color: #fff; border: 1px solid #b28cff; }
+    .pb-acts .act.trapb { font-size: 13px; border-color: #b28cff; }
+    .cs-prev { font-size: 12.5px; padding: 6px 8px; border-radius: 8px; background: rgba(91,127,214,.16); color: var(--ink); }
+    .crm-mini { display: flex; flex-direction: column; gap: 4px; font-size: 13px; }
+    .crm-mini small { display: block; color: var(--ink-2); }
+    .ko-t { color: var(--warn); }
+    /* Fenêtre d'appel de la télécommande : petite par défaut, ne masque plus les boutons */
+    #view-remote .callov { max-height: 30vh; padding: 8px 10px; gap: 6px; }
+    #view-remote .callov.big { max-height: 52vh; }
+    #view-remote .callov.mini { left: auto; right: 10px; padding: 0; border: 0; background: transparent; box-shadow: none; overflow: visible; }
+    .co-pill { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 14px; border-radius: 22px; border: 2px solid var(--ok); background: #0f2a22; color: var(--ok); font-size: 15px; font-weight: 700; box-shadow: 0 6px 18px rgba(0,0,0,.5); cursor: pointer; }
+    .co-txt.one { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .ph-wake { margin-top: 14px; text-align: center; font-size: 13px; color: #ffb74d; cursor: pointer; }
+    .ph-wake.ok { color: #6f8291; font-size: 16px; }
+    /* Tablette : briefing défilable, lancement, débriefing */
+    .sl-nav { display: flex; justify-content: center; gap: 14px; flex-wrap: wrap; }
+    .sl-nav .m-btn { min-height: 52px; min-width: 150px; font-size: 17px; }
+    .sl-nav .m-btn.go { background: #1d9e4a; border-color: #1d9e4a; color: #fff; font-weight: 700; }
+    .sl-nav .m-btn[disabled] { opacity: .35; }
+    .sl-msg { text-align: center; color: #ffb74d; font-size: 14px; min-height: 18px; }
+    .stg-note { display: block; font-style: normal; color: #ffd000; font-size: 13px; }
+    .stg-db { height: 100%; }
+    .db-tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+    .db-tabs button { min-height: 40px; padding: 0 14px; border-radius: 20px; border: 1px solid #2f6fb0; background: #0d151c; color: #9fb0bf; font-size: 14px; cursor: pointer; }
+    .db-tabs button.sel { background: #2a8cff; border-color: #2a8cff; color: #fff; font-weight: 700; }
+    .db-body { display: flex; flex-direction: column; gap: 10px; font-size: 15px; }
+    .db-body h3 { margin: 6px 0 0; color: #2a8cff; font-size: 15px; text-transform: uppercase; letter-spacing: .06em; }
+    .db-q { margin: 0; padding-left: 20px; color: #ffd000; font-size: 17px; line-height: 1.4; }
+    .db-big { color: #fff; font-size: clamp(28px, 4.5vw, 48px); text-align: center; margin: 8vh 0 2vh; }
+    .db-tl td:first-child, .db-tl td:nth-child(2) { white-space: nowrap; color: #8a9aa8; }
+    .db-tl tr.c-step td { color: #fff; font-weight: 700; background: #10202c; }
+    .db-tl tr.c-alarm td:last-child { color: #ff6b5e; }
+    .db-tl tr.c-learner td:last-child { color: #b28cff; }
+    .db-tl tr.c-call td:last-child { color: #8fb0ff; }
+    .db-att { display: flex; flex-direction: column; gap: 4px; }
+    .db-att div { display: flex; gap: 8px; align-items: baseline; padding: 6px 8px; border-radius: 4px; background: #10171d; color: #9fb0bf; }
+    .db-att div.ok { color: #fff; }
+    .db-att div span { color: #6f8291; } .db-att div.ok span { color: #3ddc84; }
+    .db-att em { font-style: normal; font-size: 12px; color: #2a8cff; }
+    .db-att time { margin-left: auto; color: #3ddc84; font-variant-numeric: tabular-nums; }
+    .db-crm { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 8px; }
+    .db-crm div { padding: 8px 10px; background: #10171d; border-radius: 4px; }
+    .db-crm b { display: block; color: #fff; } .db-crm small { color: #9fb0bf; font-size: 13.5px; }
+    .db-mine { white-space: pre-wrap; color: #fff; font-size: 20px; padding: 10px 12px; border-left: 4px solid #3ddc84; background: #10171d; }
+    .db-msgs div { color: #fff; font-size: 18px; padding: 4px 0; }
   </style>
 </head>
 <body>
@@ -952,6 +1010,7 @@
         </div>
         <button type="button" class="btn" onclick="requestSync()">Resynchroniser</button>
         <div class="muted">Relais : <span class="dot" id="remote-sync-dot" style="display:inline-block"></span> <span id="remote-sync-label">Connexion…</span></div>
+        <div class="muted">Télécommande : <span id="wake-lbl">—</span></div>
         <div class="muted">Le QR code et le PIN s'affichent sur la tablette tant que la programmation n'est pas validée, ou Menu › Maintenance (code 5008).</div>
       </div></details>
       <details class="fold" id="d-note"><summary>Note écrite</summary><div>
@@ -982,7 +1041,7 @@
         <div><label class="lbl" for="prep-name">Nom affiché</label><input type="text" id="prep-name" value="" onchange="pushPrep()"></div>
       </div>
       <div><label class="lbl" for="prep-clock">Heure de départ du scénario (horloge du scope)</label><input type="time" id="prep-clock" onchange="prep.clock=this.value;pushPrep()"></div>
-      <div class="muted">Au démarrage, aucun dispositif n'est posé : le scope affiche des mesures vides. Pendant la séance, vous validez chaque pose (ECG, SpO2, brassard) dans l'onglet Simulation.</div>
+      <div class="muted">Au démarrage, aucun dispositif n'est posé : le scope affiche des mesures vides. Pendant la séance, vous validez chaque pose (5 dérivations, SpO2, brassard, T°) dans l'onglet Simulation : l'heure de chaque pose est notée pour le débriefing.</div>
     </div>
 
     <div class="card">
@@ -994,14 +1053,26 @@
     </div>
 
     <div class="card">
+      <h2>Journée de formation</h2>
+      <div class="g2">
+        <div><label class="lbl" for="day-date">Date</label><input type="date" id="day-date" onchange="setDayField('date', this.value)"></div>
+        <div><label class="lbl" for="day-title">Intitulé</label><input type="text" id="day-title" placeholder="Ex. : Urgences en dialyse — groupe 2" onchange="setDayField('title', this.value)"></div>
+      </div>
+      <div class="lbl">Apprenants présents <span id="day-count" class="muted"></span></div>
+      <div id="day-list" class="team-l"></div>
+      <div class="row"><button type="button" class="btn grow" onclick="openRosterImport()">📋 Importer la fiche de présence</button><button type="button" class="btn" onclick="addDayLearner()">+ Ajouter</button></div>
+      <div id="day-sess" class="muted"></div>
+    </div>
+
+    <div class="card">
       <h2>Équipe de la séance</h2>
       <div class="muted">Affiché dans le briefing formateur de la tablette et repris dans le compte-rendu.</div>
       <div class="lbl">Formateurs : qui fait quoi</div>
       <div id="team-staff" class="team-l"></div>
-      <div class="lbl">Apprenants</div>
+      <div class="lbl">Apprenants de cette simulation</div>
       <div id="team-learners" class="team-l"></div>
       <div class="row"><button type="button" class="btn" onclick="addLearner()">+ Ajouter un apprenant</button><button type="button" class="btn" onclick="clearLearners(this)">Vider la liste</button></div>
-      <datalist id="learner-roles"><option value="Leader"><option value="IDE 1"><option value="IDE 2"><option value="Aide-soignant(e)"><option value="Au téléphone"><option value="Renfort (arrive plus tard)"><option value="Observateur"></datalist>
+      <datalist id="learner-roles"><option value="Leader"><option value="Gestes (IDE 1)"><option value="Préparation des médicaments (IDE 2)"><option value="Au téléphone"><option value="Surveillance, constantes"><option value="Matériel, chariot, DSA"><option value="Manutention"><option value="Renfort (arrive plus tard)"><option value="Observateur"></datalist>
     </div>
 
     <div class="card">
@@ -1018,7 +1089,7 @@
 
     <div class="card">
       <h2>Briefings sur la tablette</h2>
-      <div class="muted">La tablette affiche le briefing à l'intérieur du scope éteint. Commencez entre formateurs, puis passez au briefing des apprenants.</div>
+      <div class="muted">La tablette affiche le briefing à l'intérieur du scope éteint. Commencez entre formateurs, puis passez au briefing des apprenants. Les écrans des apprenants défilent d'ici ou directement sur la tablette ; le dernier écran de la tablette porte le bouton « Lancer la simulation ».</div>
       <div class="seg-r" id="brief-seg"></div>
       <div id="brief-nav" class="row"></div>
     </div>
@@ -1046,7 +1117,7 @@
     <div class="sec-lbl"><span>Pose des dispositifs</span><span>touchez pour valider</span></div>
     <div class="trow six" id="row-sensors"></div>
     <div class="sec-lbl"><span>Actions</span></div>
-    <div class="trow" id="row-actions"></div>
+    <div class="trow six" id="row-actions"></div>
 
     <div class="chk-card">
       <div class="seg-r" id="chk-seg"></div>
@@ -1060,7 +1131,9 @@
 
     <div id="db-p-bilan" class="r-sub">
       <button type="button" id="db-end" class="btn red big hidden" onclick="endSession(this)">■ Terminer la simulation</button>
+      <div class="card" id="db-tablet"></div>
       <div class="card"><h2>Bilan de la séance</h2><div id="db-summary"></div><div id="db-stats" class="stats"></div></div>
+      <div class="card"><h2>Monitorage</h2><div class="muted">Allumage du scope, puis heure de chaque pose (validée dans l'onglet Simulation).</div><div id="db-monit"></div></div>
       <div class="card"><h2>Délais clés</h2><div id="db-delays"></div></div>
       <div class="card"><h2>Tensions mesurées</h2><div id="db-nibp"></div></div>
     </div>
@@ -1077,12 +1150,14 @@
     </div>
 
     <div id="db-p-guide" class="r-sub hidden">
-      <div class="card"><h2>Conduite du débriefing</h2><div class="muted">Trois temps : les réactions, l'analyse des faits, puis les messages à retenir.</div><div id="db-guide" style="display:flex;flex-direction:column;gap:8px"></div></div>
+      <div class="card"><h2>Conduite du débriefing</h2><div class="muted">Quatre temps : 1. synthèse rapide de la situation, 2. réactions et émotions, 3. analyse des faits (chronologie), 4. CRM (leadership, communication en boucle fermée, ressources, outils). Puis les messages à retenir.</div><div id="db-guide" style="display:flex;flex-direction:column;gap:8px"></div></div>
     </div>
 
     <div id="db-p-crm" class="r-sub hidden">
       <div class="card"><h2>Grille d'observation CRM</h2><div id="db-crm" class="crm"></div></div>
     </div>
+
+    <div id="db-p-day" class="r-sub hidden"><div id="db-day" style="display:flex;flex-direction:column;gap:10px"></div></div>
 
     <div id="db-p-export" class="r-sub hidden">
       <div class="card">
@@ -1222,21 +1297,27 @@
       { id: `crm_pause`, t: `Pause de 10 s` },
       { id: `crm_aide`, t: `Appel précoce de l'aide` },
       { id: `crm_chariot`, t: `Chariot + DAE rapprochés` },
-      { id: `crm_tiers`, t: `Tiers perturbateur géré` }
+      { id: `crm_tiers`, t: `Tiers perturbateur géré` },
+      { id: `crm_outils`, t: `Outils maîtrisés (scope, DSA, chariot)` }
     ];
 
     const CRM_GRID = [
       { id: `lead`, t: `Leadership & organisation`, ok: `Le leader s'annonce dès l'aggravation, reste en retrait des gestes, délègue nominativement.`, ko: `Pas de leader : tout le monde se précipite sur le même geste.` },
-      { id: `com`, t: `Communication d'équipe`, ok: `Chiffres et rythme annoncés à voix haute, prescriptions répétées avant injection, boucle fermée.`, ko: `Ordres vagues (« il faut du calcium », « appelez quelqu'un ») sans destinataire ni contrôle.` },
-      { id: `sit`, t: `Conscience de la situation`, ok: `Recul aux tournants critiques, synthèse toutes les 2-3 min, alarmes du scope prises en compte.`, ko: `Effet tunnel : machine de dialyse ou perfusion au détriment de l'état du patient.` },
-      { id: `res`, t: `Utilisation des ressources`, ok: `Appel précoce du médecin et du renfort, chariot et DAE rapprochés dès les premiers signes.`, ko: `Alerte retardée (sous-estimation, peur de déranger), chariot resté dans le couloir.` }
+      { id: `com`, t: `Communication en boucle fermée`, ok: `1. L'émetteur nomme le destinataire (« Julie, tu… »). 2. Message court et chiffré (produit, dose, voie). 3. Le destinataire répète. 4. L'émetteur confirme (« oui »). 5. Le destinataire annonce « fait » quand c'est fait. Chiffres et rythme annoncés à voix haute.`, ko: `Ordres lancés « en l'air » (« il faut du calcium », « appelez quelqu'un ») : pas de destinataire, pas de répétition, pas de « fait ».` },
+      { id: `sit`, t: `Conscience de la situation`, ok: `Recul aux tournants critiques, synthèse toutes les 2-3 min (sait / craint / fait), alarmes du scope prises en compte.`, ko: `Effet tunnel : machine de dialyse ou perfusion au détriment de l'état du patient.` },
+      { id: `res`, t: `Utilisation des ressources`, ok: `Aide demandée tôt (collègues, renfort, médecin, 15), tâches réparties selon les compétences (IDE / AS), chariot, DSA, i-STAT et ECG 12 dérivations rapprochés dès les premiers signes.`, ko: `Alerte retardée (sous-estimation, peur de déranger), tout le monde sur le même geste, chariot resté dans le couloir.` },
+      { id: `outils`, t: `Connaissance des outils`, ok: `Scope : lancer une PNI, mettre l'alarme en pause, lire le rythme. DSA : pose des électrodes, analyse, sécurité avant le choc. Chariot : savoir ce qu'il contient et où. Téléphone : numéros et protocoles du service connus.`, ko: `Hésitations sur le matériel : on cherche le bouton PNI, les électrodes du DSA, le calcium dans le chariot, le numéro à appeler.` }
     ];
 
+    /* v11 : débriefing en 4 temps, puis les messages à retenir */
     const GUIDE_GENERAL = {
+      syn: [`En deux phrases : quelle était la situation ? Qu'est-ce qui s'est passé ?`, `Le leader (ou un apprenant) fait la synthèse : ce qu'on savait, ce qu'on craignait, ce qu'on a fait.`],
       emo: [`Comment vous sentez-vous ?`, `Qu'est-ce qui vous a le plus marqué ?`, `Un mot pour résumer la séance ?`],
-      ana: [`Reprenons la chronologie : qu'avez-vous vu, compris, décidé ?`, `À quel moment avez-vous perçu la gravité ?`, `Qui était le leader ? Comment l'équipe le savait-elle ?`],
-      syn: [`Quels sont les 2 ou 3 messages que vous retenez pour votre pratique ?`, `Que referiez-vous de la même façon ? Différemment ?`]
+      ana: [`Reprenons la chronologie : qu'avez-vous vu, compris, décidé ?`, `À quel moment avez-vous perçu la gravité ?`, `Qu'est-ce qui vous a aidés ? Qu'est-ce qui vous a gênés ?`],
+      crm: [`Qui était le leader ? Comment l'équipe le savait-elle ?`, `Communication en boucle fermée : les demandes avaient-elles un destinataire ? Ont-elles été répétées, puis annoncées « fait » ?`, `Ressources : quand avez-vous appelé à l'aide ? Comment les tâches ont-elles été réparties entre IDE et AS ?`, `Outils : le scope, le DSA, le chariot, le téléphone… avez-vous su vous en servir ? Qu'avez-vous cherché ?`],
+      msg: [`Quels sont les 2 ou 3 messages que vous retenez pour votre pratique ?`, `Que referiez-vous de la même façon ? Différemment ?`]
     };
+    const GUIDE_PARTS = [[`syn`, `1. Synthèse rapide de la situation`, `Ce qui s'est passé, en quelques phrases…`], [`emo`, `2. Réactions, émotions`, `Ce que disent les apprenants…`], [`ana`, `3. Analyse des faits (chronologie)`, `Points forts, écarts, causes…`], [`crm`, `4. CRM : leadership, communication, ressources, outils`, `Ce qui a marché, ce qui est à renforcer…`], [`msg`, `Pour finir : messages à retenir`, `2 ou 3 messages clés pour la pratique…`]];
 
     /* ===== Scénarios fournis par l'éditeur (format editeur.html) ===== */
     /* Scénarios fournis au départ : fiches PDF du Module 2 + version 5 du simulateur */
@@ -1256,11 +1337,18 @@
     ];
     
     const ROLES_DEFAUT = [
-      `Formateur 1 : télécommande (phases, constantes, PNI, actions)`,
-      `Formateur 2 : joue le médecin d'astreinte au téléphone`,
-      `Observateur : grille CRM et notes de débriefing`,
-      `Voix du patient : formateur 1`
+      `Formateur 1 : joue la victime (le patient)`,
+      `Formateur 2 : observateur — télécommande du scope et DSA`,
+      `Téléphone (facultatif) : répond aux appels et rappelle en tant que médecin`,
+      `Perturbateur (facultatif) : famille, collègue, ambulancier…`
     ];
+    /* v11 : anciens rôles par défaut (remplacés automatiquement) */
+    const ROLES_ANCIENS = [`Formateur 1 : télécommande (phases, constantes, PNI, actions)`, `Formateur 2 : joue le médecin d'astreinte au téléphone`, `Observateur : grille CRM et notes de débriefing`];
+    function migrateRoles(list) {
+      const r = (list || []).map((x) => String(x).trim()).filter((x) => x && !/^voix du patient/i.test(x));
+      if (!r.length || r.every((x) => ROLES_ANCIENS.includes(x))) return ROLES_DEFAUT.slice();
+      return r;
+    }
 
     const SCENARIOS_DEFAUT = [
       {
@@ -1330,31 +1418,34 @@
         objTech: [`Reconnaître la gravité d'une bradycardie sévère et l'instabilité hémodynamique`, `Transfert fauteuil → lit en sécurité (drap de glisse + planche)`, `Mettre en place rapidement monitorage, ECG, i-STAT et protocole hyperkaliémie`],
         objCrm: [`Boucle fermée systématique : appel à l'aide, ECG, O2, surveillance, matériel`, `Pause mentale de 10 secondes en cas de désorganisation`, `Conscience de la situation : reformulation toutes les 2 à 3 minutes`],
         sensorsStart: { ecg: false, spo2: false, cuff: false, temp: false },
-        trainer: { roles: ROLES_DEFAUT.slice(), dsa: `Asystolie (P3) : choc non indiqué. FV (P4) : choc indiqué ; RACS après le 1er choc.`, notes: `` },
+        trainer: { roles: ROLES_DEFAUT.slice(), dsa: `Asystolie (P3) : choc non indiqué. Calcium + adrénaline 1 mg → FV (P4) : choc indiqué ; RACS après le 1er choc.`, notes: `` },
         briefing: { situation: `Lundi 10 h. M. P., hémodialysé anurique, arrive en fauteuil après le week-end. Les ambulanciers disent qu'il a fait un malaise au lever.`, points: BRIEF_POINTS_DEFAUT.slice() },
         steps: [
           { id: `p1`, label: `Arrivée en fauteuil`, cue: `T amples pointues symétriques, P aplaties, QRS élargis. HGT 1,35 g/L.`, hr: 41, spo2: 98, rr: 15, sys: 100, dia: 70, temp: 37.0, rhythm: `hyperk2`, resp: `normal`, ectopy: `none`, nibpFail: false, rosc: false, trans: 0,
-            tech: [`Appel renfort immédiat`, `Transfert fauteuil → lit (drap + planche)`, `Monitorage posé`, `ECG 12 dérivations rapide`, `i-STAT / kaliémie`, `Recueil : dernière séance + traitements`, `Transmission médicale structurée (SAED)`, `Décision médicale : protocole hyperkaliémie`],
+            tech: [`Appel renfort immédiat`, `Transfert fauteuil → lit (drap + planche)`, `ECG 12 dérivations rapide`, `i-STAT / kaliémie`, `Recueil : dernière séance + traitements`, `Transmission médicale structurée (SAED)`, `Pas de générateur disponible signalé au médecin`, `Protocole insuline + aérosol lancé`],
             crm: [`Leader désigné`, `Boucle fermée sur appel à l'aide, ECG, O2`],
-            actions: [{ label: `Transfert fauteuil → lit`, times: 1, to: `p2`, delay: 10 }, { label: `Gluconate de calcium 10 %`, times: 1, to: ``, delay: 0 }, { label: `Salbutamol aérosol`, times: 1, to: ``, delay: 0 }],
-            call: { on: true, who: `nephro`, hear: [`Identité de l'appelant et du patient`, `Bradycardie à 41, TA 100/70`, `Asthénie, malaise, difficultés à la marche`, `Dernière dialyse il y a 72 h (vendredi)`, `ECG : T pointues, QRS larges`, `Kaliémie i-STAT`], ask: [`Quand a-t-il été dialysé pour la dernière fois ?`, `Qu'est-ce que montre l'ECG ?`, `Vous avez une kaliémie ?`, `Il est conscient ?`], answer: `C'est une hyperkaliémie menaçante. Vous lancez le protocole hyperkaliémie du service tout de suite, sans attendre la dialyse. Préparez le chariot et le DSA. Vous arrivez dans 10 minutes.`, presc: [`Gluconate de calcium 10 % selon le protocole du service`, `Insuline rapide + G10 % selon le protocole`, `Salbutamol en aérosol`, `Préparer un générateur en urgence`, `Scope continu, chariot et DSA au lit`], avoid: `Ne pas donner le diagnostic avant d'avoir entendu l'ECG ou la kaliémie. Ne pas dire de brancher la dialyse d'abord.` },
+            actions: [{ label: `Transfert fauteuil → lit`, times: 1, to: `p2`, delay: 10 }, { label: `Insuline + G10 %`, times: 1, to: ``, delay: 0 }, { label: `Salbutamol aérosol`, times: 1, to: ``, delay: 0 }, { label: `Gluconate de calcium 10 %`, times: 1, to: ``, delay: 0 }],
+            call: { on: true, who: `nephro`, hear: [`Identité de l'appelant et du patient`, `Bradycardie à 41, TA 100/70`, `Asthénie, malaise, difficultés à la marche`, `Dernière dialyse il y a 72 h (vendredi)`, `ECG : T pointues, QRS larges`, `Kaliémie i-STAT`], ask: [`Quand a-t-il été dialysé pour la dernière fois ?`, `Qu'est-ce que montre l'ECG ?`, `Vous avez une kaliémie ?`, `Il est conscient ?`], answer: `C'est une hyperkaliémie menaçante. Ta première demande : le brancher en dialyse tout de suite (« Il faut le dialyser maintenant, branchez-le. »). Si l'infirmier te répond qu'aucun générateur n'est disponible pour le moment, tu réponds : « D'accord. Alors faites le protocole : insuline rapide avec du G10 et aérosol de salbutamol, tout de suite. » Chariot et DSA au lit. Tu arrives dans 10 minutes.`, presc: [`Dialyse en urgence si un générateur est disponible`, `Sinon : insuline rapide + G10 % selon le protocole du service`, `Aérosol de salbutamol`, `Scope continu, chariot et DSA au lit`], avoid: `Ne pas donner le diagnostic avant d'avoir entendu l'ECG ou la kaliémie. Ne pas prescrire le gluconate de calcium maintenant : il sera fait en cas d'arrêt. Ne pas proposer le protocole avant que l'infirmier ait dit qu'il n'y a pas de générateur disponible.` },
             next: [{ label: `Aggravation (secours)`, to: `p2` }] },
-          { id: `p2`, label: `Aggravation (pré-ACR)`, cue: `Aggravation juste après le transfert au lit. P disparues, QRS très larges, aspect sinusoïdal. TA non mesurable. L'arrêt survient juste après la pose de l'insuline.`, hr: 23, spo2: 95, rr: 15, sys: 55, dia: 30, temp: 37.0, rhythm: `hyperk_sine`, resp: `normal`, ectopy: `none`, nibpFail: true, rosc: false, trans: 30,
-            tech: [`Gluconate de calcium 10 %`, `Insuline + G10 %`, `Salbutamol aérosol`, `Oxygène`, `Matériel préparé : chariot + DSA, électrodes posées`, `Adrénaline prête`],
+          { id: `p2`, label: `Aggravation (pré-ACR)`, cue: `Aggravation juste après le transfert au lit. P disparues, QRS très larges, aspect sinusoïdal. TA non mesurable. L'asystolie survient pendant l'insuline et l'aérosol : quand l'apprenant coupe l'alarme, la télécommande propose de passer en asystolie (sinon ✋ bouton de secours).`, hr: 23, spo2: 95, rr: 15, sys: 55, dia: 30, temp: 37.0, rhythm: `hyperk_sine`, resp: `normal`, ectopy: `none`, nibpFail: true, rosc: false, trans: 30,
+            tech: [`Insuline + G10 %`, `Salbutamol aérosol`, `Oxygène`, `Matériel préparé : chariot + DSA, électrodes posées`, `Adrénaline prête`],
             crm: [`Pause mentale de 10 s`, `Reformulation toutes les 2-3 min`, `Boucle fermée sur surveillance et matériel`],
-            actions: [{ label: `Gluconate de calcium 10 %`, times: 1, to: ``, delay: 0 }, { label: `Insuline + G10 %`, times: 1, to: `p3`, delay: 10 }, { label: `Salbutamol aérosol`, times: 1, to: ``, delay: 0 }],
-            call: { on: true, who: `nephro`, hear: [`FC 23`, `TA non mesurable`, `QRS très larges, aspect sinusoïdal`, `Traitements déjà faits`], ask: [`Vous avez fait le calcium ?`, `Il est conscient ? Il a un pouls ?`], answer: `Il est en pré-arrêt. Calcium immédiatement s'il n'est pas fait, électrodes du DSA posées. J'arrive. S'il fait un arrêt, massage et appelez le 15.`, presc: [`Gluconate de calcium 10 % maintenant`, `Électrodes du DSA posées`, `Adrénaline prête`], avoid: `Ne pas rassurer faussement.` },
+            silence: `p3`,
+            actions: [{ label: `Insuline + G10 %`, times: 1, to: ``, delay: 0 }, { label: `Salbutamol aérosol`, times: 1, to: ``, delay: 0 }, { label: `Gluconate de calcium 10 %`, times: 1, to: ``, delay: 0 }],
+            call: { on: true, who: `nephro`, hear: [`FC 23`, `TA non mesurable`, `QRS très larges, aspect sinusoïdal`, `Traitements déjà faits (insuline, aérosol)`], ask: [`Où en est le protocole ? L'insuline est passée ?`, `Il est conscient ? Il a un pouls ?`], answer: `Il est en pré-arrêt. Vous continuez l'insuline et l'aérosol, électrodes du DSA posées, chariot au lit, adrénaline prête. J'arrive. S'il fait un arrêt : massage, vous appelez le 15 et vous faites le calcium.`, presc: [`Poursuivre insuline + G10 % et aérosol`, `Électrodes du DSA posées, chariot au lit`, `Adrénaline prête`, `Si arrêt : massage, appel du 15, gluconate de calcium`], avoid: `Ne pas rassurer faussement. Ne pas faire faire le calcium avant l'arrêt.` },
             next: [{ label: `Arrêt cardiaque (secours)`, to: `p3` }] },
-          { id: `p3`, label: `Arrêt cardiaque — asystolie`, cue: `Asystolie. Le DSA ne propose pas de choc. Le 2e calcium fait passer en FV.`, hr: 0, spo2: 95, rr: 0, sys: 0, dia: 0, temp: 37.0, rhythm: `asystole`, resp: `agonal`, ectopy: `none`, nibpFail: false, rosc: false, trans: 0,
+          { id: `p3`, label: `Arrêt cardiaque — asystolie`, cue: `Asystolie. Le DSA ne propose pas de choc. Calcium + adrénaline 1 mg (les deux, dans n'importe quel ordre) → FV (P4).`, hr: 0, spo2: 95, rr: 0, sys: 0, dia: 0, temp: 37.0, rhythm: `asystole`, resp: `agonal`, ectopy: `none`, nibpFail: false, rosc: false, trans: 0,
             tech: [`Arrêt reconnu, alerte`, `MCE débuté`, `DSA posé, analyse : choc non indiqué`, `Calcium IVD`, `Adrénaline`],
             crm: [`Leader en retrait des gestes`, `Relais du massage annoncés`],
-            actions: [{ label: `Gluconate de calcium 10 %`, times: 2, to: `p4`, delay: 5 }, { label: `Adrénaline 1 mg`, times: 1, to: ``, delay: 0 }],
-            call: { on: true, who: `samu`, hear: [`Adresse : centre d'hémodialyse`, `Arrêt cardiaque, heure de l'arrêt`, `Patient hémodialysé, hyperkaliémie suspectée`, `Massage en cours, DSA posé`, `Médicaments déjà donnés`], ask: [`Quelle est l'adresse exacte ?`, `À quelle heure a eu lieu l'arrêt ?`, `Le massage est commencé ? Le DSA est posé ?`, `Qu'est-ce qu'il a déjà reçu ?`], answer: `Le SMUR part. Massage sans interruption, relais toutes les 2 minutes. Calcium à renouveler, adrénaline. Suivez le DSA.`, presc: [`Poursuivre le massage cardiaque`, `Adrénaline 1 mg IV toutes les 3 à 5 minutes`, `Renouveler le gluconate de calcium 10 %`, `Suivre les consignes du DSA`], avoid: `Ne pas faire arrêter le massage pour répondre au téléphone : demander qu'une autre personne garde le combiné.` },
+            actions: [{ label: `Gluconate de calcium 10 %`, times: 1, to: `p4`, delay: 5, needs: [`Adrénaline 1 mg`] }, { label: `Adrénaline 1 mg`, times: 1, to: ``, delay: 0 }],
+            call: { on: true, who: `samu`, hear: [`Adresse : centre d'hémodialyse`, `Arrêt cardiaque, heure de l'arrêt`, `Patient hémodialysé, hyperkaliémie suspectée`, `Massage en cours, DSA posé`, `Médicaments déjà donnés`], ask: [`Quelle est l'adresse exacte ?`, `À quelle heure a eu lieu l'arrêt ?`, `Le massage est commencé ? Le DSA est posé ?`, `Qu'est-ce qu'il a déjà reçu ?`], answer: `Le SMUR part. Massage sans interruption, relais toutes les 2 minutes. Gluconate de calcium et adrénaline 1 mg. Suivez le DSA.`, presc: [`Poursuivre le massage cardiaque`, `Gluconate de calcium 10 % IV`, `Adrénaline 1 mg IV toutes les 3 à 5 minutes`, `Suivre les consignes du DSA`], avoid: `Ne pas faire arrêter le massage pour répondre au téléphone : demander qu'une autre personne garde le combiné.` },
+            call2: { who: `nephro`, hear: [`Arrêt cardiaque`, `Massage en cours`], ask: [`Il est en arrêt ?`], answer: `Il est en arrêt : tu ne restes pas au téléphone. « Raccrochez et appelez le 15 tout de suite. Massez sans vous arrêter et faites-lui du calcium. » Si on te demande quel calcium ou quelle dose : « Je ne sais pas ce que vous avez dans le chariot : regardez, et donnez le calcium que vous avez. »`, presc: [`Appeler le 15 immédiatement`, `Massage cardiaque sans interruption`, `Calcium : celui du chariot`], avoid: `Tu ne connais pas le contenu du chariot d'urgence du centre : tu ne cites ni produit précis ni dose. Tu ne gardes pas l'infirmier au téléphone : tu le renvoies vers le 15.` },
             next: [{ label: `Passage en FV (secours)`, to: `p4` }] },
-          { id: `p4`, label: `Fibrillation ventriculaire`, cue: `FV. Adrénaline, puis le DSA délivre un choc : RACS.`, hr: 0, spo2: 95, rr: 0, sys: 0, dia: 0, temp: 37.0, rhythm: `vf`, resp: `agonal`, ectopy: `none`, nibpFail: false, rosc: false, trans: 0,
+          { id: `p4`, label: `Fibrillation ventriculaire`, cue: `FV (après calcium + adrénaline). Le DSA propose un choc : après le choc, RACS.`, hr: 0, spo2: 95, rr: 0, sys: 0, dia: 0, temp: 37.0, rhythm: `vf`, resp: `agonal`, ectopy: `none`, nibpFail: false, rosc: false, trans: 0,
             tech: [`Analyse DSA : choc indiqué`, `Sécurité annoncée avant le choc`, `Choc délivré`, `MCE repris aussitôt`, `Adrénaline 1 mg`],
             crm: [`Boucle fermée sur le choc`, `Synthèse sait / craint / fait`],
-            actions: [{ label: `Adrénaline 1 mg`, times: 1, to: ``, delay: 0 }, { label: `Choc DSA délivré`, times: 1, to: `p5`, delay: 5 }],
+            actions: [{ label: `Choc DSA délivré`, times: 1, to: `p5`, delay: 5 }, { label: `Adrénaline 1 mg`, times: 1, to: ``, delay: 0 }],
+            call2: { who: `nephro`, hear: [`Arrêt cardiaque`, `Massage en cours`], ask: [`Il est en arrêt ?`], answer: `Il est en arrêt : tu ne restes pas au téléphone. « Raccrochez et appelez le 15 tout de suite. Massez sans vous arrêter et faites-lui du calcium. » Si on te demande quel calcium ou quelle dose : « Je ne sais pas ce que vous avez dans le chariot : regardez, et donnez le calcium que vous avez. »`, presc: [`Appeler le 15 immédiatement`, `Massage cardiaque sans interruption`, `Calcium : celui du chariot`], avoid: `Tu ne connais pas le contenu du chariot d'urgence du centre : tu ne cites ni produit précis ni dose. Tu ne gardes pas l'infirmier au téléphone : tu le renvoies vers le 15.` },
             next: [{ label: `RACS (secours)`, to: `p5` }] },
           { id: `p5`, label: `Retour à une circulation spontanée`, cue: `Les QRS s'affinent, la PA remonte. T toujours pointues.`, hr: 52, spo2: 95, rr: 14, sys: 96, dia: 60, temp: 37.0, rhythm: `hyperk2`, resp: `normal`, ectopy: `none`, nibpFail: false, rosc: true, trans: 30,
             tech: [`Surveillance rapprochée (PNI répétée)`, `Nouveau point au médecin`],
@@ -1385,8 +1476,8 @@
           { name: `Séance vierge`, when: `Feuille de surveillance à remplir`, img: `` }
         ],
         debrief: {
-          questions: [`Qu'est-ce qui a été priorisé, et pourquoi ?`, `Quand l'équipe a-t-elle déclenché l'aide ?`, `Quels éléments ont orienté (ou non) la suspicion d'hyperkaliémie ?`, `Qu'a-t-on oublié sous stress ?`, `Quel a été le délai d'administration du calcium ? Comment avez-vous géré l'impossibilité de dialyser tout de suite ?`, `Quand le rythme est tombé à 23 bpm, avez-vous ressenti le besoin d'une pause de 10 secondes ?`],
-          messages: [`Hémodialysé après 72 h, asthénique et bradycarde : hyperkaliémie jusqu'à preuve du contraire.`, `Le calcium n'attend pas la dialyse.`, `On alerte tôt, avec un message structuré.`]
+          questions: [`Qu'est-ce qui a été priorisé, et pourquoi ?`, `Quand l'équipe a-t-elle déclenché l'aide ?`, `Quels éléments ont orienté (ou non) la suspicion d'hyperkaliémie ?`, `Qu'a-t-on oublié sous stress ?`, `Comment avez-vous géré l'impossibilité de dialyser tout de suite ? Qu'avez-vous dit au médecin ?`, `Pendant l'arrêt : qui a trouvé le calcium dans le chariot ? Combien de temps a-t-il fallu ?`, `Quand le rythme est tombé à 23 bpm, avez-vous ressenti le besoin d'une pause de 10 secondes ?`],
+          messages: [`Hémodialysé après 72 h, asthénique et bradycarde : hyperkaliémie jusqu'à preuve du contraire.`, `Pas de générateur disponible : le protocole (insuline + G10, aérosol) n'attend pas la dialyse.`, `On alerte tôt, avec un message structuré.`]
         }
       },
       {
@@ -1406,7 +1497,7 @@
         briefing: { situation: `Mardi, ouverture de la salle. Un patient est assis dans le sas d'accueil, il respire mal. L'ambulancier vous appelle.`, points: BRIEF_POINTS_DEFAUT.slice() },
         steps: [
           { id: `p1`, label: `Détresse respiratoire (OAP)`, cue: `Tachycardie sinusale, HVG. SpO2 88 % à l'air. Quand l'O2 est posé, touchez « Oxygène 4 L/min » : la SpO2 monte à 92 % en 1 min.`, hr: 100, spo2: 88, rr: 30, sys: 180, dia: 100, temp: 36.6, rhythm: `lvh`, resp: `shallow`, ectopy: `none`, nibpFail: false, rosc: false, trans: 0,
-            tech: [`Position assise`, `Oxygène`, `Scope + PNI`, `Appel médecin`], crm: [`Leader désigné`, `Proche pris en charge`],
+            tech: [`Position assise`, `Oxygène`, `Appel médecin`], crm: [`Leader désigné`, `Proche pris en charge`],
             actions: [{ label: `Oxygène 4 L/min`, times: 1, to: ``, delay: 0, set: { spo2: 92 }, setTrans: 60 }],
             call: { on: true, who: `nephro`, hear: [`Identité de l'appelant et du patient`, `Détresse respiratoire : SpO2 88 % à l'air (92 % sous O2 si déjà posé)`, `PA 180/100, FC 100, FR 30`, `+5 kg au-dessus du poids sec, œdèmes, crépitants`, `BPCO`], ask: [`Il a pris combien par rapport à son poids sec ?`, `Il sature à combien ? Il est sous oxygène ?`, `Et la tension ?`], answer: `C'est un OAP de surcharge. Vous le laissez assis sous oxygène et vous le branchez tout de suite pour une ultrafiltration seule : 1,5 litre en 1 heure. Surveillance de la tension rapprochée pendant l'UF.`, presc: [`Position assise`, `Oxygène 4 L/min, objectif SpO2 88 à 92 % (BPCO)`, `Branchement en UF seule : 1,5 L en 1 h`, `Surveillance tensionnelle toutes les 15 min pendant l'UF`, `Rappeler si la SpO2 ne remonte pas ou si la tension baisse`], avoid: `Pour toi, c'est un OAP de surcharge et rien d'autre : ne parle pas de cause cardiaque ni de douleur thoracique, ne demande pas d'ECG. C'est une UF seule, pas une dialyse classique.` },
             next: [{ label: `Sous O2, UF seule 1,5 L / 1 h`, to: `p2` }] },
@@ -1653,7 +1744,7 @@
        Chaque appel est relié à une action « ☎ Appel … » de la phase.
        SAMU : fonctionnement réel du centre 15 — l'ARM décroche, localise, identifie,
        évalue la gravité en deux questions, puis passe le médecin régulateur. */
-    const ARM_ITEMS = [`Adresse exacte (centre, ville, étage, salle, code)`, `Numéro de rappel`, `Qui appelle (nom, fonction)`, `Patient : nom, âge`, `Motif en une phrase`, `Conscient ? Respire normalement ?`];
+    const ARM_ITEMS = [`Adresse exacte (centre, ville, étage, salle, code)`, `Accord pour rappeler sur ce numéro`, `Qui appelle (nom, fonction)`, `Patient : nom, âge`, `Motif en une phrase`, `Conscient ? Respire normalement ?`];
     const isSamuCt = (ct) => !!ct && (ct.kind ? ct.kind === `samu` : (ct.id === `samu` || /samu|centre 15|\(15\)/i.test(ct.name || ``)));
     const callLabelFor = (ct) => (isSamuCt(ct) ? `Appel SAMU` : `Appel médecin`);
     /* v10 : médecins possibles pour un interlocuteur (un par ligne : « Dr Martin : calme, précis, un peu pressé »).
@@ -1680,9 +1771,9 @@
       if (!Array.isArray(st.actions)) st.actions = [];
       if (!Array.isArray(st.calls)) {
         st.calls = [];
-        if (st.call && st.call.on) { const c = Object.assign({}, st.call); delete c.on; delete c.prompt; st.calls.push(c); }
+        [st.call, st.call2].forEach((cc, k) => { if (cc && (cc.on || k === 1)) { const c = Object.assign({}, cc); delete c.on; delete c.prompt; st.calls.push(c); } });
       }
-      delete st.call;
+      delete st.call; delete st.call2;
       st.calls.forEach((c) => {
         if (!c.who && contacts && contacts[0]) c.who = contacts[0].id;
         if (!st.actions.some((a) => a.kind === `call` && a.who === c.who)) {
@@ -1715,6 +1806,9 @@
         `- Tu ne prescris, ne demandes et ne proposes que ce qui figure dans ta décision prévue et tes prescriptions : aucun examen, aucun bilan, aucun avis en plus.`,
         `- Tu n'évoques aucun autre diagnostic que celui de ta décision prévue et tu n'annonces jamais ce qui pourrait arriver ensuite, sauf si l'appelant t'en parle lui-même. Si l'appelant t'apprend un élément nouveau et inquiétant, tu lui demandes de te rappeler ou d'appeler le 15, sans inventer de traitement.`
       ];
+      /* v11 : mémoire des appels précédents de la séance avec ce même interlocuteur */
+      const prev = T(ctx.prev) ? [``, `TU AS DÉJÀ EU L'ÉQUIPE AU TÉLÉPHONE POUR CE PATIENT, TU T'EN SOUVIENS :`, T(ctx.prev),
+        `Tu restes cohérent avec ce que tu as déjà dit et prescrit. Tu ne fais pas répéter ce qui a déjà été dit : tu demandes ce qui a changé depuis, ce qui a été fait, et les constantes actuelles. Si l'appelant se présente, tu le reconnais (« Oui, c'est pour M. … ? Je vous écoute. »).`] : [];
       const vous = `Dans les consignes du formateur, « vous » peut te désigner, toi le médecin (par exemple « vous envoyez le SMUR » veut dire : tu engages le SMUR).`;
       const common = T(ctx.common) ? [``, `CONSIGNES COMMUNES DU FORMATEUR :`, T(ctx.common)] : [];
       const decide = LV
@@ -1746,7 +1840,7 @@
           `4. ${decide}`,
           `5. Quand tu décides : tu dis ce que tu décides (tu viens, dans combien de temps, ou tu renvoies vers le 15), puis tes prescriptions une par une, puis « Répétez-moi ce que vous allez faire ». Tu corriges si la reformulation est fausse ou incomplète.`,
           `6. ${bye}`
-        ].concat(body, know, common).join(`\n`) };
+        ].concat(body, know, prev, common).join(`\n`) };
       }
       const arm = [
         `Tu joues le rôle de l'ARM (assistant ou assistante de régulation médicale) qui décroche au SAMU, centre 15.${T(ct.arm) ? ` ${T(ct.arm)}` : ``}`,
@@ -1755,10 +1849,12 @@
         ``, `ÉLÉMENTS À OBTENIR, DANS CET ORDRE (numérotés) :`,
         ARM_ITEMS.map((x, i) => `${i + 1}. ${x}`).join(`\n`),
         `La première question est toujours l'adresse exacte. Chaque fois que tu obtiens un élément, ${note}.`,
+        `Numéro de rappel : tu ne demandes pas le numéro (il s'affiche sur ton écran). Tu demandes seulement : « Est-ce que je peux vous rappeler sur ce numéro ? »`,
+        T(ctx.prev) ? `L'équipe a déjà appelé le 15 pour ce patient pendant cette séance. Si l'appelant le dit, tu retrouves le dossier (« Oui, je vois le dossier »), tu vérifies juste l'adresse et ce qui a changé, puis tu passes le médecin sans tout redemander.` : ``,
         `Si l'appelant se lance dans les détails médicaux, recentre-le poliment (« D'accord, je note. Vous êtes où exactement ? ») : les détails sont pour le médecin.`,
         `Si le patient ne répond pas et ne respire pas normalement : dis que tu engages tout de suite une équipe SMUR, demande de commencer le massage cardiaque et d'apporter le défibrillateur, puis passe le médecin sans attendre le reste.`,
-        LV ? `Dès que tu as au moins l'adresse, le numéro de rappel et le motif, dis : « Je vous passe le médecin régulateur, ne quittez pas. » puis appelle la fonction transferer_au_regulateur et tais-toi.`
-          : `Dès que tu as au moins l'adresse, le numéro de rappel et le motif, dis : « Je vous passe le médecin régulateur, ne quittez pas. » et mets « transfert » à true.`,
+        LV ? `Dès que tu as au moins l'adresse, l'accord pour rappeler sur ce numéro et le motif, dis : « Je vous passe le médecin régulateur, ne quittez pas. » puis appelle la fonction transferer_au_regulateur et tais-toi.`
+          : `Dès que tu as au moins l'adresse, l'accord pour rappeler sur ce numéro et le motif, dis : « Je vous passe le médecin régulateur, ne quittez pas. » et mets « transfert » à true.`,
         T(ctx.address) ? `Adresse réelle du centre (vérifie que l'appelant la donne précisément, fais-la préciser sinon) : ${T(ctx.address)}` : ``
       ].filter((x) => x !== ``).join(`\n`);
       const main = [
@@ -1773,7 +1869,7 @@
         `5. Annonce de la décision, dans cet ordre : le moyen engagé et le délai (par exemple « J'engage une équipe SMUR, elle sera chez vous dans une vingtaine de minutes »), puis les consignes d'attente une par une, puis « Répétez-moi ce que vous allez faire ». Tu corriges si la reformulation est fausse ou incomplète.`,
         `6. ${bye.replace(`(« Rappelez-moi si ça ne s'améliore pas ou si quelque chose change. »)`, `(« Vous restez près de lui, vous rappelez le 15 immédiatement si ça change. »)`)}`,
         `À tout moment, si l'appelant décrit un arrêt cardiaque, tu engages le SMUR tout de suite, tu fais masser sans interruption et tu ${urg}.`
-      ].concat(body, know, common).join(`\n`);
+      ].concat(body, know, prev, common).join(`\n`);
       return { arm, main };
     }
     /* Décision prévue, donnée à l'IA seulement quand l'essentiel est transmis */
@@ -1814,6 +1910,7 @@
         `- Tu ne sais pas comment il va maintenant ni ce qui va se passer : l'équipe doit te le dire. Tu n'annonces jamais une évolution ou un diagnostic que l'équipe n'a pas évoqué.`,
         c && T(c.answer) ? `- Lors du premier appel, ta décision était : ${T(c.answer)} (« vous » peut te désigner, toi).` : ``,
         c && (c.presc || []).length ? `- Tu avais prescrit :\n${L(c.presc)}` : ``,
+        T(ctx.prev) ? `\nCE QUI S'EST DIT AUX APPELS PRÉCÉDENTS (tu t'en souviens) :\n${T(ctx.prev)}` : ``,
         ``, `CE QUE TU VEUX SAVOIR, une question à la fois :`, L(cb.ask && cb.ask.length ? cb.ask : [`Comment va le patient ?`, `Les constantes actuelles ?`, `Ce qui a été fait depuis mon appel ?`]),
         ``, `SELON LES NOUVELLES :`, T(cb.note) || `Si ça va mieux, tu donnes la suite de la surveillance. Si ça s'aggrave, tu demandes d'appeler le 15 ou tu annonces que tu arrives.`,
         `Quand tu as ce qu'il te faut, tu conclus en une phrase, tu dis au revoir et tu attends que l'appelant dise au revoir à son tour, ${LV ? `puis appelle la fonction raccrocher` : `et mets « raccrocher » à true`}. Tu ne raccroches jamais pendant que l'appelant parle.`,
@@ -1836,13 +1933,16 @@
         id: s.id, label: s.label || `Phase`, cue: s.cue || ``,
         hr: +s.hr || 0, spo2: +s.spo2 || 0, rr: +s.rr || 0, sys: +s.sys || 0, dia: +s.dia || 0, temp: s.temp === `` || s.temp == null ? 37 : +s.temp,
         rhythm: s.rhythm || `sinus`, resp: s.resp || `normal`, ectopy: s.ectopy || `none`, nibpFail: !!s.nibpFail, rosc: !!s.rosc, trans: +s.trans || 0,
-        actions: (s.actions || []).filter((a) => String(a.label || ``).trim()).map((a) => Object.assign({ label: String(a.label).trim(), times: Math.max(1, +a.times || 1), to: a.to || ``, delay: +a.delay || 0 }, a.kind === `call` ? { kind: `call`, who: a.who } : {}, actEffect(a))),
+        silence: s.silence || ``,
+        actions: (s.actions || []).filter((a) => String(a.label || ``).trim()).map((a) => Object.assign({ label: String(a.label).trim(), times: Math.max(1, +a.times || 1), to: a.to || ``, delay: +a.delay || 0 }, a.kind === `call` ? { kind: `call`, who: a.who } : { needs: L(a.needs) }, actEffect(a))),
         next: (s.next || []).filter((n) => n.to).map((n) => ({ label: String(n.label || ``).trim() || `Phase suivante`, to: n.to })),
         calls: (s.calls || []).filter((c) => c && c.who)
       }));
       const tech = [], crm = [];
+      /* v11 : la pose du monitorage n'est plus un geste à cocher (elle est notée à part : allumage, 5 dérivations, SpO2, PNI, T°) */
+      const isMonit = (x) => /^\s*(monitorage|scope\s*(\+|et)\s*pni|scope continu\s*$)/i.test(x);
       (e.steps || []).forEach((s, i) => {
-        L(s.tech).forEach((x, j) => tech.push({ id: `${e.id}_${s.id}_t${j}`, t: x, ph: i }));
+        L(s.tech).filter((x) => !isMonit(x)).forEach((x, j) => tech.push({ id: `${e.id}_${s.id}_t${j}`, t: x, ph: i }));
         L(s.crm).forEach((x, j) => crm.push({ id: `${e.id}_${s.id}_c${j}`, t: x, ph: i }));
       });
       const info = L(e.infoToObtain);
@@ -1855,7 +1955,7 @@
         sensorsStart: Object.assign({ ecg: false, spo2: false, cuff: false, temp: false }, e.sensorsStart),
         startTime: e.startTime || ``, steps, tech, crm,
         questions: L((e.debrief || {}).questions), messages: L((e.debrief || {}).messages),
-        trainer: e.trainer || {}, briefing: e.briefing || {}, documents: e.documents || [], contacts,
+        trainer: Object.assign({}, e.trainer, { roles: migrateRoles((e.trainer || {}).roles) }), briefing: e.briefing || {}, documents: e.documents || [], contacts,
         trigger: e.trigger || ``, saed: e.call || {},
         objTech: L(e.objTech), objCrm: L(e.objCrm), mailTo: e.mailTo || ``, editor: true
       };
@@ -3576,8 +3676,48 @@
     /* =====================================================================
        11. DÉMARRAGE, ALIMENTATION, ÉCRANS DE SÉANCE, PLEIN ÉCRAN, ANTI-VEILLE
        ===================================================================== */
-    let wakeLock = null;
-    async function requestWakeLock() { try { if (`wakeLock` in navigator) wakeLock = await navigator.wakeLock.request(`screen`); } catch (_) {} }
+    /* v11 : anti-veille renforcé (tablette, télécommande, téléphone d'appel, poste médecin).
+       1. Wake Lock de l'écran, redemandé dès qu'il est relâché, à chaque toucher et toutes les 20 s ;
+       2. secours (navigateurs sans Wake Lock, anciens iPhone) : petite vidéo muette en boucle. */
+    let wakeLock = null, wakeWant = false, wakeVid = null, wakeBusy = false, wakeTry = 0;
+    async function requestWakeLock() {
+      wakeWant = true;
+      if (document.visibilityState !== `visible` || wakeBusy) return;
+      if (wakeLock && !wakeLock.released) return;
+      wakeBusy = true;
+      try {
+        if (`wakeLock` in navigator) {
+          wakeLock = await navigator.wakeLock.request(`screen`);
+          wakeLock.addEventListener(`release`, () => { wakeLock = null; if (wakeWant) setTimeout(requestWakeLock, 800); });
+        }
+      } catch (_) { wakeLock = null; }
+      wakeBusy = false;
+      if (!wakeLock) wakeVideo();
+    }
+    function wakeVideo() {
+      try {
+        if (!wakeVid) {
+          const c = document.createElement(`canvas`); c.width = c.height = 4;
+          const g = c.getContext(`2d`); let k = 0;
+          setInterval(() => { g.fillStyle = k++ % 2 ? `#000` : `#020202`; g.fillRect(0, 0, 4, 4); }, 500);
+          const v = document.createElement(`video`);
+          v.muted = true; v.loop = true; v.playsInline = true;
+          v.setAttribute(`muted`, ``); v.setAttribute(`playsinline`, ``); v.setAttribute(`aria-hidden`, `true`);
+          v.style.cssText = `position:fixed;left:0;bottom:0;width:2px;height:2px;opacity:.01;pointer-events:none;z-index:-1`;
+          if (c.captureStream) v.srcObject = c.captureStream(2);
+          document.body.appendChild(v); wakeVid = v;
+        }
+        const p = wakeVid.play(); if (p && p.catch) p.catch(() => {});
+      } catch (_) {}
+    }
+    const wakeOk = () => !!(wakeLock && !wakeLock.released) || !!(wakeVid && !wakeVid.paused);
+    const wakeTxt = () => (wakeLock && !wakeLock.released ? `écran maintenu allumé ✓` : wakeVid && !wakeVid.paused ? `écran maintenu allumé (mode secours)` : `anti-veille inactif : touchez l'écran`);
+    function keepAwake() {
+      let last = 0;
+      document.addEventListener(`pointerdown`, () => { if (Date.now() - last > 1500) { last = Date.now(); requestWakeLock(); } });
+      document.addEventListener(`visibilitychange`, () => { if (document.visibilityState === `visible` && wakeWant) requestWakeLock(); });
+      setInterval(() => { if (wakeWant && document.visibilityState === `visible` && !(wakeLock && !wakeLock.released)) requestWakeLock(); }, 20000);
+    }
     function goFullscreen() {
       if (EMBED) return;
       const el = document.documentElement;
@@ -3655,8 +3795,8 @@
       if (st === `prep`) mode = !forceQr && Date.now() - mon.remoteAt < 12000 ? (sim.brief === `learn` ? `learn` : `syn`) : `qr`;
       else if (st === `run` && !mon.power && /^(syn|learn|sleep)\|/.test(stageKey)) mode = `sleep`;
       else if (st === `pause`) mode = `pause`;
-      else if (st === `end`) mode = `end`;
-      const key = `${mode}|${mode === `syn` ? sim.rev : mode === `learn` ? `${sim.scenarioId}.${sim.briefIdx}.${sim.patient.bed}` : mode === `qr` ? maintQr : ``}|${appState.pin}`;
+      else if (st === `end`) mode = mon.dbv && mon.dbv.sid === sim.sessionId && (mon.dbv.show || `syn`) !== `off` ? `debrief` : `end`;
+      const key = `${mode}|${mode === `syn` ? sim.rev : mode === `learn` ? `${sim.scenarioId}.${sim.briefIdx}.${sim.patient.bed}` : mode === `qr` ? maintQr : mode === `debrief` ? `${mon.dbv.k}.${dbvLocal}` : ``}|${appState.pin}`;
       if (key === stageKey) return;
       stageKey = key;
       const el = $(`stage`);
@@ -3676,6 +3816,7 @@
             <small>Touchez l'écran pour passer en plein écran.</small></div></div></div>`;
       } else if (mode === `syn`) el.innerHTML = trainerHtml();
       else if (mode === `learn`) el.innerHTML = learnHtml();
+      else if (mode === `debrief`) el.innerHTML = dbvHtml(mon.dbv);
       else if (mode === `sleep`) {
         el.classList.add(`sleep`);
         el.innerHTML = `<div class="stg-sleep"><div class="stg-logo">EDAN</div><small>Mise en veille…</small></div>`;
@@ -3742,7 +3883,8 @@
     function flowListHtml(sc) {
       const P = (id) => { const j = stepIdxById(sc, id); return j >= 0 ? `P${j + 1}` : `?`; };
       return `<div class="flow-l">${sc.steps.map((s, i) => {
-        const g = (s.actions || []).filter((a) => a.to).map((a) => `<span class="fl-go auto">${a.kind === `call` ? `☎` : `⚡`} ${esc(a.label)}${a.times > 1 && a.kind !== `call` ? ` ×${a.times}` : ``} → ${P(a.to)}${a.delay ? ` (${a.delay} s)` : ``}</span>`)
+        const g = (s.actions || []).filter((a) => a.to).map((a) => `<span class="fl-go auto">${a.kind === `call` ? `☎` : `⚡`} ${esc(a.label)}${a.times > 1 && a.kind !== `call` ? ` ×${a.times}` : ``}${(a.needs || []).length ? ` + ${esc(a.needs.join(` + `))}` : ``} → ${P(a.to)}${a.delay ? ` (${a.delay} s)` : ``}</span>`)
+          .concat(s.silence ? [`<span class="fl-go auto">🔕 silence d'alarme → ${P(s.silence)}</span>`] : [])
           .concat((s.next || []).map((n) => `<span class="fl-go">✋ ${esc(n.label)} → ${P(n.to)}</span>`));
         const att = sc.tech.filter((x) => x.ph === i).map((x) => x.t);
         return `<div class="fl-row"><b>P${i + 1}</b><div><div><b>${esc(s.label)}</b> <small>FC ${s.hr} · TA ${s.nibpFail ? `imprenable` : s.sys ? `${s.sys}/${s.dia}` : `—`} · SpO2 ${s.spo2}</small>${(s.calls || []).map((c) => ` <small class="fl-call">☎ ${esc(((sc.contacts || []).find((x) => x.id === c.who) || {}).name || `appel`)}${c.cb && c.cb.on ? ` · 📞 rappel` : ``}</small>`).join(``)}</div>
@@ -3751,38 +3893,162 @@
       }).join(``)}</div>`;
     }
 
-    /* ---------- Équipe de la séance (formateurs et apprenants) ---------- */
+    /* ---------- Équipe de la séance (formateurs et apprenants) — v11 ---------- */
     function rolesOf(sc) {
-      const r = ((sc.trainer || {}).roles || []).map((x) => String(x).trim()).filter(Boolean);
-      return (r.length ? r : ROLES_DEFAUT).map((line) => {
+      return migrateRoles((sc.trainer || {}).roles).map((line) => {
         const i = line.indexOf(`:`);
-        return i > 0 ? { key: line.slice(0, i).trim(), task: line.slice(i + 1).trim() } : { key: line, task: `` };
+        const r = i > 0 ? { key: line.slice(0, i).trim(), task: line.slice(i + 1).trim() } : { key: line, task: `` };
+        r.opt = /facultati/i.test(r.key);
+        r.label = r.key.replace(/\s*\(facultatif\)\s*/i, ``).trim();
+        return r;
       });
     }
-    const teamOf = () => { sim.team = sim.team || { staff: {}, learners: [] }; sim.team.staff = sim.team.staff || {}; sim.team.learners = sim.team.learners || []; return sim.team; };
+    const teamOf = () => {
+      const T = sim.team = sim.team || {};
+      T.staff = T.staff || {}; T.on = T.on || {}; T.snote = T.snote || {}; T.learners = T.learners || [];
+      return T;
+    };
+    const roleOn = (r) => { const v = teamOf().on[r.key]; return v == null ? !r.opt : !!v; };
+    const PRO = [[`IDE`, `IDE`], [`AS`, `AS`]];
+    const proSeg = (cur, fn) => `<span class="pro-seg">${PRO.map(([k, l]) => `<button type="button" class="${cur === k ? `sel` : ``}" onclick="${fn}('${k}')">${l}</button>`).join(``)}</span>`;
+    const jsq = (s) => esc(s).replace(/'/g, `\\'`);
     function renderTeam() {
       const box = $(`team-staff`), lb = $(`team-learners`);
       if (!box) return;
       const T = teamOf(), sc = scenarioById(sim.scenarioId);
-      box.innerHTML = rolesOf(sc).map((r) => `<div class="team-r"><div class="grow"><b>${esc(r.key)}</b>${r.task ? `<small>${esc(r.task)}</small>` : ``}</div>
-        <input type="text" placeholder="Prénom" value="${esc(T.staff[r.key] || ``)}" onchange="setStaff('${esc(r.key).replace(/'/g, `\\'`)}', this.value)"></div>`).join(``) +
-        `<div class="muted">Les rôles viennent du scénario (éditeur, onglet 1). Les prénoms sont gardés d'une séance à l'autre.</div>`;
-      lb.innerHTML = T.learners.length ? T.learners.map((l, i) => `<div class="team-r">
-        <input type="text" class="grow" placeholder="Prénom de l'apprenant" value="${esc(l.name)}" onchange="setLearner(${i}, 'name', this.value)">
-        <input type="text" list="learner-roles" placeholder="Rôle" value="${esc(l.role)}" onchange="setLearner(${i}, 'role', this.value)">
-        <button type="button" class="btn sm" onclick="delLearner(${i})" aria-label="Retirer">✕</button></div>`).join(``) : `<div class="muted">Aucun apprenant inscrit.</div>`;
+      box.innerHTML = rolesOf(sc).map((r) => {
+        const on = roleOn(r), k = jsq(r.key);
+        return `<div class="team-r col ${on ? `` : `off`}"><div class="team-r">
+          <div class="grow"><b>${esc(r.label)}${r.opt ? ` <em class="opt">facultatif</em>` : ``}</b>${r.task ? `<small>${esc(r.task)}</small>` : ``}</div>
+          ${r.opt ? `<button type="button" class="btn sm ${on ? `grn` : ``}" onclick="setRoleOn('${k}', ${on ? `false` : `true`})">${on ? `✓ Tenu` : `Non tenu`}</button>` : ``}
+          ${on ? `<input type="text" placeholder="Prénom" value="${esc(T.staff[r.key] || ``)}" onchange="setStaff('${k}', this.value)">` : ``}</div>
+          ${on ? `<input type="text" class="note-in" placeholder="Annotation (consigne, matériel, réplique…)" value="${esc(T.snote[r.key] || ``)}" onchange="setStaffNote('${k}', this.value)">` : ``}</div>`;
+      }).join(``) + `<div class="muted">Les rôles viennent du scénario (éditeur, onglet 1). Prénoms et annotations sont gardés d'une séance à l'autre.</div>`;
+      const pool = day.learners.filter((l) => l.name);
+      const inSim = (l) => T.learners.some((x) => norm(x.name) === norm(l.name));
+      const chips = pool.length ? `<div class="lbl">Présents aujourd'hui : touchez ceux qui jouent cette simulation</div><div class="chips">${pool.map((l) => `<button type="button" class="chip ${inSim(l) ? `on` : ``}" onclick="toggleSimLearner('${jsq(l.id)}')">${esc(l.name)}${l.pro ? ` <time>${l.pro}</time>` : ``}</button>`).join(``)}</div>` : `<div class="muted">Pas encore de liste du jour : remplissez « Journée de formation » ci-dessus (fiche de présence).</div>`;
+      lb.innerHTML = chips + (T.learners.length ? T.learners.map((l, i) => `<div class="team-r col"><div class="team-r">
+          <input type="text" class="grow" placeholder="Prénom de l'apprenant" value="${esc(l.name)}" onchange="setLearner(${i}, 'name', this.value)">
+          ${proSeg(l.pro, `setLearnerPro.bind(null,${i})`)}
+          <button type="button" class="btn sm" onclick="delLearner(${i})" aria-label="Retirer">✕</button></div>
+          <div class="team-r"><input type="text" list="learner-roles" placeholder="Rôle" value="${esc(l.role)}" onchange="setLearner(${i}, 'role', this.value)">
+          <input type="text" class="grow note-in" placeholder="Annotation" value="${esc(l.note || ``)}" onchange="setLearner(${i}, 'note', this.value)"></div></div>`).join(``) : `<div class="muted">Aucun apprenant dans cette simulation.</div>`) +
+        (pool.length && T.learners.length ? `<div class="muted">Observateurs : ${esc(pool.filter((l) => !inSim(l)).map((l) => l.name).join(`, `) || `aucun`)}</div>` : ``);
     }
     function teamChanged() { pushSim(); renderPrepChecks(); }
     function setStaff(k, v) { teamOf().staff[k] = String(v || ``).trim(); teamChanged(); }
-    function addLearner() { teamOf().learners.push({ name: ``, role: `` }); renderTeam(); const ins = $(`team-learners`).querySelectorAll(`input.grow`); if (ins.length) ins[ins.length - 1].focus(); teamChanged(); }
-    function setLearner(i, k, v) { const l = teamOf().learners[i]; if (!l) return; l[k] = String(v || ``).trim(); teamChanged(); }
+    function setStaffNote(k, v) { teamOf().snote[k] = String(v || ``).trim(); teamChanged(); }
+    function setRoleOn(k, v) { teamOf().on[k] = !!v; renderTeam(); teamChanged(); }
+    function addLearner() { teamOf().learners.push({ name: ``, role: ``, pro: ``, note: `` }); renderTeam(); const ins = $(`team-learners`).querySelectorAll(`input.grow:not(.note-in)`); if (ins.length) ins[ins.length - 1].focus(); teamChanged(); }
+    function setLearner(i, k, v) {
+      const l = teamOf().learners[i]; if (!l) return;
+      l[k] = String(v || ``).trim();
+      if (k === `name` && l.name && !day.learners.some((d) => norm(d.name) === norm(l.name))) { day.learners.push({ id: uid(), name: l.name, pro: l.pro || `` }); daySave(); renderDay(); }
+      teamChanged();
+    }
+    function setLearnerPro(i, p) {
+      const l = teamOf().learners[i]; if (!l) return;
+      l.pro = l.pro === p ? `` : p;
+      const d = day.learners.find((x) => norm(x.name) === norm(l.name)); if (d) { d.pro = l.pro; daySave(); renderDay(); }
+      renderTeam(); teamChanged();
+    }
+    function toggleSimLearner(id) {
+      const d = day.learners.find((x) => x.id === id); if (!d) return;
+      const T = teamOf(), j = T.learners.findIndex((x) => norm(x.name) === norm(d.name));
+      if (j >= 0) T.learners.splice(j, 1); else T.learners.push({ name: d.name, role: ``, pro: d.pro || ``, note: `` });
+      renderTeam(); teamChanged();
+    }
     function delLearner(i) { teamOf().learners.splice(i, 1); renderTeam(); teamChanged(); }
     let clrArm = 0;
     function clearLearners(btn) {
       if (Date.now() - clrArm > 3000) { clrArm = Date.now(); btn.textContent = `Toucher encore pour vider`; setTimeout(() => { btn.textContent = `Vider la liste`; }, 3000); return; }
       clrArm = 0; teamOf().learners = []; renderTeam(); teamChanged(); btn.textContent = `Vider la liste`;
     }
-    const learnersTxt = () => teamOf().learners.filter((l) => l.name || l.role).map((l) => `${l.name || `?`}${l.role ? ` (${l.role})` : ``}`);
+    const learnerLine = (l) => `${l.name || `?`}${l.pro || l.role ? ` (${[l.pro, l.role].filter(Boolean).join(` — `)})` : ``}${l.note ? ` : ${l.note}` : ``}`;
+    const learnersTxt = () => teamOf().learners.filter((l) => l.name || l.role).map(learnerLine);
+
+    /* ---------- v11 : journée de formation (liste des présents, IDE / AS, séances jouées) ---------- */
+    const DAY_DEFAULT = { date: ``, title: ``, learners: [], sessions: [], notes: `` };
+    let day = deep(DAY_DEFAULT);
+    const todayIso = () => { const d = new Date(); return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`; };
+    function dayLoad() { day = Object.assign(deep(DAY_DEFAULT), storeGet(`im60_day`) || {}); if (!day.date) day.date = todayIso(); }
+    function daySave() { storeSet(`im60_day`, day); }
+    function renderDay() {
+      const box = $(`day-list`); if (!box) return;
+      const di = $(`day-date`), ti = $(`day-title`);
+      if (di && document.activeElement !== di) di.value = day.date || ``;
+      if (ti && document.activeElement !== ti) ti.value = day.title || ``;
+      const L = day.learners, nI = L.filter((l) => l.pro === `IDE`).length, nA = L.filter((l) => l.pro === `AS`).length, nX = L.length - nI - nA;
+      $(`day-count`).textContent = L.length ? `${L.length} · ${nI} IDE · ${nA} AS${nX ? ` · ${nX} à préciser` : ``}` : ``;
+      box.innerHTML = L.length ? L.map((l, i) => `<div class="team-r"><input type="text" class="grow" value="${esc(l.name)}" placeholder="Nom Prénom" onchange="setDayLearner(${i}, this.value)">${proSeg(l.pro, `setDayPro.bind(null,${i})`)}<button type="button" class="btn sm" onclick="delDayLearner(${i})" aria-label="Retirer">✕</button></div>`).join(``)
+        : `<div class="muted">Aucun apprenant. Importez la fiche de présence (copier-coller ou fichier CSV) ou ajoutez-les un par un.</div>`;
+      $(`day-sess`).textContent = day.sessions.length ? `${day.sessions.length} simulation${day.sessions.length > 1 ? `s` : ``} déjà jouée${day.sessions.length > 1 ? `s` : ``} aujourd'hui (Débriefing › Journée).` : ``;
+    }
+    function setDayField(k, v) { day[k] = String(v || ``).trim(); daySave(); }
+    function setDayLearner(i, v) { const l = day.learners[i]; if (!l) return; l.name = String(v || ``).trim(); daySave(); renderTeam(); }
+    function setDayPro(i, p) {
+      const l = day.learners[i]; if (!l) return;
+      l.pro = l.pro === p ? `` : p; daySave(); renderDay();
+      const t = teamOf().learners.find((x) => norm(x.name) === norm(l.name)); if (t) { t.pro = l.pro; teamChanged(); }
+      renderTeam();
+    }
+    function addDayLearner() { day.learners.push({ id: uid(), name: ``, pro: `` }); daySave(); renderDay(); const ins = $(`day-list`).querySelectorAll(`input.grow`); if (ins.length) ins[ins.length - 1].focus(); }
+    function delDayLearner(i) { day.learners.splice(i, 1); daySave(); renderDay(); renderTeam(); }
+    /* Fiche de présence : une personne par ligne (copier-coller depuis Excel, Word, un mail…) ou fichier CSV */
+    function parseRoster(txt) {
+      const out = [];
+      String(txt || ``).split(/\r?\n/).forEach((line) => {
+        let s = line.replace(/ /g, ` `).trim(); if (!s) return;
+        if (/\bnom\b/i.test(s) && /pr[ée]nom|fonction|signature|grade/i.test(s)) return;      // ligne d'en-tête
+        let pro = ``;
+        if (/\b(IDE|IDEL|infirmi[eè]re?s?|ISP)\b/i.test(s)) pro = `IDE`;
+        if (/\b(AS|ASH|aide[\s-]*soignante?s?)\b/i.test(s) && !/\bIDE\b/i.test(s)) pro = `AS`;
+        const cells = s.split(/[;\t,|]+/).map((x) => x.trim()).filter(Boolean)
+          .filter((x) => !/^(IDE|IDEL|ISP|AS|ASH|infirmi[eè]re?s?|aide[\s-]*soignante?s?|pr[ée]sente?|absente?|x|oui|non|signature|matin|apr[eè]s-midi)$/i.test(x))
+          .filter((x) => !/^[\d\s/.:hH-]+$/.test(x) && !/@/.test(x));
+        let name = cells.slice(0, 2).join(` `).replace(/^\d+[.)-]?\s*/, ``).replace(/\s+/g, ` `).trim();
+        if (!/[a-zà-ÿ]{2}/i.test(name)) return;
+        if (out.some((o) => norm(o.name) === norm(name))) return;
+        out.push({ id: uid(), name, pro });
+      });
+      return out;
+    }
+    function openRosterImport() {
+      openSheet(`roster`, shHead(`📋 Fiche de présence`, `Une personne par ligne. IDE ou AS reconnus s'ils sont écrits sur la ligne.`) +
+        `<textarea id="roster-txt" rows="8" placeholder="Exemples :&#10;DUPONT Marie ; IDE&#10;Martin Paul	AS&#10;Léa Nguyen"></textarea>
+         <div class="row"><label class="btn grow" style="justify-content:center">📄 Choisir un fichier CSV / texte<input type="file" accept=".csv,.txt,text/csv,text/plain" class="hidden" onchange="rosterFile(this)"></label></div>
+         <div class="muted">Depuis Excel : sélectionnez les colonnes Nom, Prénom (et Fonction), copiez, collez ici. Ou « Enregistrer sous › CSV ».</div>
+         <div class="g2"><button type="button" class="btn pri" onclick="rosterApply(false)">Ajouter à la liste</button><button type="button" class="btn" onclick="rosterApply(true)">Remplacer la liste</button></div>
+         <div id="roster-prev" class="muted"></div>`);
+      const ta = $(`roster-txt`);
+      ta.addEventListener(`input`, () => { const r = parseRoster(ta.value); $(`roster-prev`).textContent = r.length ? `${r.length} personne(s) reconnue(s) : ${r.slice(0, 6).map((x) => x.name + (x.pro ? ` (${x.pro})` : ``)).join(`, `)}${r.length > 6 ? `…` : ``}` : ``; });
+    }
+    function rosterFile(inp) {
+      const f = inp.files && inp.files[0]; if (!f) return;
+      const rd = new FileReader();
+      rd.onload = () => {
+        let t = ``;
+        try { t = new TextDecoder(`utf-8`, { fatal: true }).decode(rd.result); } catch (_) { try { t = new TextDecoder(`windows-1252`).decode(rd.result); } catch (__) { t = ``; } }
+        const ta = $(`roster-txt`); if (ta) { ta.value = t; ta.dispatchEvent(new Event(`input`)); }
+      };
+      rd.readAsArrayBuffer(f);
+    }
+    function rosterApply(replace) {
+      const r = parseRoster(($(`roster-txt`) || {}).value);
+      if (!r.length) { toast(`Aucun nom reconnu`); return; }
+      if (replace) day.learners = r;
+      else r.forEach((x) => { const o = day.learners.find((d) => norm(d.name) === norm(x.name)); if (o) { if (x.pro) o.pro = x.pro; } else day.learners.push(x); });
+      daySave(); closeSheet(); renderDay(); renderTeam();
+      const nX = day.learners.filter((l) => !l.pro).length;
+      toast(`${r.length} apprenant(s) importé(s)${nX ? ` · ${nX} : choisir IDE ou AS` : ``}`);
+    }
+    let dayArm = 0;
+    function newDay(btn) {
+      if (Date.now() - dayArm > 3000) { dayArm = Date.now(); btn.textContent = `Toucher encore : tout effacer`; setTimeout(() => { btn.textContent = `Nouvelle journée`; }, 3000); return; }
+      dayArm = 0; day = deep(DAY_DEFAULT); day.date = todayIso(); daySave(); teamOf().learners = [];
+      btn.textContent = `Nouvelle journée`; renderDay(); renderTeam(); teamChanged(); if (curTab === `debrief`) renderDebrief();
+      toast(`Nouvelle journée prête`);
+    }
 
     /* ---------- Destination des appels du téléphone d'appel ---------- */
     const CALL_MODES = {
@@ -3889,7 +4155,9 @@
       const cbp = cbPend.map((p) => `<div class="pend"><span>📞 Rappel de ${esc(p.name)} dans <b data-cbcd="${p.id}">${fmtDur(p.at - Date.now())}</b></span><button type="button" class="btn sm" onclick="cbNow('${p.id}')">Maintenant</button><button type="button" class="btn sm" onclick="cbCancel('${p.id}')">Annuler</button></div>`).join(``);
       const docs = (sc.documents || []).length ? `<button type="button" class="act doc ${sim.doc >= 0 ? `on` : ``}" onclick="openDocSheet()">📄 Documents${sim.doc >= 0 ? ` <small>affiché</small>` : ``}</button>` : ``;
       const pend = pendGo ? `<div class="pend"><span>⏳ ${esc(pendGo.label)} → ${esc(sc.steps[pendGo.idx] ? sc.steps[pendGo.idx].label : ``)} dans <b id="pend-cd">${Math.max(0, Math.ceil((pendGo.at - Date.now()) / 1000))}</b> s</span><button type="button" class="btn sm" onclick="goStep(${pendGo.idx}, 'immédiat')">Maintenant</button><button type="button" class="btn sm" onclick="cancelPend()">Annuler</button></div>` : ``;
-      const html = pend + cbp + (acts || man || docs || cbs ? `<div class="acts">${acts}${cbs}${man}${docs}</div>` : ``);
+      const trap = sim.trap ? `<div class="pend trap"><span>🔕 Au prochain silence d'alarme : <b>${esc(sim.trap.label)}</b></span><button type="button" class="btn sm" onclick="openTrapSheet()">Maintenant</button><button type="button" class="btn sm" onclick="clearTrap()">Désarmer</button></div>` : ``;
+      const trapBtn = sim.trap ? `` : `<button type="button" class="act trapb" onclick="openTrapSet()"><b>🔕 Piège silence</b><small>au prochain silence d'alarme</small></button>`;
+      const html = pend + trap + cbp + `<div class="acts">${acts}${cbs}${man}${docs}${trapBtn}</div>`;
       if (box.dataset.h !== html) { box.dataset.h = html; box.innerHTML = html; }
     }
     const norm = (s) => String(s || ``).normalize(`NFD`).replace(/[̀-ͯ]/g, ``).toLowerCase().replace(/[^a-z0-9]+/g, ` `).trim();
@@ -3914,13 +4182,21 @@
       }
       const na = norm(a.label).split(` `).filter((w) => w.length > 3);
       sc.tech.filter((it) => it.ph === sim.stepIdx && !debrief.done[it.id] && na.length && na.every((w) => norm(it.t).includes(w))).forEach((it) => toggleDone(it.id));
-      if (a.to && n >= a.times && !pendGo) {
-        const idx = stepIdxById(sc, a.to);
+      /* v11 : une action peut exiger qu'une autre ait été faite (ex. : calcium + adrénaline → FV) */
+      const cntOf = (l) => sim.actCnt[actKey(sim.stepIdx, l)] || 0;
+      const ready = (x) => x && x.to && x.kind !== `call` && cntOf(x.label) >= x.times && (x.needs || []).every((l) => cntOf(l) >= 1);
+      let trig = a.to && (a.kind === `call` ? n >= a.times : ready(a)) ? a : null;
+      if (!trig) trig = (st.actions || []).find((x) => x !== a && (x.needs || []).includes(a.label) && ready(x)) || null;
+      if (!trig && a.to && a.kind !== `call` && n >= a.times && (a.needs || []).length) toast(`${a.label} noté : en attente de « ${a.needs.filter((l) => cntOf(l) < 1).join(` », « `)} »`);
+      if (trig && !pendGo) {
+        const idx = stepIdxById(sc, trig.to);
+        const lbl = trig === a ? a.label : `${trig.label} + ${a.label}`;
         if (idx >= 0) {
-          if (!a.delay) goStep(idx, a.label);
-          else { pendGo = { idx, at: Date.now() + a.delay * 1000, label: a.label }; toast(`${a.label} → ${sc.steps[idx].label} dans ${a.delay} s`); }
+          if (!trig.delay) goStep(idx, lbl);
+          else { pendGo = { idx, at: Date.now() + trig.delay * 1000, label: lbl }; toast(`${lbl} → ${sc.steps[idx].label} dans ${trig.delay} s`); }
         }
       }
+      if (sim.trap && sim.trap.to && a.kind !== `call` && /insuline|salbutamol|a[ée]rosol/i.test(a.label)) toast(`🔕 Piège armé : au prochain silence d'alarme, la télécommande proposera « ${sim.trap.label} »`);
       saveRemote(); renderActs(); renderChecklists();
     }
     function goStep(idx, why) {
@@ -3929,6 +4205,49 @@
       if (idx < 0 || !sc.steps[idx]) return;
       applyStep(idx);
       if (why) toast(`→ ${sc.steps[idx].label}`);
+    }
+    /* ---------- v11 : piège « silence d'alarme » ----------
+       Quand l'apprenant met l'alarme du scope en pause, la télécommande propose de déclencher l'évènement prévu
+       (ex. : asystolie pendant l'insuline et l'aérosol). Armé automatiquement par la phase (éditeur) ou à la main. */
+    const TRAP_RHY = [[`asystole`, `Asystolie`], [`vf`, `FV`], [`vt`, `TV sans pouls`], [`pea`, `AESP`]];
+    const trapSeen = new Set();
+    function openTrapSet() {
+      const sc = scenarioById(sim.scenarioId);
+      openSheet(`trapset`, shHead(`🔕 Piège au silence d'alarme`, `Quand l'apprenant coupera l'alarme du scope, la télécommande vous proposera :`) +
+        `<div class="lbl">Passer à une phase</div><div class="doc-list">${sc.steps.map((s, i) => i === sim.stepIdx ? `` : `<button type="button" class="btn ${sim.trap && sim.trap.to === s.id ? `pri` : ``}" onclick="setTrap('${esc(s.id)}', '')"><b>P${i + 1} — ${esc(s.label)}</b></button>`).join(``)}</div>
+         <div class="lbl">Ou changer seulement le rythme</div><div class="g2">${TRAP_RHY.map(([k, l]) => `<button type="button" class="btn red ${sim.trap && sim.trap.rhy === k ? `chosen` : ``}" onclick="setTrap('', '${k}')">${l}</button>`).join(``)}</div>
+         ${sim.trap ? `<button type="button" class="btn" onclick="clearTrap();closeSheet()">Désarmer le piège</button>` : ``}`);
+    }
+    function setTrap(to, rhy) {
+      const sc = scenarioById(sim.scenarioId), j = to ? stepIdxById(sc, to) : -1;
+      const label = j >= 0 ? sc.steps[j].label : (TRAP_RHY.find((x) => x[0] === rhy) || [0, rhy])[1];
+      sim.trap = { to: j >= 0 ? to : ``, rhy: j >= 0 ? `` : rhy, label };
+      pushSim(); remEvent(`system`, `🔕 Piège armé : au prochain silence d'alarme → ${label}`);
+      closeSheet(); renderActs();
+    }
+    function clearTrap() { if (!sim.trap) return; remEvent(`system`, `🔕 Piège désarmé (${sim.trap.label})`); sim.trap = null; pushSim(); renderActs(); }
+    function trapCheck(ev) {
+      if (role !== `remote` || !sim.trap || sim.stage !== `run` || !ev || ev.src !== `mon` || ev.cat !== `learner`) return;
+      if (!/^Pause alarme \d/.test(ev.text) || trapSeen.has(ev.id) || Date.now() - ev.ts > 20000) return;
+      trapSeen.add(ev.id);
+      openTrapSheet(true);
+    }
+    function openTrapSheet(fromScope) {
+      const t = sim.trap; if (!t) return;
+      openSheet(`trap`, shHead(fromScope ? `🔕 L'apprenant vient de couper l'alarme` : `🔕 Piège au silence d'alarme`, fromScope ? `Le scope est silencieux : c'est le moment prévu.` : `Déclencher sans attendre ?`) +
+        `<button type="button" class="btn red big" onclick="trapFire()">⚡ Maintenant : ${esc(t.label)}</button>
+         <button type="button" class="btn big" onclick="closeSheet()">Pas maintenant (piège gardé)</button>
+         <button type="button" class="btn" onclick="clearTrap();closeSheet()">Désarmer le piège</button>`);
+      ctBeep([660, 880], 0.18, 0.08);
+    }
+    function trapFire() {
+      const t = sim.trap; closeSheet();
+      if (!t) return;
+      sim.trap = null;
+      remEvent(`step`, `🔕 ${t.label} — déclenché pendant la pause d'alarme`);
+      if (t.to) { const idx = stepIdxById(scenarioById(sim.scenarioId), t.to); if (idx >= 0) goStep(idx, `silence d'alarme`); }
+      else if (t.rhy) quick(t.rhy);
+      renderActs();
     }
     function cancelPend() { if (pendGo) remEvent(`system`, `Passage automatique annulé (${pendGo.label})`); pendGo = null; renderActs(); }
     let pendPausedAt = 0;
@@ -3968,12 +4287,12 @@
     }
 
     /* ---------- Briefings (tablette, dans le scope éteint) ---------- */
-    const staffPlain = (sc) => rolesOf(sc).map((r) => `${r.key}${teamOf().staff[r.key] ? ` — ${teamOf().staff[r.key]}` : ``}${r.task ? ` : ${r.task}` : ``}`);
+    const staffPlain = (sc) => rolesOf(sc).filter(roleOn).map((r) => `${r.label}${teamOf().staff[r.key] ? ` — ${teamOf().staff[r.key]}` : ``}${r.task ? ` : ${r.task}` : ``}${teamOf().snote[r.key] ? ` [${teamOf().snote[r.key]}]` : ``}`);
     function staffLines(sc) {
       const T = teamOf();
-      return rolesOf(sc).map((r) => {
-        const n = T.staff[r.key];
-        return `<b class="stg-who">${esc(r.key)}${n ? ` — ${esc(n)}` : ``}</b>${r.task ? ` : ${esc(r.task)}` : ``}`;
+      return rolesOf(sc).filter(roleOn).map((r) => {
+        const n = T.staff[r.key], nt = T.snote[r.key];
+        return `<b class="stg-who">${esc(r.label)}${n ? ` — ${esc(n)}` : ``}</b>${r.task ? ` : ${esc(r.task)}` : ``}${nt ? `<i class="stg-note">✎ ${esc(nt)}</i>` : ``}`;
       });
     }
     function trainerHtml() {
@@ -3993,7 +4312,8 @@
         </div>
         ${sc.editor ? flowListHtml(sc) : ``}
         <details class="stg-more"><summary>Constantes programmées (détail)</summary>${synHtml()}</details>
-        <div class="stg-foot">Ensuite : briefing des apprenants depuis la télécommande, puis validation : le scope se met en veille.</div>
+        <div class="stg-foot">Ensuite : briefing des apprenants (depuis la télécommande ou ici), puis « Lancer la simulation » : le scope se met en veille.</div>
+        <div class="sl-nav"><button type="button" class="m-btn" onclick="event.stopPropagation();monToLearners()">Passer au briefing des apprenants ▶</button></div>
       </div>`;
     }
     function learnHtml() {
@@ -4002,7 +4322,29 @@
         <div class="sl-top"><span>Briefing</span><span>${i + 1} / ${sl.length}</span></div>
         ${s.kind === `situation` ? `<div class="sl-pat">${esc(sim.patient.bed || ``)} · ${esc(sim.patient.name || ``)}</div><div class="sl-big">${esc(s.text)}</div>` : `<div class="sl-big pt">${esc(s.text)}</div>`}
         <div class="sl-dots">${sl.map((_, k) => `<i class="${k === i ? `on` : ``}"></i>`).join(``)}</div>
+        <div class="sl-nav">
+          <button type="button" class="m-btn ghost" onclick="event.stopPropagation();monBrief(-1)" ${i <= 0 ? `disabled` : ``}>◀ Précédent</button>
+          ${i < sl.length - 1 ? `<button type="button" class="m-btn" onclick="event.stopPropagation();monBrief(1)">Suivant ▶</button>`
+            : `<button type="button" class="m-btn go" id="mon-launch" onclick="event.stopPropagation();monLaunch(this)">▶ Lancer la simulation</button>`}
+        </div>
+        <div id="mon-launch-msg" class="sl-msg"></div>
       </div>`;
+    }
+    /* v11 : le briefing des apprenants défile depuis la tablette, et la simulation se lance depuis la tablette */
+    function monBrief(d) {
+      const n = learnSlides(scenarioById(sim.scenarioId)).length;
+      const i = Math.max(0, Math.min(n - 1, (sim.briefIdx || 0) + d));
+      sim.briefIdx = i; stageKey = ``; renderStage();
+      publishSyncMessage({ type: `MON_BRIEF`, idx: i });
+    }
+    function monToLearners() { sim.brief = `learn`; sim.briefIdx = 0; stageKey = ``; renderStage(); publishSyncMessage({ type: `MON_BRIEF`, idx: 0, learn: true }); }
+    let monLaunchArm = 0;
+    function monLaunch(btn) {
+      if (Date.now() - monLaunchArm > 3500) { monLaunchArm = Date.now(); btn.textContent = `Toucher encore pour lancer`; return; }
+      monLaunchArm = 0; unlockTablet();
+      btn.disabled = true; btn.textContent = `Lancement…`;
+      publishSyncMessage({ type: `MON_LAUNCH`, sid: sim.sessionId || `` });
+      setTimeout(() => { if ((sim.stage || `prep`) === `prep`) { const m = $(`mon-launch-msg`); if (m) m.textContent = `La télécommande ne répond pas : lancez depuis la télécommande (Préparation › Valider).`; btn.disabled = false; btn.textContent = `▶ Lancer la simulation`; } }, 5000);
     }
 
     /* ---------- Allumage / extinction ---------- */
@@ -4175,7 +4517,7 @@
       saveMonTimer = setTimeout(() => storeSet(`im60m2`, {
         pin: appState.pin, settings, sim, sessionId: mon.sessionId, power: mon.power,
         nibpLast: mon.nibp.last, nibpHist: mon.nibp.history.slice(0, 80), trends: mon.trends.slice(-900),
-        alarmHist: mon.alarmHist.slice(0, 120), events: mon.events.slice(-250)
+        alarmHist: mon.alarmHist.slice(0, 120), events: mon.events.slice(-250), dbv: mon.dbv || null
       }), 400);
     }
     function loadMonitor() {
@@ -4191,6 +4533,7 @@
       mon.trends = s.trends || [];
       mon.alarmHist = s.alarmHist || [];
       mon.events = s.events || [];
+      mon.dbv = s.dbv || null;
       if (settings.nibp.mode === `auto`) mon.nibp.nextAt = Date.now() + settings.nibp.interval * 1000;
       if (settings.nibp.mode === `stat`) settings.nibp.mode = `manual`;
     }
@@ -4238,7 +4581,7 @@
        13. TÉLÉCOMMANDE FORMATEUR — état et persistance
        ===================================================================== */
     let events = [];
-    const DEBRIEF_DEFAULT = { done: {}, crm: {}, guide: { emo: ``, ana: ``, syn: `` } };
+    const DEBRIEF_DEFAULT = { done: {}, crm: {}, guide: { syn: ``, emo: ``, ana: ``, crm: ``, msg: `` } };
     let debrief = deep(DEBRIEF_DEFAULT);
     const PREP_DEFAULT = { module: 2, nibp: `manual`, clock: `` };
     let prep = deep(PREP_DEFAULT);
@@ -4248,7 +4591,10 @@
     let saveRemTimer = null;
     function saveRemote() {
       clearTimeout(saveRemTimer);
-      saveRemTimer = setTimeout(() => storeSet(`im60r3`, { pin: appState.pin, sim, events: events.slice(-800), debrief, prep, curTab, rcpCycleAt }), 300);
+      saveRemTimer = setTimeout(() => {
+        storeSet(`im60r3`, { pin: appState.pin, sim, events: events.slice(-800), debrief, prep, curTab, rcpCycleAt });
+        if (role === `remote` && sim.stage === `end` && sim.sessionId) { try { archiveSession(); } catch (_) {} }
+      }, 300);
     }
     function loadRemote() {
       const s = storeGet(`im60r3`) || storeGet(`im60r2`);
@@ -4261,6 +4607,8 @@
         if (s.curTab) curTab = s.curTab;
         rcpCycleAt = s.rcpCycleAt || 0;
       } else selectScenario(`sc1`, true);
+      dayLoad();
+      if (debrief.guide && debrief.guide.msg == null) { debrief.guide = { syn: ``, emo: debrief.guide.emo || ``, ana: debrief.guide.ana || ``, crm: ``, msg: debrief.guide.syn || `` }; }
       if (!prep.clock) prep.clock = hhmm(Date.now());
       if (!sim.stage) sim.stage = sim.running ? `run` : sim.endedAt ? `end` : `prep`;
       if (!sim.artifacts.weak) sim.artifacts.weak = false;
@@ -4321,6 +4669,7 @@
         if (!ev || !ev.id || have.has(ev.id)) continue;
         if (!sim.sessionId || ev.sid !== sim.sessionId) continue;
         events.push(ev); have.add(ev.id); added++;
+        trapCheck(ev);
       }
       if (added) { events.sort((a, b) => a.ts - b.ts); saveRemote(); renderLogs(); if (curTab === `debrief` && dbTab === `bilan`) renderDebrief(); }
     }
@@ -4366,8 +4715,8 @@
       if (RAW_SCN[sc.id]) shareScenario(sc.id);
       if (!silent) { renderPrep(); pushPrep(); renderHeader(); }
     }
-    const SENSOR_LBL = { ecg: `Électrodes ECG`, spo2: `Capteur SpO2`, cuff: `Brassard PNI`, temp: `Sonde T°` };
-    const SENSOR_SHORT = { ecg: [`ECG`, `💓`], spo2: [`SpO2`, `☝️`], cuff: [`Brassard`, `💪`], temp: [`T°`, `🌡️`] };
+    const SENSOR_LBL = { ecg: `5 dérivations du scope`, spo2: `Capteur SpO2`, cuff: `Brassard PNI`, temp: `Sonde T°` };
+    const SENSOR_SHORT = { ecg: [`5 dériv. scope`, `💓`], spo2: [`SpO2`, `☝️`], cuff: [`Brassard`, `💪`], temp: [`T°`, `🌡️`] };
     const NIBP_START = { manual: [`manual`, 300, `Manuel`], a1: [`auto`, 60, `Auto 1 min`], a5: [`auto`, 300, `Auto 5 min`], a15: [`auto`, 900, `Auto 15 min`] };
     const nibpStartOf = (k) => { const v = NIBP_START[k] || NIBP_START.manual; return { mode: v[0], interval: v[1] }; };
     function setPrepNibp(k) { prep.nibp = k; renderPrep(); pushPrep(); }
@@ -4411,6 +4760,7 @@
       $(`prep-nibp`).innerHTML = Object.entries(NIBP_START).map(([k, v]) => `<button type="button" class="${prep.nibp === k ? `sel` : ``}" onclick="setPrepNibp('${k}')">${v[2]}</button>`).join(``);
       renderPrepChecks();
       renderBriefCtl();
+      renderDay();
       renderTeam();
       renderCallMode();
     }
@@ -4464,6 +4814,7 @@
       sim.nibpStart = nibpStartOf(prep.nibp);
       rcpCycleAt = 0; cueOpen = false;
       sim.actCnt = {}; sim.doc = -1; sim.brief = ``; sim.briefIdx = 0; pendGo = null;
+      sim.sensorAt = {}; sim.ecg12At = 0; sim.trap = null; sim.dbShow = `syn`;
       if (RAW_SCN[sc.id]) shareScenario(sc.id);
       remEvent(`system`, `Programmation validée — ${sc.title}`, { detail: `Heure simulée de départ ${sim.clockStart.replace(`:`, ` h `)} · scope éteint, en attente d'allumage par l'apprenant` });
       applyStep(0);
@@ -4492,7 +4843,10 @@
       sim.running = false; sim.endedAt = Date.now(); sim.stage = `end`;
       if (sim.artifacts.cpr || sim.artifacts.motion || sim.artifacts.weak) sim.artifacts = { cpr: false, motion: false, weak: false };
       remEvent(`system`, `Fin de la simulation (durée active ${fmtDur(sim.endedAt - sim.startedAt - (sim.pauseTotal || 0))})`);
+      sim.dbShow = `syn`; sim.trap = null; pendGo = null;
       pushSim();
+      archiveSession();
+      setTimeout(() => sendDbv(true), 400);
       closeSheet();
       dbTab = `bilan`;
       showTab(`debrief`);
@@ -4504,6 +4858,7 @@
       sim.running = false; sim.startedAt = 0; sim.endedAt = 0; sim.stepIdx = -1; sim.sessionId = ``;
       sim.stage = `prep`; sim.pauseTotal = 0; sim.pauseAt = 0; sim.cuffSide = null; sim.sameArm = false;
       sim.actCnt = {}; sim.doc = -1; sim.brief = ``; sim.briefIdx = 0; pendGo = null;
+      sim.sensorAt = {}; sim.ecg12At = 0; sim.trap = null;
       sim.artifacts = { cpr: false, motion: false, weak: false };
       selectScenario(sim.scenarioId, true);
       showTab(`prep`);
@@ -4550,6 +4905,8 @@
       sim.t = stepTargets(st);
       sim.transition = st.trans != null ? st.trans : 15;
       if (RHYTHMS[st.rhythm] && RHYTHMS[st.rhythm].pulse && sim.artifacts.cpr) sim.artifacts.cpr = false;
+      const tj = st.silence ? stepIdxById(sc, st.silence) : -1;
+      sim.trap = tj >= 0 ? { to: st.silence, label: sc.steps[tj].label, auto: true } : null;
       pushSim();
       if (sim.running) remEvent(`step`, `Étape ${idx + 1} — ${st.label}`, { detail: `Cible : FC ${st.hr} · PA ${st.sys ? `${st.sys}/${st.dia}` : `imprenable`} · SpO2 ${st.spo2} · FR ${st.rr} · ${(RHYTHMS[st.rhythm] || {}).label || st.rhythm}${st.trans ? ` · transition ${st.trans} s` : ``}` });
       renderLive(); renderDrop(); renderHeader();
@@ -4597,6 +4954,8 @@
     function toggleSensor(k) {
       sim.sensors[k] = !sim.sensors[k];
       sim.transition = parseInt($(`live-trans`).value, 10) || 0;
+      sim.sensorAt = sim.sensorAt || {};
+      if (sim.sensors[k] && sim.running && !sim.sensorAt[k]) sim.sensorAt[k] = Date.now();
       pushSim();
       if (sim.running) remEvent(`sensor`, `${SENSOR_LBL[k]} ${sim.sensors[k] ? `posé(es) — validé par le formateur` : `retiré(es)`}`);
       renderRows();
@@ -4661,7 +5020,8 @@
       return M.nibp ? (M.nibp.ok ? `${M.nibp.sys}/${M.nibp.dia}` : `échec`) : `mesurer`;
     }
     function renderRows() {
-      $(`row-sensors`).innerHTML = Object.keys(SENSOR_SHORT).map((k) => tbtn(sim.sensors[k] ? `on` : ``, SENSOR_SHORT[k][1], SENSOR_SHORT[k][0], sim.sensors[k] ? `validé` : `à valider`, `toggleSensor('${k}')`)).join(``) +
+      const SA = sim.sensorAt || {};
+      $(`row-sensors`).innerHTML = Object.keys(SENSOR_SHORT).map((k) => tbtn(sim.sensors[k] ? `on` : ``, SENSOR_SHORT[k][1], SENSOR_SHORT[k][0], sim.sensors[k] ? (SA[k] ? `✓ ${tPlus(SA[k])}` : `validé`) : `à valider`, `toggleSensor('${k}')`)).join(``) +
         tbtn(``, `🩺`, `PNI`, pniSubText(), `forcePni()`, `pni-sub`) +
         tbtn(sim.artifacts.weak ? `act` : ``, `〰️`, `SpO2 faible`, sim.artifacts.weak ? `en cours` : `non`, `toggleArtifact('weak')`);
       const A = sim.artifacts;
@@ -4670,6 +5030,7 @@
         tbtn(``, `📈`, `Analyse`, `DSA`, `openAnalysis()`) +
         tbtn(`red`, `⚡`, `Choc`, `délivrer`, `doShock()`) +
         tbtn(``, `💉`, `Drogue`, `injection`, `openDrugSheet()`) +
+        tbtn(sim.ecg12At ? `on` : ``, `📋`, `ECG 12 dériv.`, sim.ecg12At ? `✓ ${tPlus(sim.ecg12At)}` : `réalisé ?`, `doEcg12()`) +
         tbtn(A.motion ? `act` : ``, `🌀`, `Agitation`, A.motion ? `en cours` : `non`, `toggleArtifact('motion')`);
       updateLiveTimers();
     }
@@ -4696,6 +5057,18 @@
     }
 
     /* ---------- RCP, analyse DSA, choc, drogues ---------- */
+    /* v11 : ECG 12 dérivations (distinct des 5 dérivations du scope) */
+    function doEcg12() {
+      if (!sim.running) { toast(`Validez d'abord la programmation`); return; }
+      const first = !sim.ecg12At;
+      if (first) sim.ecg12At = Date.now();
+      remEvent(`action`, `📋 ECG 12 dérivations réalisé${first ? `` : ` (nouveau tracé)`}`, { act: `ECG 12 dérivations` });
+      autoTick(/./, (it) => it.ph === sim.stepIdx && /ECG\s*12/i.test(it.t));
+      saveRemote(); renderRows();
+      const sc = scenarioById(sim.scenarioId), docs = (sc.documents || []).map((d, i) => [d, i]).filter(([d]) => /ECG/i.test(d.name));
+      if (docs.length) openSheet(`ecg12`, shHead(`📋 ECG 12 dérivations`, `Afficher le tracé sur la tablette ?`) + `<div class="doc-list">${docs.map(([d, i]) => `<button type="button" class="btn" onclick="showDoc(${i})"><b>${esc(d.name)}</b><small>${esc(d.when || ``)}</small></button>`).join(``)}</div><button type="button" class="btn" onclick="closeSheet()">Plus tard</button>`);
+      else toast(`ECG 12 dérivations noté`);
+    }
     function startRcp(label) {
       sim.artifacts.cpr = true; rcpCycleAt = Date.now();
       pushSim();
@@ -4863,8 +5236,8 @@
       }
       renderChecklists();
     }
-    function autoTick(re) {
-      scenarioById(sim.scenarioId).tech.filter((i) => re.test(i.id) && !debrief.done[i.id]).forEach((i) => toggleDone(i.id));
+    function autoTick(re, pred) {
+      scenarioById(sim.scenarioId).tech.filter((i) => re.test(i.id) && (!pred || pred(i)) && !debrief.done[i.id]).forEach((i) => toggleDone(i.id));
     }
     function setChkTab(t) { chkTab = t; renderChecklists(); }
     function renderChecklists() {
@@ -4979,7 +5352,7 @@
     /* =====================================================================
        16. ONGLET DÉBRIEFING (sous-onglets)
        ===================================================================== */
-    const DB_TABS = [[`bilan`, `Bilan`], [`chrono`, `Chronologie`], [`guide`, `Guide`], [`crm`, `Grille CRM`], [`export`, `Exporter`]];
+    const DB_TABS = [[`bilan`, `Bilan`], [`chrono`, `Chronologie`], [`guide`, `Guide`], [`crm`, `Grille CRM`], [`day`, `Journée`], [`export`, `Exporter`]];
     function setDbTab(t) { dbTab = t; renderDebrief(); window.scrollTo(0, 0); }
     const TL_FILTERS = [[`all`, `Tout`], [`step`, `Étapes`], [`action`, `Actions`], [`nibp`, `PNI`], [`alarm`, `Alarmes`], [`learner`, `Scope`], [`call`, `Appels`], [`note`, `Notes`]];
     function setTlFilter(f) { tlFilter = f; renderTimeline(); }
@@ -5023,14 +5396,26 @@
         stepsReached: new Set(events.filter((e) => e.cat === `step` && /^Étape/.test(e.text)).map((e) => e.text)).size
       };
     }
+    /* v11 : monitorage noté à part (allumage, 5 dérivations, SpO2, brassard, 1re PNI, T°) */
+    function monitRows() {
+      const first = (pred) => events.find(pred);
+      const sen = (re) => (e) => e.cat === `sensor` && re.test(e.text);
+      const on = first((e) => e.cat === `learner` && /^Moniteur allumé/.test(e.text));
+      const rows = [
+        [`Scope allumé`, on],
+        [`5 dérivations du scope`, first(sen(/^(5 dérivations du scope|Électrodes ECG) posé/))],
+        [`Capteur SpO2`, first(sen(/^Capteur SpO2 posé/))],
+        [`Brassard PNI`, first(sen(/^Brassard PNI posé/))],
+        [`1re PNI mesurée`, first(isNibpResult)],
+        [`Sonde T°`, first(sen(/^Sonde T° posé/))]
+      ];
+      return rows.map(([label, ev]) => ({ label, ev, step: ev ? stepAt(ev.ts) : null, after: ev && on && ev !== on ? fmtDur(ev.ts - on.ts) : `` }));
+    }
     function delayRows() {
       const rows = [];
       const first = (pred) => events.find(pred);
       const add = (label, ev) => rows.push({ label, ev, step: ev ? stepAt(ev.ts) : null });
-      add(`Allumage du scope`, first((e) => e.cat === `learner` && /^Moniteur allumé/.test(e.text)));
-      add(`1re pose des électrodes ECG`, first((e) => e.cat === `sensor` && /Électrodes ECG posé/.test(e.text)));
-      add(`1re pose du capteur SpO2`, first((e) => e.cat === `sensor` && /Capteur SpO2 posé/.test(e.text)));
-      add(`1re mesure PNI`, first(isNibpResult));
+      add(`ECG 12 dérivations`, first((e) => e.cat === `action` && /^📋 ECG 12 dérivations/.test(e.text)));
       add(`1er massage cardiaque`, first((e) => e.cat === `action` && /^(RCP : début|Reprise du massage)/.test(e.text)));
       add(`1er choc`, first((e) => e.cat === `action` && /^⚡ Choc/.test(e.text)));
       add(`1re pause d'alarme`, first((e) => e.cat === `learner` && /Pause alarme \d/.test(e.text)));
@@ -5050,11 +5435,97 @@
         return `<tr><td class="num">${evClock(e)}</td><td>${esc(e.text.replace(/ — valeur INCOHÉRENTE.*| \(non mesurable, imposé.*\)/, ``))}${flag}</td></tr>`;
       }).join(``)}</table>`;
     }
+    const stepTxt = (r) => (r.step ? `${esc(r.step.text.replace(/ — .*/, ``))} +${fmtDur(r.ev.ts - r.step.ts)}` : `—`);
+    function monitTableHtml() {
+      const rows = monitRows();
+      return `<table class="ptable"><tr><th>Pose</th><th>T+</th><th>Après allumage</th></tr>${rows.map((r) => `<tr><td>${esc(r.label)}</td><td class="num">${r.ev ? tPlus(r.ev.ts) : `<span class="ko-t">non noté</span>`}</td><td class="num">${r.after ? `+${r.after}` : r.ev ? `—` : ``}</td></tr>`).join(``)}</table>`;
+    }
+
+    /* ---------- v11 : écran de la tablette pendant le débriefing ---------- */
+    const DBV_SECS = [[`syn`, `Synthèse`], [`emo`, `Réactions`], [`chrono`, `Chronologie`], [`monit`, `Monitorage & délais`], [`att`, `Attendus`], [`crm`, `CRM`], [`msg`, `À retenir`], [`off`, `Masquer`]];
+    const hashStr = (s) => { let h = 5381; for (let i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) | 0; return (h >>> 0).toString(36); };
+    function dbvData() {
+      const s = computeStats(), sc = s.sc;
+      const hideCall = (e) => e.cat === `call` && /^(SAED|ARM|IA|Grille SAED)/.test(e.text);
+      const d = {
+        sid: sim.sessionId, show: sim.dbShow || `syn`, title: sc.title, patient: sc.patient, dur: fmtDur(s.dur), clock: sim.clockStart || ``,
+        steps: events.filter((e) => e.cat === `step` && /^Étape/.test(e.text)).map((e) => [tPlus(e.ts), evClock(e), e.text]),
+        ev: events.filter((e) => e.cat !== `note` && !hideCall(e)).slice(-170).map((e) => [tPlus(e.ts), evClock(e), e.cat, e.text]),
+        monit: monitRows().map((r) => [r.label, r.ev ? tPlus(r.ev.ts) : ``, r.after]),
+        delays: delayRows().filter((r) => r.ev && !s.items.some((i) => i.t === r.label)).map((r) => [r.label, tPlus(r.ev.ts), r.step ? `${r.step.text.replace(/ — .*/, ``)} +${fmtDur(r.ev.ts - r.step.ts)}` : ``]),
+        nibp: events.filter(isNibpResult).map((e) => [evClock(e), e.text.replace(/ — valeur INCOHÉRENTE.*| \(non mesurable, imposé.*\)/, ``)]),
+        tech: sc.tech.map((i) => [i.t, debrief.done[i.id] ? tPlus(debrief.done[i.id].ts) : ``, i.ph]),
+        crmc: crmOf(sc).map((i) => [i.t, debrief.done[i.id] ? tPlus(debrief.done[i.id].ts) : ``]),
+        crm: CRM_GRID.map((c) => [c.t, c.ok]),
+        qs: { syn: GUIDE_GENERAL.syn, emo: GUIDE_GENERAL.emo, ana: GUIDE_GENERAL.ana.concat(sc.questions || []), crm: GUIDE_GENERAL.crm, msg: GUIDE_GENERAL.msg },
+        msgs: sc.messages || [], mine: String(debrief.guide.msg || ``).trim(), stepsN: sc.steps.length
+      };
+      d.k = hashStr(JSON.stringify(d));
+      return d;
+    }
+    let dbvLastK = ``, dbvLastAt = 0;
+    function sendDbv(force) {
+      if (role !== `remote` || sim.stage !== `end` || !sim.sessionId) return;
+      const now = Date.now();
+      if (!force && now - dbvLastAt < 2500) return;
+      const d = dbvData();
+      if (!force && d.k === dbvLastK && now - dbvLastAt < 15000) return;
+      dbvLastK = d.k; dbvLastAt = now;
+      publishSyncMessage({ type: `DBV`, d });
+    }
+    function setDbShow(k) { sim.dbShow = k; pushSim(); sendDbv(true); renderDebrief(); toast(k === `off` ? `Tablette : écran de fin` : `Tablette : ${(DBV_SECS.find((x) => x[0] === k) || [0, k])[1]}`); }
+    const dbShowSeg = () => `<div class="seg-r wrap">${DBV_SECS.map(([k, l]) => `<button type="button" class="${(sim.dbShow || `syn`) === k ? `sel` : ``}" onclick="setDbShow('${k}')">${l}</button>`).join(``)}</div>`;
+    /* Côté tablette */
+    let dbvLocal = ``, dbvLocalFor = ``;
+    function monDbShow(k) { dbvLocal = k; dbvLocalFor = (mon.dbv || {}).show || ``; stageKey = ``; renderStage(); }
+    function dbvHtml(d) {
+      if (dbvLocalFor !== d.show) dbvLocal = ``;
+      const show = dbvLocal || d.show;
+      const L = (a) => `<ul class="db-q">${(a || []).map((x) => `<li>${esc(x)}</li>`).join(``)}</ul>`;
+      const tabs = DBV_SECS.filter(([k]) => k !== `off`).map(([k, l]) => `<button type="button" class="${k === show ? `sel` : ``}" onclick="event.stopPropagation();monDbShow('${k}')">${l}</button>`).join(``);
+      let body = ``;
+      if (show === `syn`) body = `<h3>1. Synthèse rapide de la situation</h3>${L(d.qs.syn)}
+        <div class="stg-kv"><div><span>Patient</span><b>${esc(d.patient)}</b></div><div><span>Durée</span><b>${esc(d.dur)}</b></div><div><span>Phases jouées</span><b>${d.steps.length} / ${d.stepsN}</b></div></div>
+        <table><tr><th>T+</th><th>Heure</th><th>Phase</th></tr>${d.steps.map((r) => `<tr><td>${esc(r[0])}</td><td>${esc(r[1])}</td><td>${esc(r[2])}</td></tr>`).join(``)}</table>`;
+      else if (show === `emo`) body = `<div class="db-big">Comment vous sentez-vous ?</div>${L(d.qs.emo.slice(1))}`;
+      else if (show === `chrono`) body = `<h3>3. Analyse des faits — chronologie</h3>${L(d.qs.ana)}<table class="db-tl">${d.ev.map((r) => `<tr class="c-${esc(r[2])}"><td>${esc(r[0])}</td><td>${esc(r[1])}</td><td>${esc(r[3])}</td></tr>`).join(``)}</table>`;
+      else if (show === `monit`) body = `<h3>Monitorage</h3><table><tr><th>Pose</th><th>T+</th><th>Après allumage</th></tr>${d.monit.map((r) => `<tr><td>${esc(r[0])}</td><td>${r[1] ? esc(r[1]) : `<i class="dim">non noté</i>`}</td><td>${r[2] ? `+${esc(r[2])}` : ``}</td></tr>`).join(``)}</table>
+        ${d.delays.length ? `<h3>Délais clés</h3><table><tr><th>Repère</th><th>T+</th><th>Dans la phase</th></tr>${d.delays.map((r) => `<tr><td>${esc(r[0])}</td><td>${esc(r[1])}</td><td>${esc(r[2])}</td></tr>`).join(``)}</table>` : ``}
+        ${d.nibp.length ? `<h3>Tensions mesurées</h3><table>${d.nibp.map((r) => `<tr><td>${esc(r[0])}</td><td>${esc(r[1])}</td></tr>`).join(``)}</table>` : ``}`;
+      else if (show === `att`) body = `<h3>Gestes attendus</h3><div class="db-att">${d.tech.map((r) => `<div class="${r[1] ? `ok` : ``}"><span>${r[1] ? `✓` : `○`}</span>${r[2] != null ? `<em>P${r[2] + 1}</em> ` : ``}${esc(r[0])}${r[1] ? `<time>${esc(r[1])}</time>` : ``}</div>`).join(``) || `<i class="dim">Aucun.</i>`}</div>`;
+      else if (show === `crm`) body = `<h3>4. CRM</h3>${L(d.qs.crm)}<div class="db-crm">${d.crm.map((r) => `<div><b>${esc(r[0])}</b><small>${esc(r[1])}</small></div>`).join(``)}</div>
+        ${d.crmc.length ? `<h3>Attendus CRM</h3><div class="db-att">${d.crmc.map((r) => `<div class="${r[1] ? `ok` : ``}"><span>${r[1] ? `✓` : `○`}</span>${esc(r[0])}${r[1] ? `<time>${esc(r[1])}</time>` : ``}</div>`).join(``)}</div>` : ``}`;
+      else if (show === `msg`) body = `<h3>Messages à retenir</h3>${L(d.qs.msg)}${d.mine ? `<div class="db-mine">${esc(d.mine)}</div>` : ``}${d.msgs.length ? `<div class="db-msgs">${d.msgs.map((m) => `<div>★ ${esc(m)}</div>`).join(``)}</div>` : ``}`;
+      return `<div class="stg-syn stg-db"><div class="stg-h"><span>Débriefing · ${esc(d.title)}</span><small>Durée ${esc(d.dur)}</small></div><div class="db-tabs">${tabs}</div><div class="db-body">${body}</div></div>`;
+    }
+
+    /* ---------- v11 : archive de la séance dans la journée (topo par situation + topo de la journée) ---------- */
+    function archiveSession() {
+      if (role !== `remote` || !sim.sessionId || !sim.startedAt) return;
+      const s = computeStats();
+      const rec = {
+        sid: sim.sessionId, at: sim.startedAt, end: sim.endedAt || 0, short: s.sc.short, title: s.sc.title, patient: s.sc.patient, dur: s.dur,
+        staff: staffPlain(s.sc), learners: teamOf().learners.filter((l) => l.name).map((l) => ({ name: l.name, pro: l.pro || ``, role: l.role || `` })),
+        done: s.done.length, total: s.items.length, steps: `${s.stepsReached}/${s.sc.steps.length}`,
+        monit: monitRows().map((r) => [r.label, r.ev ? fmtDur(r.ev.ts - sim.startedAt) : ``]),
+        delays: delayRows().filter((r) => r.ev && !s.items.some((i) => i.t === r.label)).map((r) => [r.label, fmtDur(r.ev.ts - sim.startedAt)]),
+        miss: s.items.filter((i) => !debrief.done[i.id]).map((i) => i.t),
+        crm: CRM_GRID.map((c) => { const v = debrief.crm[c.id] || {}; return [c.t, v.rate || ``, v.note || ``]; }),
+        guide: Object.assign({}, debrief.guide), msgs: s.sc.messages || []
+      };
+      const i = day.sessions.findIndex((x) => x.sid === rec.sid);
+      if (i >= 0) day.sessions[i] = rec; else day.sessions.push(rec);
+      daySave();
+    }
+
     function renderDebrief() {
       $(`db-tabs`).innerHTML = DB_TABS.map(([k, l]) => `<button type="button" class="chip ${k === dbTab ? `on` : ``}" onclick="setDbTab('${k}')">${l}</button>`).join(``);
       DB_TABS.forEach(([k]) => $(`db-p-${k}`).classList.toggle(`hidden`, k !== dbTab));
       $(`db-end`).classList.toggle(`hidden`, !sim.running);
       const s = computeStats();
+      const tab = $(`db-tablet`);
+      if (tab) tab.innerHTML = sim.stage === `end` ? `<h2>📺 Écran de la tablette</h2><div class="muted">La tablette affiche le débriefing (données observées, sans vos notes). Choisissez la partie à montrer :</div>${dbShowSeg()}` : ``;
+      if (tab) tab.classList.toggle(`hidden`, sim.stage !== `end`);
       if (dbTab === `bilan`) {
         $(`db-summary`).innerHTML = `<div style="font-weight:700">${esc(s.sc.title)}</div>
           <div class="muted">${esc(s.sc.patient)}${sim.startedAt ? ` · validée à ${hhmmss(sim.startedAt)} · heure simulée de départ ${esc(sim.clockStart || `—`)}` : ` · séance non démarrée`}${sim.endedAt ? ` · fin ${hhmmss(sim.endedAt)}` : sim.running ? (sim.stage === `pause` ? ` · en pause` : ` · en cours`) : ``}</div>`;
@@ -5062,9 +5533,10 @@
           [fmtDur(s.dur), `Durée active`], [`${s.stepsReached}/${s.sc.steps.length}`, `Étapes jouées`], [`${s.done.length}/${s.items.length}`, `Attendus cochés`],
           [`${s.nibpN}`, `PNI (${s.nibpOk} réussies)`], [`${s.alarmN}`, `Alarmes (${s.alarmHigh} hautes)`], [`${s.pauses}`, `Pauses`]
         ].map(([b, l]) => `<div class="stat"><b>${b}</b><span>${l}</span></div>`).join(``);
+        $(`db-monit`).innerHTML = monitTableHtml();
         const rows = delayRows();
         const doneRows = rows.filter((r) => r.ev), miss = rows.filter((r) => !r.ev);
-        $(`db-delays`).innerHTML = (doneRows.length ? `<table class="ptable"><tr><th>Repère</th><th>T+</th><th>Dans l'étape</th></tr>${doneRows.map((r) => `<tr><td>${esc(r.label)}</td><td class="num">${tPlus(r.ev.ts)}</td><td class="num">${r.step ? `${esc(r.step.text.replace(/ — .*/, ``))} +${fmtDur(r.ev.ts - r.step.ts)}` : `—`}</td></tr>`).join(``)}</table>` : `<div class="muted">Aucun repère horodaté pour l'instant.</div>`) +
+        $(`db-delays`).innerHTML = (doneRows.length ? `<table class="ptable"><tr><th>Repère</th><th>T+</th><th>Dans l'étape</th></tr>${doneRows.map((r) => `<tr><td>${esc(r.label)}</td><td class="num">${tPlus(r.ev.ts)}</td><td class="num">${stepTxt(r)}</td></tr>`).join(``)}</table>` : `<div class="muted">Aucun repère horodaté pour l'instant.</div>`) +
           (miss.length && sim.startedAt ? `<h3>Non observés</h3><div class="chips">${miss.map((r) => `<span class="chip warnc">${esc(r.label)}</span>`).join(``)}</div>` : ``);
         $(`db-nibp`).innerHTML = nibpTableHtml();
       }
@@ -5072,10 +5544,16 @@
       if (dbTab === `guide`) {
         const g = debrief.guide;
         const qList = (arr) => `<ul class="tight">${arr.map((q) => `<li>${esc(q)}</li>`).join(``)}</ul>`;
-        $(`db-guide`).innerHTML = `
-          <details class="fold" open><summary>1. Réactions (vécu, émotions)</summary><div>${qList(GUIDE_GENERAL.emo)}<textarea placeholder="Ce que disent les apprenants…" oninput="debrief.guide.emo=this.value;saveRemote()">${esc(g.emo)}</textarea></div></details>
-          <details class="fold"><summary>2. Analyse des faits</summary><div>${qList(GUIDE_GENERAL.ana.concat(s.sc.questions))}${s.sc.trap ? `<div class="info warn"><b>Piège du scénario :</b> ${esc(s.sc.trap)}</div>` : ``}<textarea placeholder="Points forts, écarts, causes…" oninput="debrief.guide.ana=this.value;saveRemote()">${esc(g.ana)}</textarea></div></details>
-          <details class="fold"><summary>3. Synthèse — messages à retenir</summary><div>${qList(GUIDE_GENERAL.syn)}<textarea placeholder="2 ou 3 messages clés pour la pratique…" oninput="debrief.guide.syn=this.value;saveRemote()">${esc(g.syn)}</textarea></div></details>`;
+        const tv = { syn: `syn`, emo: `emo`, ana: `chrono`, crm: `crm`, msg: `msg` };
+        const extra = {
+          syn: `<div class="muted">Phases jouées : ${events.filter((e) => e.cat === `step` && /^Étape/.test(e.text)).map((e) => `${tPlus(e.ts)} ${esc(e.text.replace(/ — .*/, ``))}`).join(` · `) || `—`}</div>`,
+          ana: `${s.sc.trap ? `<div class="info warn"><b>Piège du scénario :</b> ${esc(s.sc.trap)}</div>` : ``}<div class="muted">La chronologie complète est dans l'onglet « Chronologie » (et sur la tablette).</div>`,
+          crm: `<div class="crm-mini">${CRM_GRID.map((c) => `<div><b>${esc(c.t)}</b><small>${esc(c.ok)}</small></div>`).join(``)}</div><div class="muted">Notez chaque dimension dans l'onglet « Grille CRM ».</div>`
+        };
+        $(`db-guide`).innerHTML = GUIDE_PARTS.map(([k, t, ph], n) => `<details class="fold" ${n === 0 ? `open` : ``}><summary>${esc(t)}</summary><div>
+            ${qList(k === `ana` ? GUIDE_GENERAL.ana.concat(s.sc.questions) : GUIDE_GENERAL[k])}${extra[k] || ``}
+            <textarea placeholder="${esc(ph)}" oninput="debrief.guide.${k}=this.value;saveRemote()">${esc(g[k] || ``)}</textarea>
+            ${sim.stage === `end` ? `<button type="button" class="btn sm" onclick="setDbShow('${tv[k]}')">📺 Montrer sur la tablette</button>` : ``}</div></details>`).join(``);
       }
       if (dbTab === `export`) { const mt = $(`mail-to`); if (mt && document.activeElement !== mt) mt.value = mailTo(); }
       if (dbTab === `crm`) {
@@ -5087,9 +5565,83 @@
             <input type="text" placeholder="Observation…" value="${esc(v.note || ``)}" oninput="noteCrm('${c.id}', this.value)"></div>`;
         }).join(``);
       }
+      if (dbTab === `day`) renderDayTab();
     }
     function rateCrm(id, val) { const v = debrief.crm[id] || (debrief.crm[id] = {}); v.rate = v.rate === val ? `` : val; saveRemote(); renderDebrief(); }
     function noteCrm(id, txt) { (debrief.crm[id] || (debrief.crm[id] = {})).note = txt; saveRemote(); }
+
+    /* ---------- v11 : topo de la journée ---------- */
+    function dayStats() {
+      const S = day.sessions.slice().sort((a, b) => a.at - b.at);
+      const people = {};
+      day.learners.forEach((l) => { people[norm(l.name)] = { name: l.name, pro: l.pro || ``, played: [] }; });
+      S.forEach((r) => r.learners.forEach((l) => { const k = norm(l.name); const p = people[k] || (people[k] = { name: l.name, pro: l.pro || ``, played: [] }); if (!p.pro && l.pro) p.pro = l.pro; p.played.push(`${r.short}${l.role ? ` (${l.role})` : ``}`); }));
+      const crm = CRM_GRID.map((c) => { const n = { ok: 0, mid: 0, ko: 0 }; S.forEach((r) => { const x = (r.crm || []).find((y) => y[0] === c.t); if (x && n[x[1]] != null) n[x[1]]++; }); return [c.t, n]; });
+      return { S, people: Object.values(people), crm };
+    }
+    function renderDayTab() {
+      const box = $(`db-day`); if (!box) return;
+      const D = dayStats(), P = D.people;
+      const nI = P.filter((p) => p.pro === `IDE`).length, nA = P.filter((p) => p.pro === `AS`).length;
+      box.innerHTML = `<div class="card"><h2>Journée du ${esc(day.date ? new Date(day.date + `T12:00`).toLocaleDateString(`fr-FR`) : `—`)}${day.title ? ` · ${esc(day.title)}` : ``}</h2>
+          <div class="stats"><div class="stat"><b>${D.S.length}</b><span>Simulations</span></div><div class="stat"><b>${P.length}</b><span>Apprenants</span></div><div class="stat"><b>${nI} / ${nA}</b><span>IDE / AS</span></div></div></div>
+        <div class="card"><h2>Topo par situation</h2>${D.S.length ? D.S.map((r) => `<details class="fold"><summary>${hhmm(r.at)} · ${esc(r.short)} <span class="muted">${fmtDur(r.dur)} · attendus ${r.done}/${r.total}</span></summary><div>
+            <div class="muted">${r.learners.map((l) => esc(`${l.name}${l.pro ? ` (${l.pro})` : ``}${l.role ? ` — ${l.role}` : ``}`)).join(` · `) || `Apprenants non renseignés`}</div>
+            ${r.guide && r.guide.syn ? `<div><b>Synthèse :</b> ${esc(r.guide.syn)}</div>` : ``}
+            ${r.guide && r.guide.ana ? `<div><b>Analyse :</b> ${esc(r.guide.ana)}</div>` : ``}
+            ${r.guide && r.guide.crm ? `<div><b>CRM :</b> ${esc(r.guide.crm)}</div>` : ``}
+            <div><b>CRM :</b> ${r.crm.map((c) => `${esc(c[0])} : ${RATE_LBL[c[1]] || `—`}`).join(` · `)}</div>
+            <div><b>Monitorage :</b> ${r.monit.map((m) => `${esc(m[0])} ${m[1] ? `T+${m[1]}` : `—`}`).join(` · `)}</div>
+            ${r.miss.length ? `<div><b>Non observés :</b> ${r.miss.map(esc).join(` · `)}</div>` : ``}
+            ${r.guide && r.guide.msg ? `<div><b>À retenir :</b> ${esc(r.guide.msg)}</div>` : ``}
+            <button type="button" class="btn sm" onclick="delDaySession('${esc(r.sid)}', this)">Retirer de la journée</button></div></details>`).join(``) : `<div class="muted">Aucune simulation terminée aujourd'hui. Chaque simulation s'ajoute ici quand vous la terminez.</div>`}</div>
+        <div class="card"><h2>Participation</h2>${P.length ? `<table class="ptable"><tr><th>Apprenant</th><th>Joué</th></tr>${P.map((p) => `<tr><td>${esc(p.name)}${p.pro ? ` <small>${p.pro}</small>` : ``}</td><td>${p.played.length ? p.played.map(esc).join(`<br>`) : `<span class="muted">observateur</span>`}</td></tr>`).join(``)}</table>` : `<div class="muted">Liste du jour vide (Préparation › Journée de formation).</div>`}</div>
+        <div class="card"><h2>CRM sur la journée</h2><table class="ptable"><tr><th>Dimension</th><th>Acquis</th><th>À renforcer</th><th>Non observé</th></tr>${D.crm.map(([t, n]) => `<tr><td>${esc(t)}</td><td class="num">${n.ok}</td><td class="num">${n.mid}</td><td class="num">${n.ko}</td></tr>`).join(``)}</table></div>
+        <div class="card"><h2>Topo global de la journée</h2><textarea id="day-notes" placeholder="Points forts du groupe, axes de travail, messages pour la prochaine fois…" oninput="day.notes=this.value;daySave()">${esc(day.notes || ``)}</textarea>
+          <div class="g2"><button type="button" class="btn pri" onclick="exportDay()">Topo de la journée (HTML imprimable)</button><button type="button" class="btn" onclick="mailDay()">✉ Envoyer le topo</button></div>
+          <button type="button" class="btn red" onclick="newDay(this)">Nouvelle journée</button></div>`;
+    }
+    let dsArm = ``;
+    function delDaySession(sid, btn) {
+      if (dsArm !== sid) { dsArm = sid; btn.textContent = `Toucher encore pour retirer`; setTimeout(() => { if (dsArm === sid) { dsArm = ``; btn.textContent = `Retirer de la journée`; } }, 3000); return; }
+      dsArm = ``; day.sessions = day.sessions.filter((x) => x.sid !== sid); daySave(); renderDayTab();
+    }
+    function dayText() {
+      const D = dayStats();
+      const L = [`Journée de simulation — ${day.date ? new Date(day.date + `T12:00`).toLocaleDateString(`fr-FR`) : ``}${day.title ? ` — ${day.title}` : ``}`, `${D.S.length} simulation(s) · ${D.people.length} apprenant(s) (${D.people.filter((p) => p.pro === `IDE`).length} IDE, ${D.people.filter((p) => p.pro === `AS`).length} AS)`, ``];
+      D.S.forEach((r) => {
+        L.push(`■ ${hhmm(r.at)} — ${r.title} (${fmtDur(r.dur)}, attendus ${r.done}/${r.total})`);
+        if (r.learners.length) L.push(`  Équipe : ${r.learners.map((l) => `${l.name}${l.pro ? ` (${l.pro})` : ``}${l.role ? ` — ${l.role}` : ``}`).join(` ; `)}`);
+        [[`syn`, `Synthèse`], [`ana`, `Analyse`], [`crm`, `CRM`], [`msg`, `À retenir`]].forEach(([k, t]) => { if (r.guide && r.guide[k]) L.push(`  ${t} : ${r.guide[k]}`); });
+        L.push(`  Grille CRM : ${r.crm.map((c) => `${c[0]} ${RATE_LBL[c[1]] || `—`}`).join(` · `)}`, ``);
+      });
+      L.push(`Participation :`); D.people.forEach((p) => L.push(`  ${p.name}${p.pro ? ` (${p.pro})` : ``} : ${p.played.join(` ; `) || `observateur`}`));
+      if (day.notes) L.push(``, `Topo global :`, day.notes);
+      return L.join(`\n`);
+    }
+    function dayReportHtml() {
+      const D = dayStats();
+      const css = `body{font:14px/1.5 system-ui,Segoe UI,Arial,sans-serif;color:#1b2329;max-width:900px;margin:24px auto;padding:0 18px}h1{font-size:22px;margin:0 0 4px}h2{font-size:16px;margin:26px 0 8px;padding-bottom:4px;border-bottom:2px solid #0a7a8a;color:#0a5d69}h3{font-size:14px;margin:14px 0 4px}table{width:100%;border-collapse:collapse;font-size:13px}th,td{text-align:left;padding:5px 6px;border-bottom:1px solid #dfe5e8;vertical-align:top}th{background:#f1f5f6}.muted{color:#5d6b73}.box{border:1px solid #dfe5e8;border-radius:8px;padding:10px;white-space:pre-wrap;min-height:30px}.sit{border:1px solid #dfe5e8;border-radius:10px;padding:10px 14px;margin:10px 0;break-inside:avoid}@media print{body{margin:0}}`;
+      const R = (c) => RATE_LBL[c] || `—`;
+      return `<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Topo de la journée</title><style>${css}</style></head><body>
+<h1>Topo de la journée de simulation</h1><div class="muted">${esc(day.date ? new Date(day.date + `T12:00`).toLocaleDateString(`fr-FR`) : ``)}${day.title ? ` · ${esc(day.title)}` : ``} · ${D.S.length} simulation(s) · ${D.people.length} apprenant(s) : ${D.people.filter((p) => p.pro === `IDE`).length} IDE, ${D.people.filter((p) => p.pro === `AS`).length} AS</div>
+<h2>Topo par situation</h2>${D.S.map((r) => `<div class="sit"><h3>${hhmm(r.at)} — ${esc(r.title)}</h3><div class="muted">${esc(r.patient)} · durée ${fmtDur(r.dur)} · phases ${esc(r.steps)} · attendus ${r.done}/${r.total}</div>
+<p><b>Équipe :</b> ${r.learners.map((l) => esc(`${l.name}${l.pro ? ` (${l.pro})` : ``}${l.role ? ` — ${l.role}` : ``}`)).join(` ; `) || `—`}<br><b>Formateurs :</b> ${r.staff.map(esc).join(` ; `)}</p>
+${[[`syn`, `1. Synthèse`], [`emo`, `2. Réactions`], [`ana`, `3. Analyse des faits`], [`crm`, `4. CRM`], [`msg`, `À retenir`]].map(([k, t]) => r.guide && r.guide[k] ? `<p><b>${t} :</b> ${esc(r.guide[k])}</p>` : ``).join(``)}
+<table><tr><th>CRM</th><th>Évaluation</th><th>Observation</th></tr>${r.crm.map((c) => `<tr><td>${esc(c[0])}</td><td>${R(c[1])}</td><td>${esc(c[2])}</td></tr>`).join(``)}</table>
+<p><b>Monitorage :</b> ${r.monit.map((m) => `${esc(m[0])} ${m[1] ? `T+${m[1]}` : `non noté`}`).join(` · `)}</p>
+${r.miss.length ? `<p><b>Non observés :</b> ${r.miss.map(esc).join(` · `)}</p>` : ``}${r.msgs.length ? `<p><b>Messages clés du scénario :</b> ${r.msgs.map(esc).join(` · `)}</p>` : ``}</div>`).join(``) || `<p class="muted">Aucune simulation.</p>`}
+<h2>Participation</h2><table><tr><th>Apprenant</th><th>Fonction</th><th>Simulations jouées (rôle)</th></tr>${D.people.map((p) => `<tr><td>${esc(p.name)}</td><td>${esc(p.pro || `—`)}</td><td>${p.played.map(esc).join(`<br>`) || `observateur`}</td></tr>`).join(``)}</table>
+<h2>CRM sur la journée</h2><table><tr><th>Dimension</th><th>Acquis</th><th>À renforcer</th><th>Non observé</th></tr>${D.crm.map(([t, n]) => `<tr><td>${esc(t)}</td><td>${n.ok}</td><td>${n.mid}</td><td>${n.ko}</td></tr>`).join(``)}</table>
+<h2>Topo global</h2><div class="box">${esc(day.notes || ``)}</div>
+<p class="muted" style="margin-top:24px">Généré par le simulateur EDAN iM60 — urgences en hémodialyse.</p></body></html>`;
+    }
+    function exportDay() { downloadFile(dayReportHtml(), `topo_journee_${day.date || todayIso()}.html`, `text/html`); toast(`Topo de la journée téléchargé`); }
+    function mailDay() {
+      let body = dayText();
+      if (body.length > 6000) body = body.slice(0, 6000) + `\n…(tronqué : voir le topo HTML)`;
+      window.location.href = `mailto:${encodeURIComponent(mailTo())}?subject=${encodeURIComponent(`Topo journée de simulation iM60 — ${day.date || ``}`)}&body=${encodeURIComponent(body)}`;
+    }
 
     /* ---------- Exports (heures = heure simulée du scénario) ---------- */
     const RATE_LBL = { ok: `Acquis`, mid: `À renforcer`, ko: `Non observé` };
@@ -5102,13 +5654,15 @@
       const s = computeStats();
       const L = [`${s.sc.title}`, `${s.sc.patient}`, `Date : ${new Date(sim.startedAt || Date.now()).toLocaleString(`fr-FR`)} — heure simulée de départ ${sim.clockStart || `—`} — durée active ${fmtDur(s.dur)}`, ``,
         `Formateurs : ${staffPlain(s.sc).join(` ; `) || `—`}`, `Apprenants : ${learnersTxt().join(` ; `) || `—`}`, ``,
-        `Attendus observés (${s.done.length}/${s.items.length}) :`];
+        `Monitorage :`];
+      for (const r of monitRows()) L.push(`  ${r.label} : ${r.ev ? `T+${tPlus(r.ev.ts)}${r.after ? ` (+${r.after} après allumage)` : ``}` : `non noté`}`);
+      L.push(``, `Attendus observés (${s.done.length}/${s.items.length}) :`);
       for (const i of s.items) L.push(`  ${debrief.done[i.id] ? `[x] ${i.t} (T+${tPlus(debrief.done[i.id].ts)})` : `[ ] ${i.t}`}`);
       L.push(``, `PNI prises : ${s.nibpN} — Alarmes : ${s.alarmN} (${s.alarmHigh} hautes) — Pauses : ${s.pauses} — Notes : ${s.notes}`, ``, `Tensions :`);
       for (const e of events.filter(isNibpResult)) L.push(`  ${evClock(e)}  ${e.text}`);
       L.push(``, `Grille CRM :`);
       for (const c of CRM_GRID) { const v = debrief.crm[c.id] || {}; L.push(`  ${c.t} : ${RATE_LBL[v.rate] || `—`}${v.note ? ` — ${v.note}` : ``}`); }
-      if (debrief.guide.syn) L.push(``, `Messages à retenir :`, debrief.guide.syn);
+      GUIDE_PARTS.forEach(([k, t]) => { if (debrief.guide[k]) L.push(``, `${t} :`, debrief.guide[k]); });
       return L.join(`\n`);
     }
     function copySummary() {
@@ -5127,10 +5681,11 @@
 <div class="muted">${esc(s.sc.patient)} · ${new Date(sim.startedAt || Date.now()).toLocaleString(`fr-FR`)} · heure simulée de départ ${esc(sim.clockStart || `—`)} · durée active ${fmtDur(s.dur)}</div>
 <h2>Équipe</h2><table><tr><th>Formateurs</th><th>Apprenants</th></tr><tr><td>${staffPlain(s.sc).map(esc).join(`<br>`) || `—`}</td><td>${learnersTxt().map(esc).join(`<br>`) || `—`}</td></tr></table>
 <h2>Indicateurs</h2><div class="kpi"><div><b>${fmtDur(s.dur)}</b>Durée active</div><div><b>${s.stepsReached}/${s.sc.steps.length}</b>Étapes jouées</div><div><b>${s.done.length}/${s.items.length}</b>Attendus observés</div><div><b>${s.nibpN}</b>PNI prises (${s.nibpOk} réussies)</div><div><b>${s.alarmN}</b>Alarmes (${s.alarmHigh} hautes)</div><div><b>${s.pauses}</b>Pauses</div></div>
+<h2>Monitorage</h2><table><tr><th>Pose</th><th>T+</th><th>Après allumage du scope</th></tr>${monitRows().map((r) => `<tr><td>${esc(r.label)}</td><td>${r.ev ? fmtDur(r.ev.ts - sim.startedAt) : `<span class="ko">non noté</span>`}</td><td>${r.after ? `+${r.after}` : ``}</td></tr>`).join(``)}</table>
 <h2>Délais clés</h2><table><tr><th>Repère</th><th>T+</th><th>Dans l'étape</th></tr>${rows.map((r) => `<tr><td>${esc(r.label)}</td><td>${r.ev ? fmtDur(r.ev.ts - sim.startedAt) : `<span class="ko">non observé</span>`}</td><td>${r.ev && r.step ? `${esc(r.step.text.replace(/ — .*/, ``))} +${fmtDur(r.ev.ts - r.step.ts)}` : ``}</td></tr>`).join(``)}</table>
 <h2>Tensions mesurées</h2>${nb ? `<table><tr><th>Heure</th><th>Mesure</th></tr>${nb}</table>` : `<p class="muted">Aucune.</p>`}
 <h2>Grille CRM</h2><table><tr><th>Dimension</th><th>Évaluation</th><th>Observation</th></tr>${CRM_GRID.map((c) => { const v = debrief.crm[c.id] || {}; return `<tr><td>${esc(c.t)}</td><td class="${v.rate === `ok` ? `ok` : v.rate === `ko` ? `ko` : ``}">${RATE_LBL[v.rate] || `—`}</td><td>${esc(v.note || ``)}</td></tr>`; }).join(``)}</table>
-<h2>Débriefing</h2><h3>1. Réactions</h3><div class="box">${esc(g.emo)}</div><h3>2. Analyse</h3><div class="box">${esc(g.ana)}</div><h3>3. Messages à retenir</h3><div class="box">${esc(g.syn)}</div>
+<h2>Débriefing</h2>${GUIDE_PARTS.map(([k, t]) => `<h3>${esc(t)}</h3><div class="box">${esc(g[k] || ``)}</div>`).join(``)}
 <h2>Chronologie complète</h2><table><tr><th>T+</th><th>Heure simulée</th><th>Type</th><th>Évènement</th></tr>${tl}</table>
 <p class="muted" style="margin-top:24px">Généré par le simulateur EDAN iM60 — urgences en hémodialyse.</p></body></html>`;
       if (asText) return html;
@@ -5236,6 +5791,7 @@
       $(`scope-dot`).className = `dot ${cls}`;
       $(`scope-lbl`).textContent = txt;
       $(`conn-sum`).textContent = sum;
+      const wl = $(`wake-lbl`); if (wl) wl.textContent = wakeTxt();
       if (curTab === `prep`) renderPrepChecks();
       if (curTab === `live`) updateLiveTimers();
     }
@@ -5249,12 +5805,14 @@
     function remoteTick() {
       pendTick();
       callTick();
+      coPad();
       if (curTab === `prep`) renderCallDevs();
       renderHeader();
       renderScopeStatus();
       if (voiceOn) $(`vp-time`).textContent = fmtDur(Date.now() - voiceStartAt);
       const pc = $(`pause-cd`); if (pc && sim.pauseAt) pc.textContent = fmtDur(Date.now() - sim.pauseAt);
       const now = Date.now();
+      if (sim.stage === `end`) sendDbv(false);
       if (now - lastPing > 4000) { lastPing = now; publishSyncMessage({ type: `PING` }); }
       if (monView && now - monViewAt < 6000) {
         if (sim.rev && monView.simRev !== sim.rev && now - lastSimSend > 3000) { lastSimSend = now; publishSyncMessage({ type: `SIM`, sim }); }
@@ -5411,9 +5969,11 @@
         return `<div class="cs"><div class="cs-h">⏸ En attente</div><div class="muted">L'apprenant entend la musique d'attente du 15. Prenez le rôle du médecin régulateur (ou passez le téléphone à un collègue).</div>
           ${live ? `<button type="button" class="btn pri" onclick="samuResume()">▶ Reprendre en médecin régulateur</button>` : ``}</div>`;
       }
-      if (!c) return `<div class="cs-empty">${samu ? `<b>Vous êtes le médecin régulateur.</b> ` : ``}Pas de fiche d'appel pour ${esc(ct.name)} ${st ? `dans la phase « ${esc(st.label)} »` : `à ce moment`}. Jouez librement : faites préciser la situation (SAED) et exigez la reformulation des prescriptions.</div>`;
+      const prevC = Object.entries(callsSeen).filter(([k, x]) => x.end && x.live && x.contact && x.contact.id === ct.id && k !== info.cid && (!call || call.cid !== k));
+      const prevH = prevC.length ? `<div class="cs-prev">↺ Déjà eu au téléphone : ${prevC.map(([, x]) => `${hhmm(x.live)}${x.cb ? ` (rappel)` : ``}`).join(`, `)}. Vous vous en souvenez : ne faites pas tout répéter, demandez ce qui a changé.</div>` : ``;
+      if (!c) return `${prevH}<div class="cs-empty">${samu ? `<b>Vous êtes le médecin régulateur.</b> ` : ``}Pas de fiche d'appel pour ${esc(ct.name)} ${st ? `dans la phase « ${esc(st.label)} »` : `à ce moment`}. Jouez librement : faites préciser la situation (SAED) et exigez la reformulation des prescriptions.</div>`;
       const dc = samu ? null : withDoc(ct).doc;
-      return `<div class="cs">
+      return `${prevH}<div class="cs">
         ${samu ? `<div class="cs-h">2. Vous êtes le médecin régulateur <small>« Médecin régulateur, je vous écoute »</small></div>` : `<div class="cs-h">Vous êtes ${esc((dc && dc.name) || ct.name)} <small>décrochez par « Allô ? » sans vous présenter${dc && dc.persona ? ` · ${esc(dc.persona)}` : ``}</small></div>`}
         <div class="cs-h">Doit entendre <small>touchez quand c'est dit</small></div>
         <div class="cs-hear">${L(c.hear).map((h, i) => `<button type="button" class="${heard[i] ? `on` : ``}" ${live ? `onclick="markHeard(${i})"` : `disabled`}>${heard[i] ? `✓` : `○`} ${esc(h)}</button>`).join(``)}</div>
@@ -5484,6 +6044,7 @@
     function phoneEnded(why) {
       if (!call) return;
       const was = call;
+      memSave(was);
       clearTimeout(was.noAns); clearTimeout(was.holdT); iaStop(); rtcClose();
       was.state = `ended`; was.why = why;
       busyTone(); renderPhone();
@@ -5572,6 +6133,7 @@
     function endCall(why) {
       if (!call) return;
       const was = call;
+      memSave(was);
       clearTimeout(was.noAns); clearTimeout(was.holdT); clearTimeout(was.hangT);
       stopTone();
       iaStop();
@@ -5598,7 +6160,8 @@
       if (!call) {
         el.innerHTML = `<div class="ph-title">Appel médecin</div>
           <div class="ph-list">${phoneContacts().map((c, i) => `<button type="button" class="ph-ct" onclick="placeCall(${i})"><span class="ph-av">${esc((c.name || `?`).slice(0, 1))}</span><span class="grow"><b>${esc(c.name)}</b><small>Toucher pour appeler</small></span><span class="ph-go">📞</span></button>`).join(``)}</div>
-          ${ok ? `` : `<div class="ph-net">Recherche du réseau…</div>`}`;
+          ${ok ? `` : `<div class="ph-net">Recherche du réseau…</div>`}
+          <div class="ph-wake ${wakeOk() ? `ok` : ``}" onclick="requestWakeLock();setTimeout(renderPhone,600)">${wakeOk() ? `` : `☾ Touchez ici pour empêcher la mise en veille`}</div>`;
         return;
       }
       const dur = call.liveAt ? fmtDur(Date.now() - call.liveAt) : ``;
@@ -5685,8 +6248,29 @@
     }
 
     /* ---------- IA : consignes, voix du téléphone (mode classique) ---------- */
+    /* v11 : mémoire des appels de la séance (gardée sur le téléphone d'appel) : le médecin se souvient du premier appel */
+    const memKey = () => `im60_callmem_${sim.sessionId || `x`}`;
+    const memGet = () => { const m = storeGet(memKey()); return Array.isArray(m) ? m : []; };
+    function memSave(c) {
+      if (role !== `phone` || !c || !c.liveAt || c.memSaved || !c.contact) return;
+      c.memSaved = true;
+      const cfg = phaseCall(c.contact.id, c.cfgStep);
+      const list = memGet();
+      list.push({ who: c.contact.id, at: c.liveAt, dur: Date.now() - c.liveAt, cb: !!c.cb, human: c.mode !== `ia`, txt: (c.txt || []).slice(-36).map((l) => ({ who: l.who, text: l.text })), dec: c.unlocked && cfg ? callDecision(cfg) : null });
+      try { localStorage.setItem(memKey(), JSON.stringify(list.slice(-8))); } catch (_) {}
+    }
+    function memTxt(who) {
+      const L = memGet().filter((m) => m.who === who).slice(-3);
+      return L.map((m) => {
+        const mn = Math.max(1, Math.round((Date.now() - m.at) / 60000));
+        const head = `— ${m.cb ? `Tu as rappelé l'équipe` : `L'équipe t'a appelé`} il y a environ ${mn} min :`;
+        const body = m.txt.length ? m.txt.map((l) => `${String(l.who).replace(` (IA)`, ``)} : ${l.text}`).join(`\n`) : `(un collègue a tenu cet appel à ta place, sans transcription : demande où on en est)`;
+        return `${head}\n${body}${m.dec ? `\nCe que tu avais décidé : ${m.dec.decision} Prescriptions : ${m.dec.prescriptions.join(` ; `) || `aucune`}.` : ``}`;
+      }).join(`\n\n`);
+    }
     function iaPrompts(c, mode) {
       const ct = withDoc(fullCt(c.contact)), cfg = phaseCall(ct.id, c.cfgStep), ctx = ctxNow();
+      ctx.prev = memTxt(ct.id);
       if (c.cb) return { main: buildCallbackPrompt(ctx, cfg, ct, mode) };
       return buildCallPrompts(ctx, cfg, ct, mode);
     }
@@ -6216,7 +6800,9 @@
     function cbNow(id) { const p = cbPend.find((x) => x.id === id); if (!p) return; cbPend = cbPend.filter((x) => x !== p); requestCallback(p.who, p.step); renderActs(); }
     function cbCancel(id) { const p = cbPend.find((x) => x.id === id); if (!p) return; cbPend = cbPend.filter((x) => x !== p); remEvent(`system`, `Rappel programmé annulé (${p.name})`); renderActs(); }
 
-    let csOpen = true;
+    /* v11 : sur la télécommande, la fenêtre d'appel reste petite (une ligne) pour laisser les boutons du scope accessibles ;
+       « ▾ Fiche » l'agrandit, « ▁ » la réduit en pastille. */
+    let csOpen = false, coMin = false, coMinCid = ``;
     function supervisedCall() {
       const list = Object.entries(callsSeen).map(([cid, c]) => Object.assign({ cid }, c))
         .filter((c) => c.live && !c.end && Date.now() - c.live < 1800000 && (!call || call.cid !== c.cid))
@@ -6224,8 +6810,15 @@
       return list[list.length - 1] || null;
     }
     const stageTxt = (c) => (c.stage && isSamuCt(fullCt(c.contact)) ? ` · ${STAGE_LBL[c.stage]}` : ``);
+    /* v11 : la page Simulation se raccourcit de la hauteur de la fenêtre d'appel : rien n'est caché dessous */
+    function coPad() {
+      if (role !== `remote`) return;
+      const el = $(`callov`), h = el && !el.classList.contains(`hidden`) && !el.classList.contains(`mini`) ? Math.ceil(el.getBoundingClientRect().height) + 8 : 0;
+      document.documentElement.style.setProperty(`--coh`, `${h}px`);
+    }
     function renderCallUi() {
       if (role !== `remote` && role !== `doctor`) return;
+      setTimeout(coPad, 30);
       const el = $(role === `doctor` ? `dr-main` : `callov`); if (!el) return;
       const sup = supervisedCall();
       if (!call && !sup) {
@@ -6242,14 +6835,25 @@
         return;
       }
       el.classList.remove(`hidden`);
+      const curCid = call ? call.cid : sup ? sup.cid : ``;
+      if (role === `remote` && curCid !== coMinCid) { coMinCid = curCid; coMin = false; }
+      const ringing = call && (call.state === `ringing` || call.state === `dialing`);
+      el.classList.toggle(`mini`, role === `remote` && coMin && !ringing);
+      el.classList.toggle(`big`, role === `remote` && csOpen && !coMin);
+      if (role === `remote` && coMin && !ringing) {
+        const t0 = call ? call.liveAt : sup.live;
+        el.innerHTML = `<button type="button" class="co-pill" onclick="coMin=false;renderCallUi()">☎ <b id="co-time" data-t0="${t0 || Date.now()}">${fmtDur(Date.now() - (t0 || Date.now()))}</b></button>`;
+        return;
+      }
+      const minBtn = role === `remote` ? `<button type="button" class="btn sm" onclick="coMin=true;renderCallUi()" aria-label="Réduire">▁</button>` : ``;
       if (!call && sup) {
         const lines = (sup.txt || []).slice(role === `doctor` ? -8 : -4);
         const by = sup.took ? `✋ repris par un formateur` : sup.ia ? `🤖 IA` : sup.mode === `tel` ? `vrai numéro` : `poste médecin`;
         const canTake = sup.ia && !sup.took;
         el.innerHTML = `<div class="co-bar"><span>☎ ${sup.cb ? `Rappel · ` : ``}${esc(sup.contact ? sup.contact.name : ``)}${esc(stageTxt(sup))} · ${by}</span><b id="co-time" data-t0="${sup.live}">${fmtDur(Date.now() - (sup.live || Date.now()))}</b>
             ${canTake ? `<button type="button" class="btn sm grn" onclick="takeOver('${sup.cid}')">✋ Reprendre la main</button>` : ``}
-            ${role === `remote` && sup.ia ? `<button type="button" class="btn sm" onclick="csOpen=!csOpen;renderCallUi()">${csOpen ? `▴ Fiche` : `▾ Fiche`}</button>` : ``}</div>
-          ${lines.length ? `<div class="co-txt">${lines.map((l) => `<div><b>${esc(l.who)} :</b> ${esc(l.text)}</div>`).join(``)}</div>` : sup.ia ? `<div class="co-txt"><i>La conversation va s'afficher ici…</i></div>` : ``}
+            ${role === `remote` && sup.ia ? `<button type="button" class="btn sm" onclick="csOpen=!csOpen;renderCallUi()">${csOpen ? `▴ Fiche` : `▾ Fiche`}</button>` : ``}${minBtn}</div>
+          ${role === `remote` && !csOpen ? (lines.length ? `<div class="co-txt one"><b>${esc(lines[lines.length - 1].who)} :</b> ${esc(lines[lines.length - 1].text)}</div>` : ``) : lines.length ? `<div class="co-txt">${lines.map((l) => `<div><b>${esc(l.who)} :</b> ${esc(l.text)}</div>`).join(``)}</div>` : sup.ia ? `<div class="co-txt"><i>La conversation va s'afficher ici…</i></div>` : ``}
           ${sup.ia && (role === `doctor` || csOpen) ? callSheetHtml(sup, false) : ``}`;
         return;
       }
@@ -6260,14 +6864,14 @@
       }
       if (call.state === `dialing`) {
         el.innerHTML = `<div class="co-ring"><div class="co-ic">📞</div><div class="grow"><b>Rappel en cours…</b><small>vous appelez les apprenants en tant que ${esc(call.contact.name)}</small></div>
-          <button type="button" class="btn red" onclick="hangUpCallee()">Annuler</button></div>${callSheetHtml(call, true)}`;
+          <button type="button" class="btn red" onclick="hangUpCallee()">Annuler</button></div>${role === `doctor` || csOpen ? callSheetHtml(call, true) : ``}`;
         return;
       }
       el.innerHTML = `<div class="co-bar"><span>☎ En ligne · ${call.cb ? `rappel · ` : ``}${esc(call.contact.name)}${esc(stageTxt(call))}${call.voice ? `` : ` · <i>liaison…</i>`}</span><b id="co-time" data-t0="${call.liveAt}">${fmtDur(Date.now() - call.liveAt)}</b>
           <button type="button" class="btn sm ${call.muted ? `amb` : ``}" onclick="toggleMute()">${call.muted ? `Micro coupé` : `Muet`}</button>
           ${call.took ? `<button type="button" class="btn sm" onclick="giveBack()">🤖 Rendre à l'IA</button>` : ``}
           ${role === `remote` ? `<button type="button" class="btn sm" onclick="csOpen=!csOpen;renderCallUi()">${csOpen ? `▴ Fiche` : `▾ Fiche`}</button>` : ``}
-          <button type="button" class="btn sm red" onclick="hangUpCallee()">Raccrocher</button></div>
+          <button type="button" class="btn sm red" onclick="hangUpCallee()">Raccrocher</button>${minBtn}</div>
         ${csOpen || role === `doctor` ? callSheetHtml(call, true) : ``}`;
     }
 
@@ -6404,6 +7008,7 @@
       if (!sim.rev) publishSyncMessage({ type: `PH_REQ` });
       if (sim.scenarioId && sim.scenarioId !== `free` && !SCENARIOS.some((x) => x.id === sim.scenarioId) && Date.now() - devScnAt > 8000) { devScnAt = Date.now(); publishSyncMessage({ type: `SCN_REQ`, id: sim.scenarioId }); }
       const ck = $(`ph-clock`); if (ck) ck.textContent = hhmm(Date.now());
+      if (role === `phone` && !call) { const w = document.querySelector(`.ph-wake`); if (w && w.classList.contains(`ok`) !== wakeOk()) renderPhone(); }
     }
     function initDevice(r) {
       role = r;
@@ -6422,8 +7027,8 @@
         if (window.speechSynthesis) speechSynthesis.getVoices();
         renderPhone();
       } else { $(`ph-main`).classList.add(`hidden`); renderCallUi(); }
-      document.addEventListener(`pointerdown`, () => { requestWakeLock(); toneAudio(); }, { once: true });
-      document.addEventListener(`visibilitychange`, () => { if (document.visibilityState === `visible`) requestWakeLock(); });
+      document.addEventListener(`pointerdown`, () => { toneAudio(); }, { once: true });
+      keepAwake(); requestWakeLock();
       deviceTick();
       setInterval(deviceTick, 1000 * 3);
       setInterval(() => { const st = $(`ph-st`); if (st && call && call.state === `live` && !call.thinking && call.mode !== `ia` && call.stage !== `hold`) st.textContent = fmtDur(Date.now() - call.liveAt); callTick(); }, 1000);
@@ -6465,12 +7070,25 @@
         if (msg.type === `SYNC_REQ`) broadcastFullState();
         else if (msg.type === `SIM` && msg.sim && msg.sim.rev > sim.rev) applySimOnMonitor(Object.assign(deep(SIM_DEFAULT), msg.sim), false);
         else if (msg.type === `CMD`) handleCmd(msg.cmd, msg.opts);
+        else if (msg.type === `DBV` && msg.d) { if (!mon.dbv || mon.dbv.k !== msg.d.k) { mon.dbv = msg.d; renderStage(); saveMonitor(); } }
       } else {
         if (msg.type === `MON` && msg.mon) { monView = msg.mon; monViewAt = Date.now(); renderScopeStatus(); }
         else if (msg.type === `SIM_STATE` && msg.sim && msg.sim.rev > sim.rev) { sim = Object.assign(deep(SIM_DEFAULT), msg.sim); saveRemote(); renderRemoteAll(); }
         else if (msg.type === `EVT` && msg.ev) mergeEvents([msg.ev]);
         else if (msg.type === `EVTS` && Array.isArray(msg.events)) mergeEvents(msg.events);
         else if (msg.type === `NIBP_START`) { if (sim.stage === `run` && msg.sid === sim.sessionId) openPniSheet(msg.src); }
+        else if (msg.type === `MON_BRIEF`) {
+          if (sim.stage !== `prep`) return;
+          if (msg.learn) sim.brief = `learn`;
+          const n = learnSlides(scenarioById(sim.scenarioId)).length;
+          sim.briefIdx = Math.max(0, Math.min(n - 1, msg.idx || 0)); pushSim(); renderBriefCtl();
+        }
+        else if (msg.type === `MON_LAUNCH`) {
+          if (sim.stage !== `prep`) return;
+          toast(`▶ Simulation lancée depuis la tablette`); buzz();
+          startSession();
+          remEvent(`system`, `Lancée depuis la tablette (fin du briefing des apprenants)`);
+        }
       }
     }
     function switchRole(r) {
@@ -6528,8 +7146,8 @@
       let rz = null;
       window.addEventListener(`resize`, () => { if (role === `monitor` && mon.booted) { clearTimeout(rz); rz = setTimeout(initLanes, 250); } });
       document.addEventListener(`fullscreenchange`, () => { $(`view-monitor`).classList.toggle(`is-full`, !!document.fullscreenElement || $(`view-monitor`).classList.contains(`is-full`)); setTimeout(initLanes, 300); });
-      document.addEventListener(`pointerdown`, () => { if (role === `remote`) requestWakeLock(); }, { once: true });
-      document.addEventListener(`visibilitychange`, () => { if (document.visibilityState === `visible` && ((role === `monitor` && mon.booted) || role === `remote`)) requestWakeLock(); });
+      keepAwake();
+      if (role === `remote`) requestWakeLock();
       try { if (window.notebookAppApi && window.notebookAppApi.notifyAppReady) window.notebookAppApi.notifyAppReady(); } catch (_) {}
     }
     document.addEventListener(`DOMContentLoaded`, initApp);
