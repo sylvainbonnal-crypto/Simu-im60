@@ -373,7 +373,8 @@ const SCENARIOS_DEFAUT = [
     ],
     debrief: {
       questions: [`Qu'est-ce qui a été priorisé, et pourquoi ?`, `Quand l'équipe a-t-elle déclenché l'aide ?`, `Quels éléments ont orienté (ou non) la suspicion d'hyperkaliémie ?`, `Qu'a-t-on oublié sous stress ?`, `Comment avez-vous géré l'impossibilité de dialyser tout de suite ? Qu'avez-vous dit au médecin ?`, `Pendant l'arrêt : qui a trouvé le calcium dans le chariot ? Combien de temps a-t-il fallu ?`, `Quand le rythme est tombé à 23 bpm, avez-vous ressenti le besoin d'une pause de 10 secondes ?`],
-      messages: [`Hémodialysé après 72 h, asthénique et bradycarde : hyperkaliémie jusqu'à preuve du contraire.`, `Pas de générateur disponible : le protocole (insuline + G10, aérosol) n'attend pas la dialyse.`, `On alerte tôt, avec un message structuré.`]
+      messages: [`Hémodialysé après 72 h, asthénique et bradycarde : hyperkaliémie jusqu'à preuve du contraire.`, `Pas de générateur disponible : le protocole (insuline + G10, aérosol) n'attend pas la dialyse.`, `On alerte tôt, avec un message structuré.`],
+      evo: `Calcium : selon les recommandations, le gluconate de calcium se donne dès les signes ECG d'hyperkaliémie (protection du myocarde), sans attendre l'arrêt. Dans ce scénario, il est réservé à l'arrêt (choix pédagogique). À rediscuter : le faire prescrire dès l'appel en P1 ? Vérifier le protocole hyperkaliémie du service.`
     }
   },
   {
@@ -733,7 +734,7 @@ function blankScenario() {
     steps: [blankStep(1)],
     contacts: defaultContacts(),
     call: { S: ``, A: ``, E: ``, D: ``, kwS: ``, kwA: ``, kwE: ``, kwD: ``, doctor: ``, address: `` },
-    documents: [], debrief: { questions: [], messages: [] }
+    documents: [], debrief: { questions: [], messages: [], evo: `` }
   };
 }
 function normalize(s) {
@@ -1057,7 +1058,9 @@ const VIEWS = {
       <div class="grid two">
         ${inp(`debrief.questions`, `Questions guides`, { list: true })}
         ${inp(`debrief.messages`, `Messages clés à retenir`, { list: true })}
-      </div></div>`;
+      </div></div>
+      <div class="card private"><h3>📝 Notes pour le topo — évolutions futures <span class="private-tag">Formateur</span></h3><p class="sub">Ce qui est à rediscuter ou à faire évoluer dans ce scénario (choix pédagogique, protocole, matériel). Affiché au formateur dans le Guide du débriefing et repris dans le compte-rendu et le topo de la journée. Jamais sur la tablette.</p>
+      ${inp(`debrief.evo`, `Notes`, { area: true, ph: `Ex. : calcium réservé à l'arrêt dans ce scénario, à rediscuter avec le protocole du service` })}</div>`;
   },
   check() {
     const sc = cur(), list = issues(sc);

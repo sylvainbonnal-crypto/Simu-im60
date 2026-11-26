@@ -1150,6 +1150,7 @@
     </div>
 
     <div id="db-p-guide" class="r-sub hidden">
+      <div class="card" id="db-evo-card"></div>
       <div class="card"><h2>Conduite du débriefing</h2><div class="muted">Quatre temps : 1. synthèse rapide de la situation, 2. réactions et émotions, 3. analyse des faits (chronologie), 4. CRM (leadership, communication en boucle fermée, ressources, outils). Puis les messages à retenir.</div><div id="db-guide" style="display:flex;flex-direction:column;gap:8px"></div></div>
     </div>
 
@@ -1477,7 +1478,8 @@
         ],
         debrief: {
           questions: [`Qu'est-ce qui a été priorisé, et pourquoi ?`, `Quand l'équipe a-t-elle déclenché l'aide ?`, `Quels éléments ont orienté (ou non) la suspicion d'hyperkaliémie ?`, `Qu'a-t-on oublié sous stress ?`, `Comment avez-vous géré l'impossibilité de dialyser tout de suite ? Qu'avez-vous dit au médecin ?`, `Pendant l'arrêt : qui a trouvé le calcium dans le chariot ? Combien de temps a-t-il fallu ?`, `Quand le rythme est tombé à 23 bpm, avez-vous ressenti le besoin d'une pause de 10 secondes ?`],
-          messages: [`Hémodialysé après 72 h, asthénique et bradycarde : hyperkaliémie jusqu'à preuve du contraire.`, `Pas de générateur disponible : le protocole (insuline + G10, aérosol) n'attend pas la dialyse.`, `On alerte tôt, avec un message structuré.`]
+          messages: [`Hémodialysé après 72 h, asthénique et bradycarde : hyperkaliémie jusqu'à preuve du contraire.`, `Pas de générateur disponible : le protocole (insuline + G10, aérosol) n'attend pas la dialyse.`, `On alerte tôt, avec un message structuré.`],
+          evo: `Calcium : selon les recommandations, le gluconate de calcium se donne dès les signes ECG d'hyperkaliémie (protection du myocarde), sans attendre l'arrêt. Dans ce scénario, il est réservé à l'arrêt (choix pédagogique). À rediscuter : le faire prescrire dès l'appel en P1 ? Vérifier le protocole hyperkaliémie du service.`
         }
       },
       {
@@ -1954,7 +1956,7 @@
         trap: e.trap || ``, disturb: L(e.disturb).join(` ; `),
         sensorsStart: Object.assign({ ecg: false, spo2: false, cuff: false, temp: false }, e.sensorsStart),
         startTime: e.startTime || ``, steps, tech, crm,
-        questions: L((e.debrief || {}).questions), messages: L((e.debrief || {}).messages),
+        questions: L((e.debrief || {}).questions), messages: L((e.debrief || {}).messages), evo: String((e.debrief || {}).evo || ``).trim(),
         trainer: Object.assign({}, e.trainer, { roles: migrateRoles((e.trainer || {}).roles) }), briefing: e.briefing || {}, documents: e.documents || [], contacts,
         trigger: e.trigger || ``, saed: e.call || {},
         objTech: L(e.objTech), objCrm: L(e.objCrm), mailTo: e.mailTo || ``, editor: true
@@ -3968,7 +3970,7 @@
     const learnersTxt = () => teamOf().learners.filter((l) => l.name || l.role).map(learnerLine);
 
     /* ---------- v11 : journée de formation (liste des présents, IDE / AS, séances jouées) ---------- */
-    const DAY_DEFAULT = { date: ``, title: ``, learners: [], sessions: [], notes: `` };
+    const DAY_DEFAULT = { date: ``, title: ``, learners: [], sessions: [], notes: ``, evo: `` };
     let day = deep(DAY_DEFAULT);
     const todayIso = () => { const d = new Date(); return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`; };
     function dayLoad() { day = Object.assign(deep(DAY_DEFAULT), storeGet(`im60_day`) || {}); if (!day.date) day.date = todayIso(); }
@@ -4581,7 +4583,7 @@
        13. TÉLÉCOMMANDE FORMATEUR — état et persistance
        ===================================================================== */
     let events = [];
-    const DEBRIEF_DEFAULT = { done: {}, crm: {}, guide: { syn: ``, emo: ``, ana: ``, crm: ``, msg: `` } };
+    const DEBRIEF_DEFAULT = { done: {}, crm: {}, guide: { syn: ``, emo: ``, ana: ``, crm: ``, msg: ``, evo: `` } };
     let debrief = deep(DEBRIEF_DEFAULT);
     const PREP_DEFAULT = { module: 2, nibp: `manual`, clock: `` };
     let prep = deep(PREP_DEFAULT);
@@ -5511,7 +5513,7 @@
         delays: delayRows().filter((r) => r.ev && !s.items.some((i) => i.t === r.label)).map((r) => [r.label, fmtDur(r.ev.ts - sim.startedAt)]),
         miss: s.items.filter((i) => !debrief.done[i.id]).map((i) => i.t),
         crm: CRM_GRID.map((c) => { const v = debrief.crm[c.id] || {}; return [c.t, v.rate || ``, v.note || ``]; }),
-        guide: Object.assign({}, debrief.guide), msgs: s.sc.messages || []
+        guide: Object.assign({}, debrief.guide), msgs: s.sc.messages || [], evo: s.sc.evo || ``
       };
       const i = day.sessions.findIndex((x) => x.sid === rec.sid);
       if (i >= 0) day.sessions[i] = rec; else day.sessions.push(rec);
@@ -5555,6 +5557,12 @@
             <textarea placeholder="${esc(ph)}" oninput="debrief.guide.${k}=this.value;saveRemote()">${esc(g[k] || ``)}</textarea>
             ${sim.stage === `end` ? `<button type="button" class="btn sm" onclick="setDbShow('${tv[k]}')">📺 Montrer sur la tablette</button>` : ``}</div></details>`).join(``);
       }
+      if (dbTab === `guide`) {
+        $(`db-evo-card`).innerHTML = `<h2>📝 Notes pour le topo — évolutions futures</h2>
+          <div class="muted">Pour vous seulement (jamais sur la tablette) : ce qu'il faudra changer dans le scénario, le matériel, les protocoles… Repris dans le compte-rendu et dans le topo de la journée.</div>
+          ${s.sc.evo ? `<div class="info"><b>Note prévue dans le scénario :</b> ${esc(s.sc.evo)}</div>` : ``}
+          <textarea placeholder="Ex. : ajouter le chlorure de calcium dans le chariot ; revoir le délai de l'asystolie…" oninput="debrief.guide.evo=this.value;saveRemote()">${esc(debrief.guide.evo || ``)}</textarea>`;
+      }
       if (dbTab === `export`) { const mt = $(`mail-to`); if (mt && document.activeElement !== mt) mt.value = mailTo(); }
       if (dbTab === `crm`) {
         $(`db-crm`).innerHTML = CRM_GRID.map((c) => {
@@ -5594,12 +5602,22 @@
             <div><b>Monitorage :</b> ${r.monit.map((m) => `${esc(m[0])} ${m[1] ? `T+${m[1]}` : `—`}`).join(` · `)}</div>
             ${r.miss.length ? `<div><b>Non observés :</b> ${r.miss.map(esc).join(` · `)}</div>` : ``}
             ${r.guide && r.guide.msg ? `<div><b>À retenir :</b> ${esc(r.guide.msg)}</div>` : ``}
+            ${r.evo || (r.guide && r.guide.evo) ? `<div class="info"><b>📝 Évolutions futures :</b> ${[r.evo, r.guide && r.guide.evo].filter(Boolean).map(esc).join(`<br>`)}</div>` : ``}
             <button type="button" class="btn sm" onclick="delDaySession('${esc(r.sid)}', this)">Retirer de la journée</button></div></details>`).join(``) : `<div class="muted">Aucune simulation terminée aujourd'hui. Chaque simulation s'ajoute ici quand vous la terminez.</div>`}</div>
         <div class="card"><h2>Participation</h2>${P.length ? `<table class="ptable"><tr><th>Apprenant</th><th>Joué</th></tr>${P.map((p) => `<tr><td>${esc(p.name)}${p.pro ? ` <small>${p.pro}</small>` : ``}</td><td>${p.played.length ? p.played.map(esc).join(`<br>`) : `<span class="muted">observateur</span>`}</td></tr>`).join(``)}</table>` : `<div class="muted">Liste du jour vide (Préparation › Journée de formation).</div>`}</div>
         <div class="card"><h2>CRM sur la journée</h2><table class="ptable"><tr><th>Dimension</th><th>Acquis</th><th>À renforcer</th><th>Non observé</th></tr>${D.crm.map(([t, n]) => `<tr><td>${esc(t)}</td><td class="num">${n.ok}</td><td class="num">${n.mid}</td><td class="num">${n.ko}</td></tr>`).join(``)}</table></div>
+        <div class="card"><h2>📝 Évolutions futures</h2>${dayEvoList().length ? `<ul class="tight">${dayEvoList().map((x) => `<li><b>${esc(x[0])}</b> : ${esc(x[1])}</li>`).join(``)}</ul>` : `<div class="muted">Aucune note pour l'instant.</div>`}
+          <textarea placeholder="Autres évolutions à prévoir (scénarios, matériel, organisation de la journée)…" oninput="day.evo=this.value;daySave()">${esc(day.evo || ``)}</textarea></div>
         <div class="card"><h2>Topo global de la journée</h2><textarea id="day-notes" placeholder="Points forts du groupe, axes de travail, messages pour la prochaine fois…" oninput="day.notes=this.value;daySave()">${esc(day.notes || ``)}</textarea>
           <div class="g2"><button type="button" class="btn pri" onclick="exportDay()">Topo de la journée (HTML imprimable)</button><button type="button" class="btn" onclick="mailDay()">✉ Envoyer le topo</button></div>
           <button type="button" class="btn red" onclick="newDay(this)">Nouvelle journée</button></div>`;
+    }
+    function dayEvoList() {
+      const out = [], seen = new Set();
+      day.sessions.slice().sort((a, b) => a.at - b.at).forEach((r) => {
+        [r.evo, r.guide && r.guide.evo].forEach((t) => { t = String(t || ``).trim(); if (t && !seen.has(t)) { seen.add(t); out.push([r.short, t]); } });
+      });
+      return out;
     }
     let dsArm = ``;
     function delDaySession(sid, btn) {
@@ -5616,6 +5634,7 @@
         L.push(`  Grille CRM : ${r.crm.map((c) => `${c[0]} ${RATE_LBL[c[1]] || `—`}`).join(` · `)}`, ``);
       });
       L.push(`Participation :`); D.people.forEach((p) => L.push(`  ${p.name}${p.pro ? ` (${p.pro})` : ``} : ${p.played.join(` ; `) || `observateur`}`));
+      const ev = dayEvoList(); if (ev.length || day.evo) { L.push(``, `Évolutions futures :`); ev.forEach((x) => L.push(`  ${x[0]} : ${x[1]}`)); if (day.evo) L.push(`  ${day.evo}`); }
       if (day.notes) L.push(``, `Topo global :`, day.notes);
       return L.join(`\n`);
     }
@@ -5630,9 +5649,10 @@
 ${[[`syn`, `1. Synthèse`], [`emo`, `2. Réactions`], [`ana`, `3. Analyse des faits`], [`crm`, `4. CRM`], [`msg`, `À retenir`]].map(([k, t]) => r.guide && r.guide[k] ? `<p><b>${t} :</b> ${esc(r.guide[k])}</p>` : ``).join(``)}
 <table><tr><th>CRM</th><th>Évaluation</th><th>Observation</th></tr>${r.crm.map((c) => `<tr><td>${esc(c[0])}</td><td>${R(c[1])}</td><td>${esc(c[2])}</td></tr>`).join(``)}</table>
 <p><b>Monitorage :</b> ${r.monit.map((m) => `${esc(m[0])} ${m[1] ? `T+${m[1]}` : `non noté`}`).join(` · `)}</p>
-${r.miss.length ? `<p><b>Non observés :</b> ${r.miss.map(esc).join(` · `)}</p>` : ``}${r.msgs.length ? `<p><b>Messages clés du scénario :</b> ${r.msgs.map(esc).join(` · `)}</p>` : ``}</div>`).join(``) || `<p class="muted">Aucune simulation.</p>`}
+${r.miss.length ? `<p><b>Non observés :</b> ${r.miss.map(esc).join(` · `)}</p>` : ``}${r.evo || (r.guide && r.guide.evo) ? `<p><b>Évolutions futures :</b> ${[r.evo, r.guide && r.guide.evo].filter(Boolean).map(esc).join(` — `)}</p>` : ``}${r.msgs.length ? `<p><b>Messages clés du scénario :</b> ${r.msgs.map(esc).join(` · `)}</p>` : ``}</div>`).join(``) || `<p class="muted">Aucune simulation.</p>`}
 <h2>Participation</h2><table><tr><th>Apprenant</th><th>Fonction</th><th>Simulations jouées (rôle)</th></tr>${D.people.map((p) => `<tr><td>${esc(p.name)}</td><td>${esc(p.pro || `—`)}</td><td>${p.played.map(esc).join(`<br>`) || `observateur`}</td></tr>`).join(``)}</table>
 <h2>CRM sur la journée</h2><table><tr><th>Dimension</th><th>Acquis</th><th>À renforcer</th><th>Non observé</th></tr>${D.crm.map(([t, n]) => `<tr><td>${esc(t)}</td><td>${n.ok}</td><td>${n.mid}</td><td>${n.ko}</td></tr>`).join(``)}</table>
+<h2>Évolutions futures</h2>${dayEvoList().length ? `<ul>${dayEvoList().map((x) => `<li><b>${esc(x[0])}</b> : ${esc(x[1])}</li>`).join(``)}</ul>` : ``}<div class="box">${esc(day.evo || ``)}</div>
 <h2>Topo global</h2><div class="box">${esc(day.notes || ``)}</div>
 <p class="muted" style="margin-top:24px">Généré par le simulateur EDAN iM60 — urgences en hémodialyse.</p></body></html>`;
     }
@@ -5663,6 +5683,7 @@ ${r.miss.length ? `<p><b>Non observés :</b> ${r.miss.map(esc).join(` · `)}</p>
       L.push(``, `Grille CRM :`);
       for (const c of CRM_GRID) { const v = debrief.crm[c.id] || {}; L.push(`  ${c.t} : ${RATE_LBL[v.rate] || `—`}${v.note ? ` — ${v.note}` : ``}`); }
       GUIDE_PARTS.forEach(([k, t]) => { if (debrief.guide[k]) L.push(``, `${t} :`, debrief.guide[k]); });
+      if (s.sc.evo || debrief.guide.evo) L.push(``, `Évolutions futures :`, [s.sc.evo, debrief.guide.evo].filter(Boolean).join(`\n`));
       return L.join(`\n`);
     }
     function copySummary() {
@@ -5686,6 +5707,7 @@ ${r.miss.length ? `<p><b>Non observés :</b> ${r.miss.map(esc).join(` · `)}</p>
 <h2>Tensions mesurées</h2>${nb ? `<table><tr><th>Heure</th><th>Mesure</th></tr>${nb}</table>` : `<p class="muted">Aucune.</p>`}
 <h2>Grille CRM</h2><table><tr><th>Dimension</th><th>Évaluation</th><th>Observation</th></tr>${CRM_GRID.map((c) => { const v = debrief.crm[c.id] || {}; return `<tr><td>${esc(c.t)}</td><td class="${v.rate === `ok` ? `ok` : v.rate === `ko` ? `ko` : ``}">${RATE_LBL[v.rate] || `—`}</td><td>${esc(v.note || ``)}</td></tr>`; }).join(``)}</table>
 <h2>Débriefing</h2>${GUIDE_PARTS.map(([k, t]) => `<h3>${esc(t)}</h3><div class="box">${esc(g[k] || ``)}</div>`).join(``)}
+<h2>Notes pour les évolutions futures</h2>${s.sc.evo ? `<p>${esc(s.sc.evo)}</p>` : ``}<div class="box">${esc(g.evo || ``)}</div>
 <h2>Chronologie complète</h2><table><tr><th>T+</th><th>Heure simulée</th><th>Type</th><th>Évènement</th></tr>${tl}</table>
 <p class="muted" style="margin-top:24px">Généré par le simulateur EDAN iM60 — urgences en hémodialyse.</p></body></html>`;
       if (asText) return html;
